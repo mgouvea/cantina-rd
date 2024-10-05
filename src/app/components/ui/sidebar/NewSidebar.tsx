@@ -107,20 +107,20 @@ export function NewSidebar() {
             alignItems: 'center',
             padding: '7px 24px',
             backgroundColor: isSelected ? 'success.main' : 'transparent',
-            color: isSelected ? '#f6bb04' : '#666666',
+            color: isSelected ? '#fff' : '#666666',
             borderRadius: '12px',
             ':hover': {
-              color: isSelected ? '#f6bb04' : '#FFF',
+              color: isSelected ? '#fff' : '#FFF',
             },
           }}
         >
           {icons[title]}
           <Text
             sx={{
-              color: isSelected ? '#f6bb04' : '#666666',
+              color: isSelected ? '#fff' : '#666666',
               fontWeight: isSelected ? 600 : 'normal',
               ':hover': {
-                color: isSelected ? '#f6bb04' : '#FFF',
+                color: isSelected ? '#fff' : '#FFF',
               },
             }}
           >
