@@ -1,37 +1,52 @@
+'use client';
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import Box from '@mui/material/Box';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import EditIcon from '@mui/icons-material/Edit';
+import Text from '../text/Text';
 import {
-  GridRowsProp,
+  Chip,
+  CircularProgress,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  OutlinedInput,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  Theme,
+  useTheme,
+} from '@mui/material';
+import { Filtros } from '../..';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+import {
   GridRowModesModel,
-  GridRowModes,
   DataGrid,
   GridColDef,
-  GridToolbarContainer,
   GridActionsCellItem,
   GridEventListener,
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
 } from '@mui/x-data-grid';
-import { CircularProgress, IconButton, Stack } from '@mui/material';
-import { Filtros } from '../..';
-import { useRouter } from 'next/navigation';
-import Text from '../text/Text';
+import GenericModal from '../../modal/GenericModal';
 
 interface TabelaProps {
   data: any;
   isLoading: boolean;
 }
 
-export default function TabelaCliente2({ data, isLoading }: TabelaProps) {
+export default function TabelaGestor({ data, isLoading }: TabelaProps) {
   const router = useRouter();
   const [rows, setRows] = React.useState(data);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+  const [openModal, setOpenModal] = useState(false);
 
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (
     params,
@@ -112,7 +127,7 @@ export default function TabelaCliente2({ data, isLoading }: TabelaProps) {
   ];
 
   const handleAddClient = () => {
-    router.replace('/painel/admin/clientes/novo');
+    setOpenModal(true);
   };
 
   return (
@@ -130,7 +145,7 @@ export default function TabelaCliente2({ data, isLoading }: TabelaProps) {
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Clientes Cadastrados</Text>
+        <Text variant="h5">Gestores Cadastrados</Text>
 
         <IconButton
           aria-label="add"
@@ -161,6 +176,101 @@ export default function TabelaCliente2({ data, isLoading }: TabelaProps) {
           )
         }
       </Filtros>
+      <GenericModal
+        title="Excluir gestor"
+        open={openModal}
+        handleClose={() => setOpenModal(false)}
+        cancelButtonText="Cancelar"
+        confirmButtonText="Salvar"
+        handleConfirm={() => {}}
+      >
+        <RenderAddGestor />
+      </GenericModal>
     </Box>
   );
 }
+
+const RenderAddGestor = () => {
+  const theme = useTheme();
+  const [personName, setPersonName] = React.useState<string[]>([]);
+
+  const handleChange = (event: SelectChangeEvent<typeof personName>) => {
+    const {
+      target: { value },
+    } = event;
+    setPersonName(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value
+    );
+  };
+
+  const ITEM_HEIGHT = 48;
+  const ITEM_PADDING_TOP = 8;
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+
+  const names = [
+    'Oliver Hansen',
+    'Van Henry',
+    'April Tucker',
+    'Ralph Hubbard',
+    'Omar Alexander',
+    'Carlos Abbott',
+    'Miriam Wagner',
+    'Bradley Wilkerson',
+    'Virginia Andrews',
+    'Kelly Snyder',
+  ];
+
+  function getStyles(
+    name: string,
+    personName: readonly string[],
+    theme: Theme
+  ) {
+    return {
+      fontWeight: personName.includes(name)
+        ? theme.typography.fontWeightMedium
+        : theme.typography.fontWeightRegular,
+    };
+  }
+
+  return (
+    <div>
+      <FormControl sx={{ m: 1, width: 300 }}>
+        <InputLabel id="demo-multiple-chip-label">Chip</InputLabel>
+        <Select
+          labelId="demo-multiple-chip-label"
+          id="demo-multiple-chip"
+          multiple
+          value={personName}
+          onChange={handleChange}
+          input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+          renderValue={(selected) => (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {selected.map((value) => (
+                <Chip key={value} label={value} />
+              ))}
+            </Box>
+          )}
+          MenuProps={MenuProps}
+        >
+          {names.map((name) => (
+            <MenuItem
+              key={name}
+              value={name}
+              style={getStyles(name, personName, theme)}
+            >
+              {name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </div>
+  );
+};

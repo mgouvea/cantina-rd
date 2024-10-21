@@ -2,13 +2,13 @@
 import { Box, CircularProgress, Stack } from '@mui/material';
 import GenericBreadcrumbs from '@/app/components/breadcrumb/GenericBreadcrumb';
 import { useClient } from '@/hooks/queries';
-import { IlustracaoIsEmpty, TabelaCliente } from '@/app/components';
-import TabelaCliente2 from '@/app/components/ui/tables/TabelaCliente2';
+import { IlustracaoIsEmpty } from '@/app/components';
 import Text from '@/app/components/ui/text/Text';
+import TabelaGestor from '@/app/components/ui/tables/TabelaGestor';
 
 const breadcrumbItems = [
   { label: 'Início', href: '/painel/admin' },
-  { label: 'Clientes' },
+  { label: 'Gestores' },
 ];
 
 export default function Gestor() {
@@ -69,8 +69,7 @@ export default function Gestor() {
           renderClienteEmpty()
         ) : (
           <>
-            {/* <TabelaCliente data={data} isLoading={isLoading} /> */}
-            <TabelaCliente2 data={data} isLoading={isLoading} />
+            <TabelaGestor data={data} isLoading={isLoading} />
           </>
         )}
       </Stack>

@@ -69,7 +69,6 @@ export default function Clientes() {
           renderClienteEmpty()
         ) : (
           <>
-            {/* <TabelaCliente data={data} isLoading={isLoading} /> */}
             <TabelaCliente2 data={data} isLoading={isLoading} />
           </>
         )}

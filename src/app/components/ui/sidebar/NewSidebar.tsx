@@ -1,22 +1,17 @@
 'use client';
 
+import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import DashboardCustomizeRoundedIcon from '@mui/icons-material/DashboardCustomizeRounded';
 import FastfoodRoundedIcon from '@mui/icons-material/FastfoodRounded';
-import MenuIcon from '@mui/icons-material/Menu';
+import Image from 'next/image';
+import LocalAtmOutlinedIcon from '@mui/icons-material/LocalAtmOutlined';
 import React, { useState } from 'react';
 import SupervisorAccountRoundedIcon from '@mui/icons-material/SupervisorAccountRounded';
 import Text from '../text/Text';
-import {
-  Box,
-  Drawer,
-  IconButton,
-  List,
-  Toolbar,
-  useTheme,
-} from '@mui/material';
 import { useMediaQuery } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
-import Image from 'next/image';
+
+import { Box, Drawer, List, Toolbar, useTheme } from '@mui/material';
 
 export function NewSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -34,21 +29,22 @@ export function NewSidebar() {
 
   const navigationItems = [
     { title: 'Dashboard', route: '' },
+    { title: 'Faturas', route: 'faturas' },
     {
       title: 'Clientes',
       route: 'clientes',
-      submenus: [
-        { title: 'Listar clientes', route: 'clientes' },
-        { title: 'Adicionar cliente', route: 'clientes/novo' },
-      ],
+      // submenus: [
+      //   { title: 'Listar clientes', route: 'clientes' },
+      //   { title: 'Adicionar cliente', route: 'clientes/novo' },
+      // ],
     },
     {
       title: 'Gestores',
       route: 'gestor',
-      submenus: [
-        { title: 'Listar gestores', route: 'gestor' },
-        { title: 'Adicionar gestor', route: 'gestor/novo' },
-      ],
+      // submenus: [
+      //   { title: 'Listar gestores', route: 'gestor' },
+      //   { title: 'Adicionar gestor', route: 'gestor/novo' },
+      // ],
     },
     {
       title: 'Produtos',
@@ -77,8 +73,9 @@ export function NewSidebar() {
 
     const icons: Record<string, JSX.Element> = {
       Dashboard: <DashboardCustomizeRoundedIcon />,
+      Faturas: <LocalAtmOutlinedIcon />,
       Clientes: <SupervisorAccountRoundedIcon />,
-      Gestores: <SupervisorAccountRoundedIcon />,
+      Gestores: <AdminPanelSettingsOutlinedIcon />,
       Produtos: <FastfoodRoundedIcon />,
     };
 
