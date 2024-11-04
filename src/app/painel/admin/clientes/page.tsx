@@ -1,10 +1,12 @@
 'use client';
 import { Box, CircularProgress, Stack } from '@mui/material';
 import GenericBreadcrumbs from '@/app/components/breadcrumb/GenericBreadcrumb';
-import { useClient } from '@/hooks/queries';
-import { IlustracaoIsEmpty, TabelaCliente } from '@/app/components';
+import { useUsers } from '@/hooks/queries';
+import { IlustracaoIsEmpty } from '@/app/components';
 import TabelaCliente2 from '@/app/components/ui/tables/TabelaCliente2';
 import Text from '@/app/components/ui/text/Text';
+import { useApp } from '@/contexts';
+import { useEffect } from 'react';
 
 const breadcrumbItems = [
   { label: 'Início', href: '/painel/admin' },
@@ -12,7 +14,14 @@ const breadcrumbItems = [
 ];
 
 export default function Clientes() {
-  const { data, isLoading } = useClient();
+  const { data, isLoading } = useUsers();
+  const { setUserContext } = useApp();
+
+  useEffect(() => {
+    if (!isLoading && data) {
+      setUserContext(data);
+    }
+  }, [data]);
 
   const renderClienteEmpty = () => {
     return (

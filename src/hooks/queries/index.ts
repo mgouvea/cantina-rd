@@ -1,1 +1,1 @@
-export * from './useClient';
+export * from './useUsers.query';

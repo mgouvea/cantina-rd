@@ -2192,6 +2192,11 @@ globalthis@^1.0.3:
     define-properties "^1.2.1"
     gopd "^1.0.1"
 
+goober@2.1.14:
+  version "2.1.14"
+  resolved "https://registry.yarnpkg.com/goober/-/goober-2.1.14.tgz#4a5c94fc34dc086a8e6035360ae1800005135acd"
+  integrity sha512-4UpC0NdGyAFqLNPnhCT2iHpza2q+RAY3GV85a/mRPdzyPQMsj0KmMMuetdIkzWRbJ+Hgau1EZztq8ImmiMGhsg==
+
 gopd@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/gopd/-/gopd-1.0.1.tgz#29ff76de69dac7489b7c0918a5788e56477c332c"
@@ -3176,6 +3181,13 @@ react-query-devtools@^2.6.3:
   integrity sha512-pSvWq5Q8zgIP7QbF0+4BerCHLaLn5HPzce7sIXYqz4XEizcYJHkJtcrAwn6bUkCu5JmAt1Y7fViQtZwOIG2SYA==
   dependencies:
     match-sorter "^4.1.0"
+
+react-switch-selector@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/react-switch-selector/-/react-switch-selector-2.3.0.tgz#3da8b237ba9201125aeaec1821997dcf12037c6e"
+  integrity sha512-nHL4OfTqGCdA/+4WubiKtDX5JDw/C6aroYX/DneibhqsirBFzg24UeYUODiRf4gSS9sKX1j7JbLhUkxzEzhu7A==
+  dependencies:
+    goober "2.1.14"
 
 react-transition-group@^4.4.5:
   version "4.4.5"

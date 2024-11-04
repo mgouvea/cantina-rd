@@ -3,6 +3,7 @@ export * from './filtros/Filtros';
 export * from './svg/IlustracaoEmpty';
 export * from './filtros/Pesquisa';
 export * from './modal/GenericModal';
+export * from './snackbar/SnackbarProvider';
 export * from './ui/header/Header';
 export * from './ui/sidebar/Sidebar';
 export * from './ui/sidebar/NewSidebar';

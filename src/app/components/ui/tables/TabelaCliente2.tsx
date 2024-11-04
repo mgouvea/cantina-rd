@@ -61,9 +61,9 @@ export default function TabelaCliente2({ data, isLoading }: TabelaProps) {
   };
 
   const columns: GridColDef[] = [
-    { field: 'nomeCompleto', headerName: 'Nome', width: 300, editable: true },
+    { field: 'name', headerName: 'Nome', width: 300, editable: true },
     {
-      field: 'telefone',
+      field: 'telephone',
       headerName: 'Telefone',
       type: 'number',
       width: 200,
@@ -79,7 +79,7 @@ export default function TabelaCliente2({ data, isLoading }: TabelaProps) {
       editable: true,
     },
     {
-      field: 'grupoFamiliar',
+      field: 'groupFamilys',
       headerName: 'Grupo Familiar',
       width: 250,
       editable: true,
@@ -149,6 +149,7 @@ export default function TabelaCliente2({ data, isLoading }: TabelaProps) {
               rows={rowsFiltradas}
               columns={columns}
               editMode="row"
+              getRowId={(row) => row._id}
               rowModesModel={rowModesModel}
               onRowModesModelChange={handleRowModesModelChange}
               onRowEditStop={handleRowEditStop}

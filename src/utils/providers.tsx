@@ -1,5 +1,7 @@
 'use client';
 
+import { SnackbarProvider } from '@/app/components';
+import { AppProvider } from '@/contexts';
 import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -79,11 +81,15 @@ export const Providers = ({ children }: Props) => {
   });
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {children}
-      </ThemeProvider>
-    </QueryClientProvider>
+    <AppProvider>
+      <SnackbarProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            {children}
+          </ThemeProvider>
+        </QueryClientProvider>
+      </SnackbarProvider>
+    </AppProvider>
   );
 };
