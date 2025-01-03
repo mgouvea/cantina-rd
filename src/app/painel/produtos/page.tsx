@@ -2,16 +2,16 @@
 import { Box, CircularProgress, Stack } from '@mui/material';
 import GenericBreadcrumbs from '@/app/components/breadcrumb/GenericBreadcrumb';
 import { useClient } from '@/hooks/queries';
-import { IlustracaoIsEmpty } from '@/app/components';
+import { IlustracaoIsEmpty, TabelaCliente } from '@/app/components';
+import FullFeaturedCrudGrid from '@/app/components/ui/tables/TabelaCliente';
 import Text from '@/app/components/ui/text/Text';
-import TabelaGestor from '@/app/components/ui/tables/TabelaGestor';
 
 const breadcrumbItems = [
   { label: 'Início', href: '/painel/admin' },
-  { label: 'Gestores' },
+  { label: 'Clientes' },
 ];
 
-export default function Gestor() {
+export default function Produtos() {
   const { data, isLoading } = useClient();
 
   const renderClienteEmpty = () => {
@@ -33,7 +33,7 @@ export default function Gestor() {
             color: '#333333',
           }}
         >
-          Ainda não há clientes para exibir{' '}
+          Ainda não há produtos para exibir{' '}
         </Text>
       </Box>
     );
@@ -69,7 +69,8 @@ export default function Gestor() {
           renderClienteEmpty()
         ) : (
           <>
-            <TabelaGestor data={data} isLoading={isLoading} />
+            {/* <TabelaCliente data={data} isLoading={isLoading} /> */}
+            <FullFeaturedCrudGrid data={data} isLoading={isLoading} />
           </>
         )}
       </Stack>

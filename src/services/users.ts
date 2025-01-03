@@ -14,7 +14,7 @@ export const GetUserById = async (id: string) => {
 };
 
 export const GetAdmins = async (isAdmin: boolean) => {
-  return (await http.get(`users/admin`)).data;
+  return (await http.get(`users/gestor`)).data;
 };
 
 export const GetGroupFamily = async (groupFamily: string) => {

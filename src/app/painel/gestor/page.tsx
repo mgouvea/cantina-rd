@@ -1,27 +1,18 @@
 'use client';
 import { Box, CircularProgress, Stack } from '@mui/material';
 import GenericBreadcrumbs from '@/app/components/breadcrumb/GenericBreadcrumb';
-import { useUsers } from '@/hooks/queries';
 import { IlustracaoIsEmpty } from '@/app/components';
-import TabelaCliente2 from '@/app/components/ui/tables/TabelaCliente2';
 import Text from '@/app/components/ui/text/Text';
-import { useApp } from '@/contexts';
-import { useEffect } from 'react';
+import TabelaGestor from '@/app/components/ui/tables/TabelaGestor';
+import { useAdmins } from '@/hooks/queries';
 
 const breadcrumbItems = [
   { label: 'Início', href: '/painel/admin' },
-  { label: 'Clientes' },
+  { label: 'Gestores' },
 ];
 
-export default function Clientes() {
-  const { data, isLoading } = useUsers();
-  const { setUserContext } = useApp();
-
-  useEffect(() => {
-    if (!isLoading && data) {
-      setUserContext(data);
-    }
-  }, [data]);
+export default function Gestor() {
+  const { data: dadosGestor, isLoading } = useAdmins();
 
   const renderClienteEmpty = () => {
     return (
@@ -74,11 +65,11 @@ export default function Clientes() {
           >
             <CircularProgress />
           </Box>
-        ) : !data ? (
+        ) : !dadosGestor ? (
           renderClienteEmpty()
         ) : (
           <>
-            <TabelaCliente2 data={data} isLoading={isLoading} />
+            <TabelaGestor data={dadosGestor} isLoading={isLoading} />
           </>
         )}
       </Stack>

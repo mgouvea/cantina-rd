@@ -1,7 +1,6 @@
-'use client';
-
 import { DataGrid, DataGridProps } from '@mui/x-data-grid';
 import React from 'react';
+import { Box } from '@mui/material';
 
 interface TabelaProps extends DataGridProps {
   autoHeight?: boolean;
@@ -13,88 +12,60 @@ interface TabelaProps extends DataGridProps {
 }
 
 export function Tabela({
-  autoHeight,
-  disableColumnMenu,
-  disableColumnSelector,
-  disableRowSelectionOnClick,
-  hideFooter,
-  scroll,
+  autoHeight = true,
+  disableColumnMenu = true,
+  disableColumnSelector = true,
+  disableRowSelectionOnClick = true,
+  hideFooter = false,
+  scroll = true,
   ...props
 }: Readonly<TabelaProps>) {
   return (
-    <DataGrid
-      autoHeight={autoHeight}
-      disableColumnMenu={disableColumnMenu}
-      disableColumnSelector={disableColumnSelector}
-      disableRowSelectionOnClick={disableRowSelectionOnClick}
-      hideFooter={hideFooter}
+    <Box
       sx={{
-        '.MuiDataGrid-root': {
-          overflowX: scroll ? 'auto' : 'hidden',
-        },
-        '.MuiDataGrid-virtualScroller': {
-          overflowX: scroll ? 'auto' : 'hidden',
-        },
-        '.MuiDataGrid-cell': {
-          border: 'none !important',
-        },
-        '.MuiDataGrid-withBorderColor': {
-          border: 'none !important',
-        },
-        '.MuiDataGrid-columnHeaders': {
-          backgroundColor: 'none !important',
-          overflowX: 'hidden',
-        },
-        '.MuiDataGrid-topContainer': {
-          '&::after': {
-            backgroundColor: 'transparent !important',
+        width: '100%',
+        maxWidth: '100%',
+        height: 'auto',
+        overflow: 'hidden',
+        '@media (max-width: 600px)': {
+          '& .MuiDataGrid-root': {
+            fontSize: '0.8rem', // Ajuste para telas pequenas
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            display: 'none', // Opcional: Esconde cabeçalhos em telas muito pequenas
+          },
+          '& .MuiDataGrid-cell': {
+            padding: '4px', // Reduz o padding
           },
         },
-        '.MuiDataGrid-columnHeaders > div': {
-          borderRadius: '10px !important',
-          color: '#999 !important',
-        },
-        '.MuiDataGrid-row': {
-          cursor: 'pointer',
-          borderBottom: '1px solid #ccc',
-        },
-        '.MuiDataGrid-row:hover': {
-          backgroundColor: '#edf4fc !important',
-          borderRadius: '10px !important',
-          boxShadow: '0px -1px 0px 0px #0000001F inset',
-        },
-        '&': {
-          border: 'none !important',
-          fontFamily: 'Roboto, sans-serif',
-        },
-        '.MuiDataGrid-columnSeparator': {
-          display: 'none !important',
-        },
-        '.MuiDataGrid-sortIcon': {
-          color: '#fff !important',
-        },
-        '.MuiDataGrid-columnHeaderTitleContainerContent > span > svg': {
-          fill: '#fff',
-        },
-        '.Mui-checked > svg': {
-          color: '#5271ff',
-        },
-        '.MuiDataGrid-virtualScrollerContent': {
-          borderBottom: '1px solid #0000001F',
-        },
-        '.MuiDataGrid-cell:focus': {
-          outline: 'none',
-        },
-        '.MuiDataGrid-cell:focus-within': {
-          outline: 'none',
-        },
       }}
-      {...props}
-      columns={props.columns.map((column) => ({
-        ...column,
-        minWidth: 150,
-        flex: 1,
-      }))}
-    />
+    >
+      <DataGrid
+        autoHeight={autoHeight}
+        disableColumnMenu={disableColumnMenu}
+        disableColumnSelector={disableColumnSelector}
+        disableRowSelectionOnClick={disableRowSelectionOnClick}
+        hideFooter={hideFooter}
+        sx={{
+          width: '100%',
+          maxWidth: '100%',
+          '& .MuiDataGrid-root': {
+            overflowX: scroll ? 'auto' : 'hidden',
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            backgroundColor: '#f5f5f5',
+            borderBottom: '1px solid #ccc',
+          },
+          '& .MuiDataGrid-cell': {
+            borderBottom: '1px solid #eee',
+          },
+          '& .MuiDataGrid-columnHeader, & .MuiDataGrid-cell': {
+            minWidth: 100, // Reduz o mínimo para telas menores
+            flex: 1, // Permite flexibilidade no redimensionamento
+          },
+        }}
+        {...props}
+      />
+    </Box>
   );
 }

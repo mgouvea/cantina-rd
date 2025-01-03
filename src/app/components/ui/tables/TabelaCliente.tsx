@@ -1,15 +1,14 @@
+'use client';
+
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import {
-  GridRowsProp,
   GridRowModesModel,
-  GridRowModes,
   DataGrid,
   GridColDef,
-  GridToolbarContainer,
   GridActionsCellItem,
   GridEventListener,
   GridRowId,
@@ -26,7 +25,7 @@ interface TabelaProps {
   isLoading: boolean;
 }
 
-export default function TabelaCliente2({ data, isLoading }: TabelaProps) {
+export default function TabelaCliente({ data, isLoading }: TabelaProps) {
   const router = useRouter();
   const [rows, setRows] = React.useState(data);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
@@ -43,7 +42,7 @@ export default function TabelaCliente2({ data, isLoading }: TabelaProps) {
   };
 
   const handleEditClick = (id: GridRowId) => () => {
-    router.replace(`/painel/admin/clientes/editar/${id}`);
+    router.replace(`/painel/clientes/editar/${id}`);
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
@@ -79,7 +78,7 @@ export default function TabelaCliente2({ data, isLoading }: TabelaProps) {
       editable: true,
     },
     {
-      field: 'groupFamilys',
+      field: 'groupFamily',
       headerName: 'Grupo Familiar',
       width: 250,
       editable: true,
@@ -112,7 +111,7 @@ export default function TabelaCliente2({ data, isLoading }: TabelaProps) {
   ];
 
   const handleAddClient = () => {
-    router.replace('/painel/admin/clientes/novo');
+    router.replace('/painel/clientes/novo');
   };
 
   return (

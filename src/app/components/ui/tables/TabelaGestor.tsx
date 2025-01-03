@@ -48,6 +48,8 @@ export default function TabelaGestor({ data, isLoading }: TabelaProps) {
   );
   const [openModal, setOpenModal] = useState(false);
 
+  console.log('dataGestor', data);
+
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (
     params,
     event
@@ -76,30 +78,13 @@ export default function TabelaGestor({ data, isLoading }: TabelaProps) {
   };
 
   const columns: GridColDef[] = [
-    { field: 'nomeCompleto', headerName: 'Nome', width: 300, editable: true },
-    {
-      field: 'telefone',
-      headerName: 'Telefone',
-      type: 'number',
-      width: 200,
-      align: 'left',
-      headerAlign: 'left',
-      editable: true,
-    },
+    { field: 'name', headerName: 'Nome', width: 300, editable: true },
     {
       field: 'email',
       headerName: 'Email',
       type: 'string',
       width: 300,
       editable: true,
-    },
-    {
-      field: 'grupoFamiliar',
-      headerName: 'Grupo Familiar',
-      width: 250,
-      editable: true,
-      type: 'singleSelect',
-      valueOptions: ['Market', 'Finance', 'Development'],
     },
     {
       field: 'actions',
@@ -164,6 +149,7 @@ export default function TabelaGestor({ data, isLoading }: TabelaProps) {
               rows={rowsFiltradas}
               columns={columns}
               editMode="row"
+              getRowId={(row) => row._id}
               rowModesModel={rowModesModel}
               onRowModesModelChange={handleRowModesModelChange}
               onRowEditStop={handleRowEditStop}

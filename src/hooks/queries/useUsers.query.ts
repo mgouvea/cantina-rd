@@ -1,5 +1,6 @@
 import {
   GetAdmins,
+  GetAllAdmins,
   GetAllUsers,
   GetGroupFamily,
   GetUserById,
@@ -25,13 +26,6 @@ export const useUserById = (id: string) => {
 export const useAdmins = () => {
   return useQuery({
     queryKey: ['admins'],
-    queryFn: () => GetAdmins(true),
-  });
-};
-
-export const useGroupFamily = (groupFamily: string) => {
-  return useQuery({
-    queryKey: ['groupFamily', groupFamily],
-    queryFn: () => GetGroupFamily(groupFamily),
+    queryFn: () => GetAllAdmins(),
   });
 };

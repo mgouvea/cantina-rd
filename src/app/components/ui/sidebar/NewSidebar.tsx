@@ -2,16 +2,16 @@
 
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import DashboardCustomizeRoundedIcon from '@mui/icons-material/DashboardCustomizeRounded';
+import FamilyRestroomOutlinedIcon from '@mui/icons-material/FamilyRestroomOutlined';
 import FastfoodRoundedIcon from '@mui/icons-material/FastfoodRounded';
 import Image from 'next/image';
 import LocalAtmOutlinedIcon from '@mui/icons-material/LocalAtmOutlined';
 import React, { useState } from 'react';
 import SupervisorAccountRoundedIcon from '@mui/icons-material/SupervisorAccountRounded';
 import Text from '../text/Text';
+import { Box, Drawer, List, Toolbar, useTheme } from '@mui/material';
 import { useMediaQuery } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
-
-import { Box, Drawer, List, Toolbar, useTheme } from '@mui/material';
 
 export function NewSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -24,7 +24,7 @@ export function NewSidebar() {
   const drawerWidth = 260;
 
   const handleClick = (route: string) => {
-    router.replace(`/painel/admin/${route}`);
+    router.replace(`/painel/${route}`);
   };
 
   const navigationItems = [
@@ -38,6 +38,7 @@ export function NewSidebar() {
       //   { title: 'Adicionar cliente', route: 'clientes/novo' },
       // ],
     },
+    { title: 'Grupo Familiar', route: 'group-family' },
     {
       title: 'Gestores',
       route: 'gestor',
@@ -66,15 +67,15 @@ export function NewSidebar() {
     submenus?: { title: string; route: string }[];
   }) => {
     const isSelected =
-      (title === 'Dashboard' && pathname === '/painel/admin') ||
-      (title !== 'Dashboard' &&
-        pathname.startsWith(`/painel/admin/${route}`)) ||
-      submenus.some((sub) => pathname.startsWith(`/painel/admin/${sub.route}`));
+      (title === 'Dashboard' && pathname === '/painel') ||
+      (title !== 'Dashboard' && pathname.startsWith(`/painel/${route}`)) ||
+      submenus.some((sub) => pathname.startsWith(`/painel/${sub.route}`));
 
     const icons: Record<string, JSX.Element> = {
       Dashboard: <DashboardCustomizeRoundedIcon />,
       Faturas: <LocalAtmOutlinedIcon />,
       Clientes: <SupervisorAccountRoundedIcon />,
+      'Grupo Familiar': <FamilyRestroomOutlinedIcon />,
       Gestores: <AdminPanelSettingsOutlinedIcon />,
       Produtos: <FastfoodRoundedIcon />,
     };
@@ -126,7 +127,7 @@ export function NewSidebar() {
         </Box>
         {(isSelected ||
           submenus.some((sub) =>
-            pathname.startsWith(`/painel/admin/${sub.route}`)
+            pathname.startsWith(`/painel/${sub.route}`)
           )) &&
           submenus.length > 0 && (
             <Box sx={{ paddingLeft: '24px', marginTop: '8px' }}>
@@ -134,7 +135,7 @@ export function NewSidebar() {
                 <SubmenuButton
                   key={submenu.title}
                   title={submenu.title}
-                  isSelected={pathname === `/painel/admin/${submenu.route}`} // Comparação exata da rota
+                  isSelected={pathname === `/painel/${submenu.route}`} // Comparação exata da rota
                   onClick={(e) => {
                     e.stopPropagation(); // Evitar a propagação do clique para o botão principal
                     handleClick(submenu.route);

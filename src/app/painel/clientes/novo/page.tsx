@@ -12,11 +12,12 @@ import { Avatar, Box, IconButton, Stack, Tooltip } from '@mui/material';
 import { Botao, EntradaTexto, useSnackbar } from '@/app/components';
 import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
-import { useAddUser } from '@/hooks/mutations';
+import { useAddAdmin, useAddUser } from '@/hooks/mutations';
 import { useApp } from '@/contexts';
 import { useForm, useWatch } from 'react-hook-form';
-import { User } from '@/types';
+import { User, UserAdmin } from '@/types';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface fotoPerfilProps {
   base64: string;
@@ -46,18 +47,22 @@ const INITIAL_FORM_VALUES = {
 const optionsSwitch = [
   {
     label: 'Cliente',
-    value: true,
+    value: 0,
     selectedBackgroundColor: '#4caf50',
   },
   {
     label: 'Administrador',
-    value: false,
+    value: 1,
     selectedBackgroundColor: '#1565c0',
   },
 ];
 
 export default function NovoCliente() {
+  const queryClient = useQueryClient();
+
   const { mutateAsync: addUser } = useAddUser();
+  const { mutateAsync: addAdmin } = useAddAdmin();
+
   const { userContext } = useApp();
   const { showSnackbar } = useSnackbar();
   const router = useRouter();
@@ -88,6 +93,7 @@ export default function NovoCliente() {
 
   const handleSaveClient = async () => {
     setIsSubmitting(true);
+
     const userExists = userContext.some(
       (user) =>
         user.email === watchedEmail && user.telephone === watchedTelefone
@@ -98,27 +104,41 @@ export default function NovoCliente() {
         message: 'Cliente já cadastrado!',
         severity: 'warning',
       });
-    } else {
-      try {
-        await addUser({
-          ...getValues(),
-          isAdmin: checked,
-          password: checked ? 'udv@realeza' : undefined,
-        });
-        router.replace('/painel/admin/clientes');
-        reset();
-        showSnackbar({
-          message: 'Cliente cadastrado com sucesso!',
-          severity: 'success',
-        });
-      } catch (error) {
-        showSnackbar({
-          message: 'Ocorreu um erro!',
-          severity: 'error',
-        });
-      } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const { name, email } = getValues();
+      const newUser = await addUser({
+        ...getValues(),
+        isAdmin: checked,
+      });
+
+      if (checked) {
+        const adminPayload: UserAdmin = {
+          idUser: newUser._id,
+          name: name,
+          email: email,
+          password: 'udv@realeza',
+        };
+        await addAdmin(adminPayload);
       }
+
+      router.replace('/painel/admin/clientes');
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      reset();
+      showSnackbar({
+        message: 'Cliente cadastrado com sucesso!',
+        severity: 'success',
+      });
+    } catch (error) {
+      showSnackbar({
+        message: 'Ocorreu um erro!',
+        severity: 'error',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -302,7 +322,7 @@ const ClientForm = ({ control, checked, onCheckChange }: any) => (
       onChange={onCheckChange}
       options={optionsSwitch}
       initialSelectedIndex={optionsSwitch.findIndex(
-        ({ value }) => value === true
+        ({ value }) => value === (checked ? 1 : 0) // Compare with 1 for true (Admin) and 0 for false (Client)
       )}
       backgroundColor={'#666666'}
       fontColor={'#f5f6fa'}

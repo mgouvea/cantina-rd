@@ -1,16 +1,20 @@
 export type User = {
-  id: string;
+  _id?: string;
   name: string;
   email: string;
-  password?: string;
   isAdmin: boolean;
   telephone: string;
   groupFamily: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date | null;
 };
 
-export type ClienteResponse = {
-  status: number;
-  data: User[];
+export type UserAdmin = {
+  _id?: string;
+  idUser: string;
+  name: string;
+  email: string;
+  password: string;
+  createdAt?: Date;
+  updatedAt?: Date | null;
 };

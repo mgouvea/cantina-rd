@@ -10,6 +10,13 @@ export const formatarCPF = (cpf: string) => {
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 };
 
+export const isValidEmail = (email: string): any => {
+  if (!email) return;
+
+  const emailPattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+  return emailPattern.test(email);
+};
+
 export const removerMascaraCPF = (cpf: string) => {
   return cpf.replace(/\D/g, '');
 };

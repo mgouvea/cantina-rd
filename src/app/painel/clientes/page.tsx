@@ -1,18 +1,28 @@
 'use client';
-import { Box, CircularProgress, Stack } from '@mui/material';
+
 import GenericBreadcrumbs from '@/app/components/breadcrumb/GenericBreadcrumb';
-import { useClient } from '@/hooks/queries';
-import { IlustracaoIsEmpty, TabelaCliente } from '@/app/components';
-import FullFeaturedCrudGrid from '@/app/components/ui/tables/TabelaCliente2';
+import TabelaCliente from '@/app/components/ui/tables/TabelaCliente';
 import Text from '@/app/components/ui/text/Text';
+import { Box, CircularProgress, Stack } from '@mui/material';
+import { IlustracaoIsEmpty } from '@/app/components';
+import { useApp } from '@/contexts';
+import { useEffect } from 'react';
+import { useUsers } from '@/hooks/queries';
 
 const breadcrumbItems = [
-  { label: 'Início', href: '/painel/admin' },
+  { label: 'Início', href: '/painel' },
   { label: 'Clientes' },
 ];
 
-export default function Produtos() {
-  const { data, isLoading } = useClient();
+export default function Clientes() {
+  const { data, isLoading } = useUsers();
+  const { setUserContext } = useApp();
+
+  useEffect(() => {
+    if (!isLoading && data) {
+      setUserContext(data);
+    }
+  }, [data]);
 
   const renderClienteEmpty = () => {
     return (
@@ -33,7 +43,7 @@ export default function Produtos() {
             color: '#333333',
           }}
         >
-          Ainda não há produtos para exibir{' '}
+          Ainda não há clientes para exibir{' '}
         </Text>
       </Box>
     );
@@ -69,8 +79,7 @@ export default function Produtos() {
           renderClienteEmpty()
         ) : (
           <>
-            {/* <TabelaCliente data={data} isLoading={isLoading} /> */}
-            <FullFeaturedCrudGrid data={data} isLoading={isLoading} />
+            <TabelaCliente data={data} isLoading={isLoading} />
           </>
         )}
       </Stack>
