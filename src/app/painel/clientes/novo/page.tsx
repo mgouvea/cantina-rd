@@ -125,7 +125,7 @@ export default function NovoCliente() {
         await addAdmin(adminPayload);
       }
 
-      router.replace('/painel/admin/clientes');
+      router.replace('/painel/clientes');
       queryClient.invalidateQueries({ queryKey: ['users'] });
       reset();
       showSnackbar({
@@ -161,8 +161,8 @@ export default function NovoCliente() {
   );
 
   const breadcrumbItems = [
-    { label: 'Início', href: '/painel/admin' },
-    { label: 'Cliente', href: '/painel/admin/clientes' },
+    { label: 'Início', href: '/painel' },
+    { label: 'Cliente', href: '/painel/clientes' },
     { label: 'Novo' },
   ];
 
@@ -179,7 +179,7 @@ export default function NovoCliente() {
             backgroundColor: 'success.dark',
             '&:hover': { backgroundColor: 'success.main', transition: '0.3s' },
           }}
-          onClick={() => router.replace('/painel/admin/clientes')}
+          onClick={() => router.replace('/painel/clientes')}
         >
           <Tooltip title="Voltar">
             <ArrowBackIcon fontSize="medium" sx={{ color: '#fff' }} />

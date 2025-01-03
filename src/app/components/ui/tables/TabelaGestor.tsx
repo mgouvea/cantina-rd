@@ -34,6 +34,7 @@ import {
   GridRowEditStopReasons,
 } from '@mui/x-data-grid';
 import GenericModal from '../../modal/GenericModal';
+import EmptyContent from '../emptyContent/EmptyContent';
 
 interface TabelaProps {
   data: any;
@@ -48,8 +49,6 @@ export default function TabelaGestor({ data, isLoading }: TabelaProps) {
   );
   const [openModal, setOpenModal] = useState(false);
 
-  console.log('dataGestor', data);
-
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (
     params,
     event
@@ -60,7 +59,7 @@ export default function TabelaGestor({ data, isLoading }: TabelaProps) {
   };
 
   const handleEditClick = (id: GridRowId) => () => {
-    router.replace(`/painel/admin/clientes/editar/${id}`);
+    router.replace(`/painel/clientes/editar/${id}`);
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
@@ -140,28 +139,36 @@ export default function TabelaGestor({ data, isLoading }: TabelaProps) {
           <AddCircleIcon fontSize="large" />
         </IconButton>
       </Stack>
-      <Filtros rows={data}>
-        {(rowsFiltradas) =>
-          isLoading ? (
-            <CircularProgress />
-          ) : (
-            <DataGrid
-              rows={rowsFiltradas}
-              columns={columns}
-              editMode="row"
-              getRowId={(row) => row._id}
-              rowModesModel={rowModesModel}
-              onRowModesModelChange={handleRowModesModelChange}
-              onRowEditStop={handleRowEditStop}
-              processRowUpdate={processRowUpdate}
-              slotProps={{
-                toolbar: { setRows, setRowModesModel },
-              }}
-              sx={{ borderRadius: '16px' }}
-            />
-          )
-        }
-      </Filtros>
+
+      {!isLoading && (!data || data.length === 0) && (
+        <EmptyContent title="Ainda não há gestores paraa exibir" />
+      )}
+
+      {!isLoading && data && data.length > 0 && (
+        <Filtros rows={data}>
+          {(rowsFiltradas) =>
+            isLoading ? (
+              <CircularProgress />
+            ) : (
+              <DataGrid
+                rows={rowsFiltradas}
+                columns={columns}
+                editMode="row"
+                getRowId={(row) => row._id}
+                rowModesModel={rowModesModel}
+                onRowModesModelChange={handleRowModesModelChange}
+                onRowEditStop={handleRowEditStop}
+                processRowUpdate={processRowUpdate}
+                slotProps={{
+                  toolbar: { setRows, setRowModesModel },
+                }}
+                sx={{ borderRadius: '16px' }}
+              />
+            )
+          }
+        </Filtros>
+      )}
+
       <GenericModal
         title="Excluir gestor"
         open={openModal}

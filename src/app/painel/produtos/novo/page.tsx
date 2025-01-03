@@ -1,12 +1,12 @@
 'use client';
-import { Box, CircularProgress, Stack } from '@mui/material';
+
+import { Stack } from '@mui/material';
 import GenericBreadcrumbs from '@/app/components/breadcrumb/GenericBreadcrumb';
-import { useClient } from '@/hooks/queries';
 import Text from '@/app/components/ui/text/Text';
 
 const breadcrumbItems = [
-  { label: 'Início', href: '/painel/admin' },
-  { label: 'Produtos', href: '/painel/admin/produtos' },
+  { label: 'Início', href: '/painel' },
+  { label: 'Produtos', href: '/painel/produtos' },
   { label: 'Novo' },
 ];
 

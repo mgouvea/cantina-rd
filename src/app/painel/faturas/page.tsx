@@ -3,7 +3,7 @@ import Text from '@/app/components/ui/text/Text';
 import { Box, Stack } from '@mui/material';
 
 const breadcrumbItems = [
-  { label: 'Início', href: '/painel/admin' },
+  { label: 'Início', href: '/painel' },
   { label: 'Faturas' },
 ];
 

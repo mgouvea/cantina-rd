@@ -56,7 +56,7 @@ const Sidebar: React.FC = () => {
     setOpenMenu(openMenu === menu ? null : menu);
   };
 
-  // Verifica se a rota é exatamente igual a /painel/admin
+  // Verifica se a rota é exatamente igual a /painel
   const isActive = (path: string) => currentRoute === path;
 
   const colorIcons = 'error.main';
@@ -68,7 +68,7 @@ const Sidebar: React.FC = () => {
         {
           text: 'Início',
           icon: <DashboardCustomizeRoundedIcon sx={{ color: colorIcons }} />,
-          href: '/painel/admin', // Seleciona apenas se a rota for exatamente essa
+          href: '/painel', // Seleciona apenas se a rota for exatamente essa
         },
       ],
     },
@@ -78,11 +78,11 @@ const Sidebar: React.FC = () => {
       items: [
         {
           text: 'Listar cliente',
-          href: '/painel/admin/clientes',
+          href: '/painel/clientes',
         },
         {
           text: 'Novo cliente',
-          href: '/painel/admin/clientes/novo',
+          href: '/painel/clientes/novo',
         },
       ],
     },
@@ -92,11 +92,11 @@ const Sidebar: React.FC = () => {
       items: [
         {
           text: 'Listar gestores',
-          href: '/painel/admin/gestor',
+          href: '/painel/gestor',
         },
         {
           text: 'Novo gestor',
-          href: '/painel/admin/gestor/novo',
+          href: '/painel/gestor/novo',
         },
       ],
     },
@@ -106,11 +106,11 @@ const Sidebar: React.FC = () => {
       items: [
         {
           text: 'Listar produtos',
-          href: '/painel/admin/produtos',
+          href: '/painel/produtos',
         },
         {
           text: 'Cadastrar produto',
-          href: '/painel/admin/produtos/novo',
+          href: '/painel/produtos/novo',
         },
       ],
     },

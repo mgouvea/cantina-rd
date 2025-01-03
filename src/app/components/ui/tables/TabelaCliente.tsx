@@ -19,6 +19,7 @@ import { CircularProgress, IconButton, Stack } from '@mui/material';
 import { Filtros } from '../..';
 import { useRouter } from 'next/navigation';
 import Text from '../text/Text';
+import EmptyContent from '../emptyContent/EmptyContent';
 
 interface TabelaProps {
   data: any;
@@ -139,28 +140,35 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
           <AddCircleIcon fontSize="large" />
         </IconButton>
       </Stack>
-      <Filtros rows={data}>
-        {(rowsFiltradas) =>
-          isLoading ? (
-            <CircularProgress />
-          ) : (
-            <DataGrid
-              rows={rowsFiltradas}
-              columns={columns}
-              editMode="row"
-              getRowId={(row) => row._id}
-              rowModesModel={rowModesModel}
-              onRowModesModelChange={handleRowModesModelChange}
-              onRowEditStop={handleRowEditStop}
-              processRowUpdate={processRowUpdate}
-              slotProps={{
-                toolbar: { setRows, setRowModesModel },
-              }}
-              sx={{ borderRadius: '16px' }}
-            />
-          )
-        }
-      </Filtros>
+
+      {!isLoading && (!data || data.length === 0) && (
+        <EmptyContent title="Ainda não há clientes para exibir" />
+      )}
+
+      {!isLoading && data && data.length > 0 && (
+        <Filtros rows={data}>
+          {(rowsFiltradas) =>
+            isLoading ? (
+              <CircularProgress />
+            ) : (
+              <DataGrid
+                rows={rowsFiltradas}
+                columns={columns}
+                editMode="row"
+                getRowId={(row) => row._id}
+                rowModesModel={rowModesModel}
+                onRowModesModelChange={handleRowModesModelChange}
+                onRowEditStop={handleRowEditStop}
+                processRowUpdate={processRowUpdate}
+                slotProps={{
+                  toolbar: { setRows, setRowModesModel },
+                }}
+                sx={{ borderRadius: '16px' }}
+              />
+            )
+          }
+        </Filtros>
+      )}
     </Box>
   );
 }

@@ -7,7 +7,6 @@ import Grid from '@mui/material/Grid2';
 import Text from '@/app/components/ui/text/Text';
 import { Botao, EntradaTexto } from '@/app/components';
 import { useForm } from 'react-hook-form';
-import { Cliente } from '@/types/clientes';
 import GenericBreadcrumbs from '@/app/components/breadcrumb/GenericBreadcrumb';
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -27,7 +26,7 @@ export default function EditarGestor() {
 
   const router = useRouter();
 
-  const clienteForm = useForm<Cliente>({
+  const clienteForm = useForm<any>({
     defaultValues: {
       nomeCompleto: '',
       email: '',
@@ -41,8 +40,8 @@ export default function EditarGestor() {
   };
 
   const breadcrumbItems = [
-    { label: 'Início', href: '/painel/admin' },
-    { label: 'Cliente', href: '/painel/admin/clientes' },
+    { label: 'Início', href: '/painel' },
+    { label: 'Cliente', href: '/painel/clientes' },
     { label: 'Editar' },
   ];
 
@@ -113,7 +112,7 @@ export default function EditarGestor() {
                 <Botao
                   variant="contained"
                   color="error"
-                  onClick={() => router.replace('/painel/admin/clientes')}
+                  onClick={() => router.replace('/painel/clientes')}
                   sx={{ paddingX: 7, borderRadius: '8px' }}
                 >
                   Cancelar

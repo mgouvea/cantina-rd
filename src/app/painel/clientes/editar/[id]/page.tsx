@@ -101,8 +101,8 @@ export default function EditarCliente() {
   };
 
   const breadcrumbItems = [
-    { label: 'Início', href: '/painel/admin' },
-    { label: 'Cliente', href: '/painel/admin/clientes' },
+    { label: 'Início', href: '/painel' },
+    { label: 'Cliente', href: '/painel/clientes' },
     { label: 'Editar' },
   ];
 
@@ -210,7 +210,7 @@ export default function EditarCliente() {
                 <Botao
                   variant="contained"
                   color="error"
-                  onClick={() => router.replace('/painel/admin/clientes')}
+                  onClick={() => router.replace('/painel/clientes')}
                   sx={{ paddingX: 7, borderRadius: '8px' }}
                 >
                   Cancelar
