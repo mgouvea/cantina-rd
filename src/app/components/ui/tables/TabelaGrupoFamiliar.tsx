@@ -114,7 +114,7 @@ export default function TabelaGrupoFamiliar({ data, isLoading }: TabelaProps) {
   ];
 
   const handleAddClient = () => {
-    router.replace('/painel/group-family/novo');
+    router.replace('/painel/grupo-familiar/novo');
   };
 
   return (

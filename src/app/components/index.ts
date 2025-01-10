@@ -16,4 +16,5 @@ export * from './ui/botao/Botao';
 export * from './ui/emptyContent/EmptyContent';
 export * from './ui/entradaTexto/EntradaTexto';
 export * from './ui/text/Text';
+export * from './ui/transferList/TransferList';
 export * from './ui/wrapper/ContentWrapper';

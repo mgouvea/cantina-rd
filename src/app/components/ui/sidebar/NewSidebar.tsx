@@ -38,7 +38,7 @@ export function NewSidebar() {
       //   { title: 'Adicionar cliente', route: 'clientes/novo' },
       // ],
     },
-    { title: 'Grupo Familiar', route: 'group-family' },
+    { title: 'Grupo Familiar', route: 'grupo-familiar' },
     {
       title: 'Gestores',
       route: 'gestor',
