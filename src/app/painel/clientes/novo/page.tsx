@@ -85,7 +85,7 @@ export default function NovoCliente() {
 
   useEffect(() => {
     setIsModified(
-      [watchedNome, watchedEmail, watchedTelefone, watchedGrupoFamiliar].every(
+      [watchedNome, watchedEmail, watchedTelefone].every(
         (field) => field.trim() !== ''
       )
     );
@@ -314,7 +314,7 @@ const ClientForm = ({ control, checked, onCheckChange }: any) => (
       <EntradaTexto name="email" control={control} label="Email" />
       <EntradaTexto name="telephone" control={control} label="Telefone" />
     </Stack>
-    <EntradaTexto name="groupFamily" control={control} label="Grupo familiar" />
+    {/* <EntradaTexto name="groupFamily" control={control} label="Grupo familiar" /> */}
     <Text color="textSecondary" fontWeight="bold">
       Perfil do usuário
     </Text>

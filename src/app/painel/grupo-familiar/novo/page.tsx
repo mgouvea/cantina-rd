@@ -20,13 +20,15 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Stack,
   TextField,
   Tooltip,
+  Typography,
 } from '@mui/material';
 import { StepIconProps } from '@mui/material/StepIcon';
 import { styled } from '@mui/material/styles';
-import { useForm } from 'react-hook-form';
+import { Control, useForm } from 'react-hook-form';
 import { User } from '@/types';
 import { useRouter } from 'next/navigation';
 
@@ -34,9 +36,10 @@ import StepConnector, {
   stepConnectorClasses,
 } from '@mui/material/StepConnector';
 import { groupFamily } from '@/types/groupFamily';
-import { EntradaTexto } from '@/app/components';
+import { EntradaTexto, SnackbarProvider, useSnackbar } from '@/app/components';
 import TransferList from '@/app/components/ui/transferList/TransferList';
 import { useUsers } from '@/hooks/queries';
+import { useAddGroupFamily } from '@/hooks/mutations/groupFamily.mutation';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',
@@ -63,6 +66,25 @@ const INITIAL_FORM_VALUES: FormData = {
   members: [],
   owner: '',
 };
+
+interface FormValues {
+  name: string;
+}
+
+interface SummaryItemProps {
+  title: string;
+  value: string | SelectedMember[];
+}
+
+interface StepContentProps {
+  step: number;
+  control: Control<FormValues>;
+  users: SelectedMember[];
+  selectedMembers: SelectedMember[];
+  owner: string;
+  onMembersChange: (members: SelectedMember[]) => void;
+  onOwnerChange: (event: SelectChangeEvent) => void;
+}
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -149,6 +171,9 @@ const steps = ['Nome do grupo', 'Membros', 'Responsável', 'Salvar'];
 
 export default function NovoGrupoFamiliar() {
   const { data: users, isLoading } = useUsers();
+  const { showSnackbar } = useSnackbar();
+
+  const { mutateAsync: addGroup } = useAddGroupFamily();
 
   const router = useRouter();
   const { control, getValues, setValue, watch } = useForm<FormData>({
@@ -159,8 +184,7 @@ export default function NovoGrupoFamiliar() {
   const [selectedMembers, setSelectedMembers] = useState<SelectedMember[]>([]);
   const [owner, setOwner] = useState<string>('');
 
-  // Observa as mudanças no campo members do formulário
-  // const selectedMembers = watch('members');
+  const groupName = watch('name');
 
   const handleMembersChange = (updatedMembers: SelectedMember[]) => {
     setSelectedMembers(updatedMembers);
@@ -171,6 +195,13 @@ export default function NovoGrupoFamiliar() {
   };
 
   const handleNext = () => {
+    if (activeStep === 0 && groupName === '') {
+      showSnackbar({
+        message: 'Nome obrigatório!',
+        severity: 'warning',
+      });
+      return;
+    }
     setActiveStep((prevStep) => prevStep + 1);
   };
 
@@ -184,7 +215,10 @@ export default function NovoGrupoFamiliar() {
 
   const handleSave = async () => {
     if (!owner) {
-      alert('Selecione um responsável');
+      showSnackbar({
+        message: 'Selecione um responsável',
+        severity: 'warning',
+      });
       return;
     }
 
@@ -197,11 +231,52 @@ export default function NovoGrupoFamiliar() {
 
     try {
       console.log('Dados para salvar:', finalData);
-      // await saveGroupFamily(finalData);
+      await addGroup(finalData);
+      showSnackbar({
+        message: 'Grupo familiar salvo com sucesso',
+        severity: 'success',
+      });
       router.replace('/painel/grupo-familiar');
     } catch (error) {
       console.error('Erro ao salvar:', error);
     }
+  };
+
+  const RenderTextStep3 = (title: string, value: any) => {
+    const getOwnerName = (ownerId: string) => {
+      const ownerMember = selectedMembers.find(
+        (member) => member.userId === ownerId
+      );
+      return ownerMember ? ownerMember.name : ownerId;
+    };
+
+    // Processa o valor baseado no título e tipo
+    const processValue = (title: string, value: any) => {
+      if (title === 'Responsável') {
+        return getOwnerName(value);
+      }
+      return value;
+    };
+
+    const displayValue = Array.isArray(value) ? (
+      value.map((item: SelectedMember) => (
+        <Text key={item.userId} sx={{ ml: 2 }}>
+          {item.name}
+        </Text>
+      ))
+    ) : (
+      <Text>{processValue(title, value)}</Text>
+    );
+
+    return (
+      <Stack
+        direction={Array.isArray(value) ? 'column' : 'row'}
+        sx={{ gap: 1 }}
+      >
+        <Text sx={{ fontWeight: 'bold' }}>{title}:</Text>
+        {displayValue}
+      </Stack>
+    );
   };
 
   const getStepContent = (step: number) => {
@@ -256,8 +331,31 @@ export default function NovoGrupoFamiliar() {
             </Select>
           </FormControl>
         );
-      default:
-        return 'Passo desconhecido';
+      case 3:
+        const finalValues = getValues();
+        return (
+          <Stack
+            sx={{
+              border: '1px solid gray',
+              borderRadius: 4,
+              paddingX: 10,
+              paddingY: 3,
+              boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)',
+              backgroundColor: 'white',
+              position: 'relative',
+              transform: 'translateY(-4px)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                boxShadow: '0px 6px 12px rgba(0, 0, 0, 0.15)',
+                transform: 'translateY(-6px)',
+              },
+            }}
+          >
+            {RenderTextStep3('Nome do grupo', finalValues.name)}
+            {RenderTextStep3('Responsável', owner)}
+            {RenderTextStep3('Membros', selectedMembers)}
+          </Stack>
+        );
     }
   };
 
