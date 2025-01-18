@@ -20,6 +20,7 @@ import { Filtros } from '../..';
 import { useRouter } from 'next/navigation';
 import Text from '../text/Text';
 import EmptyContent from '../emptyContent/EmptyContent';
+import { capitalize } from '@/utils';
 
 interface TabelaProps {
   data: any;
@@ -61,7 +62,9 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
   };
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Nome', width: 300, editable: true },
+    { field: 'name', headerName: 'Nome', width: 300, editable: true, renderCell: (params) => (
+      capitalize(params.value)
+    )},
     {
       field: 'telephone',
       headerName: 'Telefone',
@@ -69,13 +72,6 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
       width: 200,
       align: 'left',
       headerAlign: 'left',
-      editable: true,
-    },
-    {
-      field: 'email',
-      headerName: 'Email',
-      type: 'string',
-      width: 300,
       editable: true,
     },
     {
@@ -120,7 +116,6 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
       sx={{
         padding: 2,
         height: 'fit-content',
-        width: '100%',
         '& .actions': {
           color: 'text.secondary',
         },

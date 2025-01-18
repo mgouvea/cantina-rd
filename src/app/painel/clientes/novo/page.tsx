@@ -37,7 +37,7 @@ const Item = styled(Paper)(({ theme }) => ({
 
 const INITIAL_FORM_VALUES = {
   name: '',
-  email: '',
+  email: undefined,
   telephone: '',
   isAdmin: false,
   password: '',
@@ -76,27 +76,28 @@ export default function NovoCliente() {
   const userForm = useForm<User>({ defaultValues: INITIAL_FORM_VALUES });
   const { control, getValues, reset } = userForm;
 
-  const [watchedNome, watchedEmail, watchedTelefone, watchedGrupoFamiliar] = [
+  const [watchedNome, watchedEmail, watchedTelefone] = [
     useWatch({ control, name: 'name' }),
     useWatch({ control, name: 'email' }),
     useWatch({ control, name: 'telephone' }),
-    useWatch({ control, name: 'groupFamily' }),
   ];
 
   useEffect(() => {
+    const requiredFields = [watchedNome, watchedTelefone];
+    if (checked) {
+      requiredFields.push(watchedEmail!);
+    }
+    
     setIsModified(
-      [watchedNome, watchedEmail, watchedTelefone].every(
-        (field) => field.trim() !== ''
-      )
+      requiredFields.every((field) => field?.trim?.() !== '')
     );
-  }, [watchedNome, watchedEmail, watchedTelefone, watchedGrupoFamiliar]);
+  }, [watchedNome, watchedEmail, watchedTelefone, checked]);
 
   const handleSaveClient = async () => {
     setIsSubmitting(true);
 
     const userExists = userContext.some(
-      (user) =>
-        user.email === watchedEmail && user.telephone === watchedTelefone
+      (user) => user.telephone === watchedTelefone
     );
 
     if (userExists) {
@@ -109,9 +110,10 @@ export default function NovoCliente() {
     }
 
     try {
-      const { name, email } = getValues();
+      const { name, email, ...userValues } = getValues();
       const newUser = await addUser({
-        ...getValues(),
+        ...userValues,
+        name,
         isAdmin: checked,
       });
 
@@ -119,7 +121,7 @@ export default function NovoCliente() {
         const adminPayload: UserAdmin = {
           idUser: newUser._id,
           name: name,
-          email: email,
+          email: email!,
           password: 'udv@realeza',
         };
         await addAdmin(adminPayload);
@@ -134,7 +136,7 @@ export default function NovoCliente() {
       });
     } catch (error) {
       showSnackbar({
-        message: 'Ocorreu um erro!',
+        message: `Ocorreu um erro! - ${error}`,
         severity: 'error',
       });
     } finally {
@@ -198,7 +200,7 @@ export default function NovoCliente() {
                 hovering={hovering}
               />
               <Text variant="h6">{watchedNome || 'Nome'}</Text>
-              <ContactInfo email={watchedEmail} telephone={watchedTelefone} />
+              <ContactInfo email={watchedEmail!} telephone={watchedTelefone} />
               <UploadImageButton onUpload={handleUploadFile} />
             </Item>
           </Grid>
@@ -269,12 +271,12 @@ const ContactInfo = ({
   email,
   telephone,
 }: {
-  email: string;
+  email?: string;
   telephone: string;
 }) => (
   <Stack direction="row" gap={1} marginBottom={3}>
-    <Text>{email || 'Email'}</Text>
-    <Text>-</Text>
+    {email &&<Text>{email || 'Email'}</Text>}
+    {email && <Text>-</Text>}
     <Text>{telephone || 'Telefone'}</Text>
   </Stack>
 );
@@ -309,12 +311,16 @@ const UploadImageButton = ({
 const ClientForm = ({ control, checked, onCheckChange }: any) => (
   <Stack gap={2}>
     <Text fontWeight="bold">Dados do cliente</Text>
-    <EntradaTexto name="name" control={control} label="Nome" />
     <Stack direction="row" gap={1}>
-      <EntradaTexto name="email" control={control} label="Email" />
-      <EntradaTexto name="telephone" control={control} label="Telefone" />
+      <EntradaTexto name="name" control={control} label="Nome" />
+      {!checked && <EntradaTexto name="telephone" control={control} label="Telefone" mask="(99) 99999-9999" />}
     </Stack>
-    {/* <EntradaTexto name="groupFamily" control={control} label="Grupo familiar" /> */}
+    {!!checked && (
+      <Stack direction="row" gap={1}>
+        <EntradaTexto name="email" control={control} label="Email" />
+        <EntradaTexto name="telephone" control={control} label="Telefone" mask="(99) 99999-9999" />
+      </Stack>
+    )}
     <Text color="textSecondary" fontWeight="bold">
       Perfil do usuário
     </Text>

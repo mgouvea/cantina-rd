@@ -33,7 +33,6 @@ export default function TabelaGrupoFamiliar({ data, isLoading }: TabelaProps) {
     {}
   );
 
-  console.log('dataGrupo', data);
 
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (
     params,
@@ -62,31 +61,35 @@ export default function TabelaGrupoFamiliar({ data, isLoading }: TabelaProps) {
     setRowModesModel(newRowModesModel);
   };
 
+
+  const getOwnerName = (ownerId: string, row: any) => {
+    const ownerMember = row.members.find(
+      (member: any) => member.userId === ownerId
+    );
+    return ownerMember ? ownerMember.name : ownerId;
+  };
+
   const columns: GridColDef[] = [
     { field: 'name', headerName: 'Nome', width: 300, editable: true },
     {
-      field: 'telephone',
-      headerName: 'Telefone',
-      type: 'number',
-      width: 200,
-      align: 'left',
-      headerAlign: 'left',
-      editable: true,
-    },
-    {
-      field: 'email',
-      headerName: 'Email',
+      field: 'owner',
+      headerName: 'Responsável',
       type: 'string',
       width: 300,
       editable: true,
+      renderCell: (params) => getOwnerName(params.value, params.row),
     },
     {
-      field: 'groupFamily',
-      headerName: 'Grupo Familiar',
+      field: 'members',
+      headerName: 'Membros',
       width: 250,
-      editable: true,
-      type: 'singleSelect',
-      valueOptions: ['Market', 'Finance', 'Development'],
+      renderCell: (params) => (
+        <Stack spacing={1} sx={{ py: 1, width: '100%' }}>
+          {params.value.map((member: any, index: number) => (
+            <div key={index}>{member.name}</div>
+          ))}
+        </Stack>
+      ),
     },
     {
       field: 'actions',
@@ -162,6 +165,8 @@ export default function TabelaGrupoFamiliar({ data, isLoading }: TabelaProps) {
                 onRowModesModelChange={handleRowModesModelChange}
                 onRowEditStop={handleRowEditStop}
                 processRowUpdate={processRowUpdate}
+                getRowHeight={() => 'auto'}
+                getEstimatedRowHeight={() => 100}
                 slotProps={{
                   toolbar: { setRows, setRowModesModel },
                 }}

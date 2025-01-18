@@ -5,6 +5,10 @@ export const PostAddUser = async (user: User) => {
   return (await http.post('users', user)).data;
 };
 
+export const UpdateUser = async (user: User) => {
+  return (await http.patch(`users/${user._id}`, user)).data;
+}
+
 export const GetAllUsers = async () => {
   return (await http.get('users')).data;
 };

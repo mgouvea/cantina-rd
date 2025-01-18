@@ -1,17 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
+import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 import GenericBreadcrumbs from '@/app/components/breadcrumb/GenericBreadcrumb';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import Paper from '@mui/material/Paper';
-import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
-import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
+import React, { useState } from 'react';
+import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import Text from '@/app/components/ui/text/Text';
-import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
+import TransferList from '@/app/components/ui/transferList/TransferList';
+import { Control, useForm } from 'react-hook-form';
+import { EntradaTexto, useSnackbar } from '@/app/components';
+import { StepIconProps } from '@mui/material/StepIcon';
+import { styled } from '@mui/material/styles';
+import { useAddGroupFamily } from '@/hooks/mutations/groupFamily.mutation';
+import { useRouter } from 'next/navigation';
+import { useUsers } from '@/hooks/queries';
+
 import {
   Box,
   Button,
@@ -22,24 +31,13 @@ import {
   Select,
   SelectChangeEvent,
   Stack,
-  TextField,
   Tooltip,
-  Typography,
 } from '@mui/material';
-import { StepIconProps } from '@mui/material/StepIcon';
-import { styled } from '@mui/material/styles';
-import { Control, useForm } from 'react-hook-form';
-import { User } from '@/types';
-import { useRouter } from 'next/navigation';
 
 import StepConnector, {
   stepConnectorClasses,
 } from '@mui/material/StepConnector';
-import { groupFamily } from '@/types/groupFamily';
-import { EntradaTexto, SnackbarProvider, useSnackbar } from '@/app/components';
-import TransferList from '@/app/components/ui/transferList/TransferList';
-import { useUsers } from '@/hooks/queries';
-import { useAddGroupFamily } from '@/hooks/mutations/groupFamily.mutation';
+import { useUpdateUser } from '@/hooks/mutations';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',
@@ -67,24 +65,7 @@ const INITIAL_FORM_VALUES: FormData = {
   owner: '',
 };
 
-interface FormValues {
-  name: string;
-}
 
-interface SummaryItemProps {
-  title: string;
-  value: string | SelectedMember[];
-}
-
-interface StepContentProps {
-  step: number;
-  control: Control<FormValues>;
-  users: SelectedMember[];
-  selectedMembers: SelectedMember[];
-  owner: string;
-  onMembersChange: (members: SelectedMember[]) => void;
-  onOwnerChange: (event: SelectChangeEvent) => void;
-}
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -174,6 +155,7 @@ export default function NovoGrupoFamiliar() {
   const { showSnackbar } = useSnackbar();
 
   const { mutateAsync: addGroup } = useAddGroupFamily();
+  const { mutateAsync: updateUser } = useUpdateUser();
 
   const router = useRouter();
   const { control, getValues, setValue, watch } = useForm<FormData>({

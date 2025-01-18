@@ -1,9 +1,15 @@
-import { PostAddAdmin, PostAddUser } from '@/services';
+import { PostAddAdmin, PostAddUser, UpdateUser } from '@/services';
 import { useMutation } from '@tanstack/react-query';
 
 export const useAddUser = () => {
   return useMutation({
     mutationFn: PostAddUser,
+  });
+};
+
+export const useUpdateUser = () => {
+  return useMutation({
+    mutationFn: UpdateUser,
   });
 };
 

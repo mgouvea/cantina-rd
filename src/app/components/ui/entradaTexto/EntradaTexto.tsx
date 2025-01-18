@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import { styled } from '@mui/material/styles';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import InputMask from 'react-input-mask';
 
 import {
   TextField,
@@ -12,6 +13,7 @@ import {
   Theme,
   SxProps,
   TextFieldProps,
+  Stack,
 } from '@mui/material';
 
 type EntradaTextoProps<T extends FieldValues> = {
@@ -22,6 +24,7 @@ type EntradaTextoProps<T extends FieldValues> = {
   autoComplete?: string;
   helperText?: string;
   showPasswordToggle?: boolean;
+  mask?: string;
   sx?: SxProps<Theme>;
   props?: TextFieldProps;
 };
@@ -52,54 +55,76 @@ export function EntradaTexto<T extends FieldValues>({
   autoComplete,
   helperText,
   showPasswordToggle = false,
-  props,
+  mask,
   sx,
+  props,
 }: Readonly<EntradaTextoProps<T>>) {
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
     <Controller
       name={name}
       control={control}
       rules={{ required: true }}
-      render={({
-        field: { onChange, onBlur, value, ...field },
-        fieldState: { invalid, error },
-      }) => (
-        <UnioTextFieldBase
-          label={label}
-          type={showPasswordToggle && showPassword ? 'text' : type}
-          autoComplete={autoComplete}
-          error={invalid}
-          helperText={error ? error.message : helperText}
-          required
-          fullWidth
-          InputProps={{
-            endAdornment: showPasswordToggle ? (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="alterna visibilidade da senha"
-                  onClick={() => setShowPassword(!showPassword)}
-                  edge="end"
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ) : undefined,
-          }}
-          value={value}
-          onChange={(e) => {
-            const rawValue = e.target.value;
-            onChange(rawValue);
-          }}
-          onBlur={(e) => {
-            const rawValue = e.target.value;
-            onBlur();
-          }}
-          {...field}
-          {...props}
-          sx={sx}
-        />
+      render={({ field, fieldState: { invalid, error } }) => (
+        <>
+          {mask ? (
+            <InputMask
+              mask={mask}
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+            >
+              {(inputProps: any) => (
+                <UnioTextFieldBase
+                  {...inputProps}
+                  {...props}
+                  label={label}
+                  type={showPassword ? 'text' : type}
+                  error={!!error}
+                  helperText={error ? error.message : helperText}
+                  sx={sx}
+                  fullWidth
+                  InputProps={{
+                    ...inputProps.InputProps,
+                    endAdornment: showPasswordToggle && (
+                      <InputAdornment position="end">
+                        <IconButton onClick={handleClickShowPassword} edge="end">
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
+            </InputMask>
+          ) : (
+            <UnioTextFieldBase
+              {...field}
+              {...props}
+              label={label}
+              type={showPassword ? 'text' : type}
+              error={!!error}
+              helperText={error ? error.message : helperText}
+              sx={sx}
+              fullWidth
+              autoComplete={autoComplete}
+              InputProps={{
+                endAdornment: showPasswordToggle && (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleClickShowPassword} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          )}
+        </>
       )}
     />
   );
