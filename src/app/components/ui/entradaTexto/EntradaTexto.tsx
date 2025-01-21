@@ -13,7 +13,6 @@ import {
   Theme,
   SxProps,
   TextFieldProps,
-  Stack,
 } from '@mui/material';
 
 type EntradaTextoProps<T extends FieldValues> = {

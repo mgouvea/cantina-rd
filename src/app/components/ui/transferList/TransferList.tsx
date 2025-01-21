@@ -9,6 +9,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import Checkbox from '@mui/material/Checkbox';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import { capitalize } from '@/utils';
 
 interface User {
   _id: string;
@@ -173,7 +174,7 @@ export default function TransferList({
                   }}
                 />
               </ListItemIcon>
-              <ListItemText id={labelId} primary={user.name} />
+              <ListItemText id={labelId} primary={capitalize(user.name)} />
             </ListItemButton>
           );
         })}

@@ -1,6 +1,7 @@
 'use client';
 
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
+import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 import GenericBreadcrumbs from '@/app/components/breadcrumb/GenericBreadcrumb';
@@ -13,13 +14,14 @@ import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import Text from '@/app/components/ui/text/Text';
 import TransferList from '@/app/components/ui/transferList/TransferList';
-import { Control, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { EntradaTexto, useSnackbar } from '@/app/components';
 import { StepIconProps } from '@mui/material/StepIcon';
 import { styled } from '@mui/material/styles';
 import { useAddGroupFamily } from '@/hooks/mutations/groupFamily.mutation';
 import { useRouter } from 'next/navigation';
 import { useUsers } from '@/hooks/queries';
+import {  useUpdateUsersGroupFamily } from '@/hooks/mutations/useUsers.mutation';
 
 import {
   Box,
@@ -29,7 +31,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
   Stack,
   Tooltip,
 } from '@mui/material';
@@ -37,7 +38,7 @@ import {
 import StepConnector, {
   stepConnectorClasses,
 } from '@mui/material/StepConnector';
-import { useUpdateUser } from '@/hooks/mutations';
+import { capitalize } from '@/utils';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',
@@ -155,7 +156,7 @@ export default function NovoGrupoFamiliar() {
   const { showSnackbar } = useSnackbar();
 
   const { mutateAsync: addGroup } = useAddGroupFamily();
-  const { mutateAsync: updateUser } = useUpdateUser();
+  const { mutateAsync: updateUser } = useUpdateUsersGroupFamily();
 
   const router = useRouter();
   const { control, getValues, setValue, watch } = useForm<FormData>({
@@ -212,24 +213,32 @@ export default function NovoGrupoFamiliar() {
     };
 
     try {
-      console.log('Dados para salvar:', finalData);
-      await addGroup(finalData);
+      const result = await addGroup(finalData);
+
+      await updateUser({
+        id: result._id,
+        users: selectedMembers,
+      });
+
       showSnackbar({
         message: 'Grupo familiar salvo com sucesso',
         severity: 'success',
       });
       router.replace('/painel/grupo-familiar');
     } catch (error) {
-      console.error('Erro ao salvar:', error);
+      showSnackbar({
+        message: `Erro ao salvar grupo familiar - ${error}`,
+        severity: 'error',
+      });
     }
   };
 
-  const RenderTextStep3 = (title: string, value: any) => {
+  const RenderSaveStep = (title: string, value: any) => {
     const getOwnerName = (ownerId: string) => {
       const ownerMember = selectedMembers.find(
         (member) => member.userId === ownerId
       );
-      return ownerMember ? ownerMember.name : ownerId;
+      return ownerMember ? capitalize(ownerMember.name) : ownerId;
     };
 
     // Processa o valor baseado no título e tipo
@@ -243,7 +252,7 @@ export default function NovoGrupoFamiliar() {
     const displayValue = Array.isArray(value) ? (
       value.map((item: SelectedMember) => (
         <Text key={item.userId} sx={{ ml: 2 }}>
-          {item.name}
+          {capitalize(item.name)}
         </Text>
       ))
     ) : (
@@ -265,14 +274,14 @@ export default function NovoGrupoFamiliar() {
     switch (step) {
       case 0:
         return (
-          <EntradaTexto
-            name="name"
-            control={control}
-            label="Nome do grupo"
-            sx={{
-              width: '70%',
-            }}
-          />
+            <EntradaTexto
+              name="name"
+              control={control}
+              label="Nome do grupo"
+              sx={{
+                width: '70%',
+              }}
+            />
         );
       case 1:
         return (
@@ -306,7 +315,7 @@ export default function NovoGrupoFamiliar() {
               ) : (
                 selectedMembers.map((member) => (
                   <MenuItem key={member.userId} value={member.userId}>
-                    {member.name}
+                    {capitalize(member.name)}
                   </MenuItem>
                 ))
               )}
@@ -333,9 +342,9 @@ export default function NovoGrupoFamiliar() {
               },
             }}
           >
-            {RenderTextStep3('Nome do grupo', finalValues.name)}
-            {RenderTextStep3('Responsável', owner)}
-            {RenderTextStep3('Membros', selectedMembers)}
+            {RenderSaveStep('Nome do grupo', finalValues.name)}
+            {RenderSaveStep('Responsável', owner)}
+            {RenderSaveStep('Membros', selectedMembers)}
           </Stack>
         );
     }
@@ -343,7 +352,7 @@ export default function NovoGrupoFamiliar() {
 
   const breadcrumbItems = [
     { label: 'Início', href: '/painel' },
-    { label: 'Grupo Familiar', href: '/painel/clientes' },
+    { label: 'Grupo Familiar', href: '/painel/grupo-familiar' },
     { label: 'Novo' },
   ];
 
@@ -360,7 +369,7 @@ export default function NovoGrupoFamiliar() {
             backgroundColor: 'success.dark',
             '&:hover': { backgroundColor: 'success.main', transition: '0.3s' },
           }}
-          onClick={() => router.replace('/painel/clientes')}
+          onClick={() => router.replace('/painel/grupo-familiar')}
         >
           <Tooltip title="Voltar">
             <ArrowBackIcon fontSize="medium" sx={{ color: '#fff' }} />

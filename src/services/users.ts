@@ -1,4 +1,4 @@
-import { User } from '@/types';
+import { GroupFamilyUser, User } from '@/types';
 import { http } from '.';
 
 export const PostAddUser = async (user: User) => {
@@ -7,6 +7,10 @@ export const PostAddUser = async (user: User) => {
 
 export const UpdateUser = async (user: User) => {
   return (await http.patch(`users/${user._id}`, user)).data;
+}
+
+export const UpdateUserGroupFamily = async ({ id, users }: { id: string, users: GroupFamilyUser[] }) => {
+  return (await http.patch(`users/group-family/${id}`, users)).data;
 }
 
 export const GetAllUsers = async () => {

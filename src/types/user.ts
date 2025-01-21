@@ -18,3 +18,9 @@ export type UserAdmin = {
   createdAt?: Date;
   updatedAt?: Date | null;
 };
+
+
+export type GroupFamilyUser = {
+  name: string;
+  userId: string;
+}
