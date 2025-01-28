@@ -21,6 +21,8 @@ import { useRouter } from 'next/navigation';
 import Text from '../text/Text';
 import EmptyContent from '../emptyContent/EmptyContent';
 import { capitalize } from '@/utils';
+import { useGroupFamily } from '@/hooks/queries/useGroupFamily.query';
+import { groupFamily } from '@/types/groupFamily';
 
 interface TabelaProps {
   data: any;
@@ -33,6 +35,9 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+
+  const { data: groupFamilies } = useGroupFamily();
+
 
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (
     params,
@@ -62,14 +67,14 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
   };
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Nome', width: 300, editable: true, renderCell: (params) => (
+    { field: 'name', headerName: 'Nome', width: 500, editable: true, renderCell: (params) => (
       capitalize(params.value)
     )},
     {
       field: 'telephone',
       headerName: 'Telefone',
       type: 'number',
-      width: 200,
+      width: 300,
       align: 'left',
       headerAlign: 'left',
       editable: true,
@@ -77,10 +82,12 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
     {
       field: 'groupFamily',
       headerName: 'Grupo Familiar',
-      width: 250,
+      width: 300,
       editable: true,
-      type: 'singleSelect',
-      valueOptions: ['Market', 'Finance', 'Development'],
+      renderCell: (params) => {
+        const group = groupFamilies?.find((group: groupFamily) => group._id === params.value);
+        return group ? capitalize(group.name) : '-';
+      }
     },
     {
       field: 'actions',

@@ -8,3 +8,5 @@ export const PostAddGroupFamily = async (groupFamily: groupFamily) => {
 export const GetAllGroupFamilies = async () => {
   return (await http.get('group-family')).data;
 };
+
+
