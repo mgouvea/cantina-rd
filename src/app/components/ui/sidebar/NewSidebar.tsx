@@ -50,10 +50,10 @@ export function NewSidebar() {
     {
       title: 'Produtos',
       route: 'produtos',
-      submenus: [
-        { title: 'Listar produtos', route: 'produtos' },
-        { title: 'Adicionar produto', route: 'produtos/novo' },
-      ],
+      // submenus: [
+      //   { title: 'Listar produtos', route: 'produtos' },
+      //   { title: 'Adicionar produto', route: 'produtos/novo' },
+      // ],
     },
   ];
 
@@ -159,13 +159,8 @@ export function NewSidebar() {
         />
       </Toolbar>
       <List>
-        {navigationItems.map(({ title, route, submenus }) => (
-          <NavigationButton
-            key={title}
-            title={title}
-            route={route}
-            submenus={submenus}
-          />
+        {navigationItems.map(({ title, route }) => (
+          <NavigationButton key={title} title={title} route={route} />
         ))}
       </List>
     </Box>

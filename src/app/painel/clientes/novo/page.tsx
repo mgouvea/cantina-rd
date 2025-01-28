@@ -174,7 +174,7 @@ export default function NovoCliente() {
 
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Text variant="h5" fontWeight="bold">
-          Novo cliente
+          Cadastrar Novo cliente
         </Text>
         <IconButton
           sx={{
