@@ -1,69 +1,26 @@
+'use client';
+
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Close';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import {
-  GridRowsProp,
   GridRowModesModel,
-  GridRowModes,
   DataGrid,
   GridColDef,
-  GridToolbarContainer,
   GridActionsCellItem,
   GridEventListener,
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
-  GridSlots,
 } from '@mui/x-data-grid';
-import {
-  randomCreatedDate,
-  randomTraderName,
-  randomId,
-  randomArrayItem,
-} from '@mui/x-data-grid-generator';
-import { useClient } from '@/hooks/queries';
-import Text from '../../text/Text';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, IconButton, Stack } from '@mui/material';
 import { Filtros } from '../..';
-
-const roles = ['Market', 'Finance', 'Development'];
-const randomRole = () => {
-  return randomArrayItem(roles);
-};
-
-interface EditToolbarProps {
-  setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
-  setRowModesModel: (
-    newModel: (oldModel: GridRowModesModel) => GridRowModesModel
-  ) => void;
-}
-
-function EditToolbar(props: EditToolbarProps) {
-  const { setRows, setRowModesModel } = props;
-
-  const handleClick = () => {
-    const id = randomId();
-    setRows((oldRows) => [
-      ...oldRows,
-      { id, name: '', age: '', role: '', isNew: true },
-    ]);
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
-    }));
-  };
-
-  return (
-    <GridToolbarContainer>
-      <Text variant="h5">Produtos Cadastrados</Text>
-    </GridToolbarContainer>
-  );
-}
+import { useRouter } from 'next/navigation';
+import Text from '../text/Text';
+import EmptyContent from '../emptyContent/EmptyContent';
+import { capitalize } from '@/utils';
 
 interface TabelaProps {
   data: any;
@@ -71,10 +28,12 @@ interface TabelaProps {
 }
 
 export default function TabelaProduto({ data, isLoading }: TabelaProps) {
+  const router = useRouter();
   const [rows, setRows] = React.useState(data);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+
 
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (
     params,
@@ -86,7 +45,7 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
   };
 
   const handleEditClick = (id: GridRowId) => () => {
-    console.log('Edit row with id: ', id);
+    router.replace(`/painel/produtos/editar/${id}`);
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
@@ -104,30 +63,48 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
   };
 
   const columns: GridColDef[] = [
-    { field: 'nomeCompleto', headerName: 'Nome', width: 300, editable: true },
+    { field: 'name', headerName: 'Nome', width: 300, editable: true, renderCell: (params) => (
+      capitalize(params.value)
+    )},
     {
-      field: 'telefone',
-      headerName: 'Telefone',
-      type: 'number',
-      width: 200,
-      align: 'left',
-      headerAlign: 'left',
-      editable: true,
-    },
-    {
-      field: 'email',
-      headerName: 'Email',
-      type: 'string',
+      field: 'description',
+      headerName: 'Descrição',
       width: 300,
-      editable: true,
+      editable: true,renderCell: (params) => (
+        capitalize(params.value)
+      )
     },
     {
-      field: 'grupoFamiliar',
-      headerName: 'Grupo Familiar',
-      width: 250,
-      editable: true,
-      type: 'singleSelect',
-      valueOptions: ['Market', 'Finance', 'Development'],
+      field: 'price',
+      headerName: 'Preço unitário',
+      width: 150,
+      editable: true,renderCell: (params) => (
+        `R$ ${params.value ?? 0}`
+      )
+    },
+    {
+      field: 'category',
+      headerName: 'Categoria',
+      width: 180,
+      editable: true,renderCell: (params) => (
+        capitalize(params.value)
+      )
+    },
+    {
+      field: 'subcategory',
+      headerName: 'Subcategoria',
+      width: 180,
+      editable: true,renderCell: (params) => (
+        capitalize(params.value)
+      )
+    },
+    {
+      field: 'quantity',
+      headerName: 'Quantidade',
+      width: 120,
+      editable: true,renderCell: (params) => (
+        capitalize(params.value)
+      )
     },
     {
       field: 'actions',
@@ -154,12 +131,15 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
     },
   ];
 
+  const handleAddClient = () => {
+    router.replace('/painel/produtos/novo');
+  };
+
   return (
     <Box
       sx={{
         padding: 2,
         height: 'fit-content',
-        width: '100%',
         '& .actions': {
           color: 'text.secondary',
         },
@@ -168,28 +148,46 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
         },
       }}
     >
-      <Text variant="h5">Clientes Cadastrados</Text>
-      <Filtros rows={data}>
-        {(rowsFiltradas) =>
-          isLoading ? (
-            <CircularProgress />
-          ) : (
-            <DataGrid
-              rows={rowsFiltradas}
-              columns={columns}
-              editMode="row"
-              rowModesModel={rowModesModel}
-              onRowModesModelChange={handleRowModesModelChange}
-              onRowEditStop={handleRowEditStop}
-              processRowUpdate={processRowUpdate}
-              slotProps={{
-                toolbar: { setRows, setRowModesModel },
-              }}
-              sx={{ borderRadius: '16px' }}
-            />
-          )
-        }
-      </Filtros>
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Text variant="h5">Produtos Cadastrados</Text>
+
+        <IconButton
+          aria-label="add"
+          sx={{ color: 'success.main' }}
+          onClick={handleAddClient}
+        >
+          <AddCircleIcon fontSize="large" />
+        </IconButton>
+      </Stack>
+
+      {!isLoading && (!data || data.length === 0) && (
+        <EmptyContent title="Ainda não há produtos para exibir" />
+      )}
+
+      {!isLoading && data && data.length > 0 && (
+        <Filtros rows={data}>
+          {(rowsFiltradas) =>
+            isLoading ? (
+              <CircularProgress />
+            ) : (
+              <DataGrid
+                rows={rowsFiltradas}
+                columns={columns}
+                editMode="row"
+                getRowId={(row) => row._id}
+                rowModesModel={rowModesModel}
+                onRowModesModelChange={handleRowModesModelChange}
+                onRowEditStop={handleRowEditStop}
+                processRowUpdate={processRowUpdate}
+                slotProps={{
+                  toolbar: { setRows, setRowModesModel },
+                }}
+                sx={{ borderRadius: '16px' }}
+              />
+            )
+          }
+        </Filtros>
+      )}
     </Box>
   );
 }

@@ -1,23 +1,23 @@
 'use client';
-import FullFeaturedCrudGrid from '@/app/components/ui/tables/TabelaCliente';
 import Loading from '@/app/components/loading/Loading';
 import ContentWrapper from '@/app/components/ui/wrapper/ContentWrapper';
-import { useUsers } from '@/hooks/queries';
+import TabelaProduto from '@/app/components/ui/tables/TabelaProduto';
+import { useProducts } from '@/hooks/queries/useProducts.query';
 
 const breadcrumbItems = [
   { label: 'Início', href: '/painel' },
-  { label: 'Clientes' },
+  { label: 'Produtos' },
 ];
 
 export default function Produtos() {
-  const { data, isLoading } = useUsers();
+  const { data, isLoading } = useProducts();
 
   const renderContent = () => {
     if (isLoading) {
       return <Loading />;
     }
 
-    return <FullFeaturedCrudGrid data={data} isLoading={isLoading} />;
+    return <TabelaProduto data={data} isLoading={isLoading} />;
   };
 
   return (
