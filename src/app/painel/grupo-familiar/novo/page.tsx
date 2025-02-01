@@ -1,27 +1,27 @@
-'use client';
+"use client";
 
-import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
-import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
-import GenericBreadcrumbs from '@/app/components/breadcrumb/GenericBreadcrumb';
-import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import Paper from '@mui/material/Paper';
-import React, { useState } from 'react';
-import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import Stepper from '@mui/material/Stepper';
-import Text from '@/app/components/ui/text/Text';
-import TransferList from '@/app/components/ui/transferList/TransferList';
-import { useForm } from 'react-hook-form';
-import { EntradaTexto, useSnackbar } from '@/app/components';
-import { StepIconProps } from '@mui/material/StepIcon';
-import { styled } from '@mui/material/styles';
-import { useAddGroupFamily } from '@/hooks/mutations/groupFamily.mutation';
-import { useRouter } from 'next/navigation';
-import { useUsers } from '@/hooks/queries';
-import {  useUpdateUsersGroupFamily } from '@/hooks/mutations/useUsers.mutation';
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
+import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
+import GenericBreadcrumbs from "@/app/components/breadcrumb/GenericBreadcrumb";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import Paper from "@mui/material/Paper";
+import React, { useState } from "react";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import Stepper from "@mui/material/Stepper";
+import Text from "@/app/components/ui/text/Text";
+import TransferList from "@/app/components/ui/transferList/TransferList";
+import { useForm } from "react-hook-form";
+import { EntradaTexto, useSnackbar } from "@/app/components";
+import { StepIconProps } from "@mui/material/StepIcon";
+import { styled } from "@mui/material/styles";
+import { useAddGroupFamily } from "@/hooks/mutations/useGroupFamily.mutation";
+import { useRouter } from "next/navigation";
+import { useUsers } from "@/hooks/queries";
+import { useUpdateUsersGroupFamily } from "@/hooks/mutations/useUsers.mutation";
 
 import {
   Box,
@@ -33,19 +33,19 @@ import {
   Select,
   Stack,
   Tooltip,
-} from '@mui/material';
+} from "@mui/material";
 
 import StepConnector, {
   stepConnectorClasses,
-} from '@mui/material/StepConnector';
-import { capitalize } from '@/utils';
+} from "@mui/material/StepConnector";
+import { capitalize } from "@/utils";
 
 const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: '#fff',
+  backgroundColor: "#fff",
   ...theme.typography.body2,
   padding: theme.spacing(3),
-  textAlign: 'start',
-  borderRadius: '12px',
+  textAlign: "start",
+  borderRadius: "12px",
   color: theme.palette.text.secondary,
 }));
 
@@ -61,12 +61,10 @@ interface FormData {
 }
 
 const INITIAL_FORM_VALUES: FormData = {
-  name: '',
+  name: "",
   members: [],
-  owner: '',
+  owner: "",
 };
-
-
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -75,39 +73,39 @@ const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.active}`]: {
     [`& .${stepConnectorClasses.line}`]: {
       backgroundImage:
-        'linear-gradient( 95deg, rgb(169,226,173) 0%, rgb(76 175 80) 50%, rgb(21,120,27) 100%)',
+        "linear-gradient( 95deg, rgb(169,226,173) 0%, rgb(76 175 80) 50%, rgb(21,120,27) 100%)",
     },
   },
   [`&.${stepConnectorClasses.completed}`]: {
     [`& .${stepConnectorClasses.line}`]: {
       backgroundImage:
-        'linear-gradient( 95deg, rgb(169,226,173) 0%, rgb(76 175 80) 50%, rgb(21,120,27) 100%)',
+        "linear-gradient( 95deg, rgb(169,226,173) 0%, rgb(76 175 80) 50%, rgb(21,120,27) 100%)",
     },
   },
   [`& .${stepConnectorClasses.line}`]: {
     height: 3,
     border: 0,
-    backgroundColor: '#eaeaf0',
+    backgroundColor: "#eaeaf0",
     borderRadius: 1,
-    ...theme.applyStyles('dark', {
+    ...theme.applyStyles("dark", {
       backgroundColor: theme.palette.grey[800],
     }),
   },
 }));
 
-const ColorlibStepIconRoot = styled('div')<{
+const ColorlibStepIconRoot = styled("div")<{
   ownerState: { completed?: boolean; active?: boolean };
 }>(({ theme }) => ({
-  backgroundColor: '#ccc',
+  backgroundColor: "#ccc",
   zIndex: 1,
-  color: '#fff',
+  color: "#fff",
   width: 50,
   height: 50,
-  display: 'flex',
-  borderRadius: '50%',
-  justifyContent: 'center',
-  alignItems: 'center',
-  ...theme.applyStyles('dark', {
+  display: "flex",
+  borderRadius: "50%",
+  justifyContent: "center",
+  alignItems: "center",
+  ...theme.applyStyles("dark", {
     backgroundColor: theme.palette.grey[700],
   }),
   variants: [
@@ -115,15 +113,15 @@ const ColorlibStepIconRoot = styled('div')<{
       props: ({ ownerState }) => ownerState.active,
       style: {
         backgroundImage:
-          'linear-gradient( 136deg, rgb(169,226,173) 0%, rgb(76 175 80) 50%, rgb(21,120,27) 100%)',
-        boxShadow: '0 4px 10px 0 rgba(0,0,0,.25)',
+          "linear-gradient( 136deg, rgb(169,226,173) 0%, rgb(76 175 80) 50%, rgb(21,120,27) 100%)",
+        boxShadow: "0 4px 10px 0 rgba(0,0,0,.25)",
       },
     },
     {
       props: ({ ownerState }) => ownerState.completed,
       style: {
         backgroundImage:
-          'linear-gradient( 136deg, rgb(169,226,173) 0%, rgb(76 175 80) 50%, rgb(21,120,27) 100%)',
+          "linear-gradient( 136deg, rgb(169,226,173) 0%, rgb(76 175 80) 50%, rgb(21,120,27) 100%)",
       },
     },
   ],
@@ -149,7 +147,7 @@ function ColorlibStepIcon(props: StepIconProps) {
   );
 }
 
-const steps = ['Nome do grupo', 'Membros', 'Responsável', 'Salvar'];
+const steps = ["Nome do grupo", "Membros", "Responsável", "Salvar"];
 
 export default function NovoGrupoFamiliar() {
   const { data: users, isLoading } = useUsers();
@@ -165,9 +163,9 @@ export default function NovoGrupoFamiliar() {
 
   const [activeStep, setActiveStep] = useState(0);
   const [selectedMembers, setSelectedMembers] = useState<SelectedMember[]>([]);
-  const [owner, setOwner] = useState<string>('');
+  const [owner, setOwner] = useState<string>("");
 
-  const groupName = watch('name');
+  const groupName = watch("name");
 
   const handleMembersChange = (updatedMembers: SelectedMember[]) => {
     setSelectedMembers(updatedMembers);
@@ -178,10 +176,10 @@ export default function NovoGrupoFamiliar() {
   };
 
   const handleNext = () => {
-    if (activeStep === 0 && groupName === '') {
+    if (activeStep === 0 && groupName === "") {
       showSnackbar({
-        message: 'Nome obrigatório!',
-        severity: 'warning',
+        message: "Nome obrigatório!",
+        severity: "warning",
       });
       return;
     }
@@ -193,14 +191,14 @@ export default function NovoGrupoFamiliar() {
   };
 
   const handleCancel = () => {
-    router.replace('/painel/grupo-familiar');
+    router.replace("/painel/grupo-familiar");
   };
 
   const handleSave = async () => {
     if (!owner) {
       showSnackbar({
-        message: 'Selecione um responsável',
-        severity: 'warning',
+        message: "Selecione um responsável",
+        severity: "warning",
       });
       return;
     }
@@ -221,14 +219,14 @@ export default function NovoGrupoFamiliar() {
       });
 
       showSnackbar({
-        message: 'Grupo familiar salvo com sucesso',
-        severity: 'success',
+        message: "Grupo familiar salvo com sucesso",
+        severity: "success",
       });
-      router.replace('/painel/grupo-familiar');
+      router.replace("/painel/grupo-familiar");
     } catch (error) {
       showSnackbar({
         message: `Erro ao salvar grupo familiar - ${error}`,
-        severity: 'error',
+        severity: "error",
       });
     }
   };
@@ -243,7 +241,7 @@ export default function NovoGrupoFamiliar() {
 
     // Processa o valor baseado no título e tipo
     const processValue = (title: string, value: any) => {
-      if (title === 'Responsável') {
+      if (title === "Responsável") {
         return getOwnerName(value);
       }
       return value;
@@ -261,10 +259,10 @@ export default function NovoGrupoFamiliar() {
 
     return (
       <Stack
-        direction={Array.isArray(value) ? 'column' : 'row'}
+        direction={Array.isArray(value) ? "column" : "row"}
         sx={{ gap: 1 }}
       >
-        <Text sx={{ fontWeight: 'bold' }}>{title}:</Text>
+        <Text sx={{ fontWeight: "bold" }}>{title}:</Text>
         {displayValue}
       </Stack>
     );
@@ -274,18 +272,18 @@ export default function NovoGrupoFamiliar() {
     switch (step) {
       case 0:
         return (
-            <EntradaTexto
-              name="name"
-              control={control}
-              label="Nome do grupo"
-              sx={{
-                width: '70%',
-              }}
-            />
+          <EntradaTexto
+            name="name"
+            control={control}
+            label="Nome do grupo"
+            sx={{
+              width: "70%",
+            }}
+          />
         );
       case 1:
         return (
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
             <TransferList
               users={users || []}
               onSelectionChange={handleMembersChange}
@@ -297,7 +295,7 @@ export default function NovoGrupoFamiliar() {
         return (
           <FormControl
             sx={{
-              width: '70%',
+              width: "70%",
             }}
           >
             <InputLabel id="owner-select-label">Responsável</InputLabel>
@@ -327,37 +325,37 @@ export default function NovoGrupoFamiliar() {
         return (
           <Stack
             sx={{
-              border: '1px solid gray',
+              border: "1px solid gray",
               borderRadius: 4,
               paddingX: 10,
               paddingY: 3,
-              boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.1)',
-              backgroundColor: 'white',
-              position: 'relative',
-              transform: 'translateY(-4px)',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                boxShadow: '0px 6px 12px rgba(0, 0, 0, 0.15)',
-                transform: 'translateY(-6px)',
+              boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
+              backgroundColor: "white",
+              position: "relative",
+              transform: "translateY(-4px)",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.15)",
+                transform: "translateY(-6px)",
               },
             }}
           >
-            {RenderSaveStep('Nome do grupo', finalValues.name)}
-            {RenderSaveStep('Responsável', owner)}
-            {RenderSaveStep('Membros', selectedMembers)}
+            {RenderSaveStep("Nome do grupo", finalValues.name)}
+            {RenderSaveStep("Responsável", owner)}
+            {RenderSaveStep("Membros", selectedMembers)}
           </Stack>
         );
     }
   };
 
   const breadcrumbItems = [
-    { label: 'Início', href: '/painel' },
-    { label: 'Grupo Familiar', href: '/painel/grupo-familiar' },
-    { label: 'Novo' },
+    { label: "Início", href: "/painel" },
+    { label: "Grupo Familiar", href: "/painel/grupo-familiar" },
+    { label: "Novo" },
   ];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ display: "flex", flexDirection: "column" }}>
       <GenericBreadcrumbs items={breadcrumbItems} />
 
       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -366,13 +364,13 @@ export default function NovoGrupoFamiliar() {
         </Text>
         <IconButton
           sx={{
-            backgroundColor: 'success.dark',
-            '&:hover': { backgroundColor: 'success.main', transition: '0.3s' },
+            backgroundColor: "success.dark",
+            "&:hover": { backgroundColor: "success.main", transition: "0.3s" },
           }}
-          onClick={() => router.replace('/painel/grupo-familiar')}
+          onClick={() => router.replace("/painel/grupo-familiar")}
         >
           <Tooltip title="Voltar">
-            <ArrowBackIcon fontSize="medium" sx={{ color: '#fff' }} />
+            <ArrowBackIcon fontSize="medium" sx={{ color: "#fff" }} />
           </Tooltip>
         </IconButton>
       </Stack>
@@ -384,7 +382,7 @@ export default function NovoGrupoFamiliar() {
         }}
       >
         <Item>
-          <Stack sx={{ width: '100%' }} spacing={4}>
+          <Stack sx={{ width: "100%" }} spacing={4}>
             <Stepper
               alternativeLabel
               activeStep={activeStep}
@@ -403,8 +401,8 @@ export default function NovoGrupoFamiliar() {
               sx={{
                 mt: 2,
                 mb: 1,
-                display: 'flex',
-                justifyContent: 'center',
+                display: "flex",
+                justifyContent: "center",
               }}
             >
               {getStepContent(activeStep)}

@@ -1,66 +1,66 @@
-'use client';
+"use client";
 
-import React, { FormEvent, useState } from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import CssBaseline from '@mui/material/CssBaseline';
-import Divider from '@mui/material/Divider';
-import ForgotPassword from './forgotPassword';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormLabel from '@mui/material/FormLabel';
-import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import { Card, Toolbar } from '@mui/material';
+import React, { FormEvent, useState } from "react";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import CssBaseline from "@mui/material/CssBaseline";
+import Divider from "@mui/material/Divider";
+import ForgotPassword from "./forgotPassword";
+import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormLabel from "@mui/material/FormLabel";
+import Link from "@mui/material/Link";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import { Card, Toolbar } from "@mui/material";
 import {
   FacebookIcon,
   GoogleIcon,
   SitemarkIcon,
   useSnackbar,
-} from './components';
-import Image from 'next/image';
-import { useAdmins } from '@/hooks/queries';
-import { isValidEmail } from '@/utils';
-import { useRouter } from 'next/navigation';
+} from "./components";
+import Image from "next/image";
+import { useAdmins } from "@/hooks/queries";
+import { isValidEmail } from "@/utils";
+import { useRouter } from "next/navigation";
 
 const muiCardStyles = (theme: any) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignSelf: 'center',
-  width: '100%',
+  display: "flex",
+  flexDirection: "column",
+  alignSelf: "center",
+  width: "100%",
   padding: theme.spacing(4),
   gap: theme.spacing(2),
-  margin: 'auto',
-  [theme.breakpoints.up('sm')]: {
-    maxWidth: '450px',
+  margin: "auto",
+  [theme.breakpoints.up("sm")]: {
+    maxWidth: "450px",
   },
   boxShadow:
-    theme.palette.mode === 'dark'
-      ? 'hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px'
-      : 'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
+    theme.palette.mode === "dark"
+      ? "hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px"
+      : "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
 });
 
 const signInContainerStyles = (theme: any) => ({
-  height: 'calc((1 - var(--template-frame-height, 0)) * 100dvh)',
-  minHeight: '100%',
+  height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
+  minHeight: "100%",
   padding: theme.spacing(2),
-  [theme.breakpoints.up('sm')]: {
+  [theme.breakpoints.up("sm")]: {
     padding: theme.spacing(4),
   },
-  '&::before': {
+  "&::before": {
     content: '""',
-    display: 'block',
-    position: 'absolute',
+    display: "block",
+    position: "absolute",
     zIndex: -1,
     inset: 0,
     backgroundImage:
-      theme.palette.mode === 'dark'
-        ? 'radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))'
-        : 'radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))',
-    backgroundRepeat: 'no-repeat',
+      theme.palette.mode === "dark"
+        ? "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))"
+        : "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
+    backgroundRepeat: "no-repeat",
   },
 });
 
@@ -69,12 +69,12 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
 
   const router = useRouter();
 
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [emailError, setEmailError] = useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = useState('');
+  const [emailErrorMessage, setEmailErrorMessage] = useState("");
   const [passwordError, setPasswordError] = useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
@@ -92,8 +92,8 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
     }
     const data = new FormData(event.currentTarget);
     console.log({
-      email: data.get('email'),
-      password: data.get('password'),
+      email: data.get("email"),
+      password: data.get("password"),
     });
   };
 
@@ -101,13 +101,13 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
     const validateEmail: boolean = isValidEmail(email);
     if (!validateEmail || !password) {
       showSnackbar({
-        severity: 'error',
-        message: 'Digite um e-mail ou senha válidos!',
+        severity: "error",
+        message: "Digite um e-mail ou senha válidos!",
       });
       return;
     }
 
-    router.replace('/painel');
+    router.replace("/painel");
   };
 
   return (
@@ -119,7 +119,7 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
         sx={signInContainerStyles}
       >
         <Card variant="outlined" sx={muiCardStyles}>
-          <Toolbar sx={{ justifyContent: 'center', padding: '0.5rem 0 0 0' }}>
+          <Toolbar sx={{ justifyContent: "center", padding: "0.5rem 0 0 0" }}>
             <Image
               src="/cantinaRd.png"
               width={110}
@@ -132,9 +132,9 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
             onSubmit={handleSubmit}
             noValidate
             sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
               gap: 2,
             }}
           >
@@ -154,8 +154,8 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
                 required
                 fullWidth
                 variant="outlined"
-                color={emailError ? 'error' : 'primary'}
-                sx={{ ariaLabel: 'email' }}
+                color={emailError ? "error" : "primary"}
+                sx={{ ariaLabel: "email" }}
               />
             </FormControl>
             <FormControl>
@@ -174,7 +174,7 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
                 required
                 fullWidth
                 variant="outlined"
-                color={passwordError ? 'error' : 'primary'}
+                color={passwordError ? "error" : "primary"}
               />
             </FormControl>
             <FormControlLabel
@@ -195,17 +195,17 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
               type="button"
               onClick={handleClickOpen}
               variant="body2"
-              sx={{ alignSelf: 'center' }}
+              sx={{ alignSelf: "center" }}
             >
               Esqueceu a senha?
             </Link>
           </Box>
           <Divider>ou</Divider>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign in with Google')}
+              onClick={() => alert("Sign in with Google")}
               startIcon={<GoogleIcon />}
             >
               Entrar com o Google
