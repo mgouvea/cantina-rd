@@ -1,7 +1,6 @@
 "use client";
 
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
-import PasswordOutlinedIcon from "@mui/icons-material/PasswordOutlined";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import GenericBreadcrumbs from "@/app/components/breadcrumb/GenericBreadcrumb";
@@ -150,14 +149,14 @@ function ColorlibStepIcon(props: StepIconProps) {
 const steps = ["Nome do grupo", "Membros", "Responsável", "Salvar"];
 
 export default function NovoGrupoFamiliar() {
-  const { data: users, isLoading } = useUsers();
+  const { data: users } = useUsers();
   const { showSnackbar } = useSnackbar();
 
   const { mutateAsync: addGroup } = useAddGroupFamily();
   const { mutateAsync: updateUser } = useUpdateUsersGroupFamily();
 
   const router = useRouter();
-  const { control, getValues, setValue, watch } = useForm<FormData>({
+  const { control, getValues, watch } = useForm<FormData>({
     defaultValues: INITIAL_FORM_VALUES,
   });
 
@@ -231,7 +230,7 @@ export default function NovoGrupoFamiliar() {
     }
   };
 
-  const RenderSaveStep = (title: string, value: any) => {
+  const RenderSaveStep = (title: string, value: string | SelectedMember[]) => {
     const getOwnerName = (ownerId: string) => {
       const ownerMember = selectedMembers.find(
         (member) => member.userId === ownerId
@@ -240,19 +239,21 @@ export default function NovoGrupoFamiliar() {
     };
 
     // Processa o valor baseado no título e tipo
-    const processValue = (title: string, value: any) => {
+    const processValue = (title: string, value: React.ReactNode) => {
       if (title === "Responsável") {
-        return getOwnerName(value);
+        return getOwnerName(value as string);
       }
       return value;
     };
 
     const displayValue = Array.isArray(value) ? (
-      value.map((item: SelectedMember) => (
-        <Text key={item.userId} sx={{ ml: 2 }}>
-          {capitalize(item.name)}
-        </Text>
-      ))
+      <>
+        {value.map((item: SelectedMember) => (
+          <Text key={item.userId} sx={{ ml: 2 }}>
+            {capitalize(item.name)}
+          </Text>
+        ))}
+      </>
     ) : (
       <Text>{processValue(title, value)}</Text>
     );

@@ -13,20 +13,13 @@ import FormLabel from "@mui/material/FormLabel";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import { Card, Toolbar } from "@mui/material";
-import {
-  FacebookIcon,
-  GoogleIcon,
-  SitemarkIcon,
-  useSnackbar,
-} from "./components";
+import { Card, Theme, Toolbar } from "@mui/material";
+import { GoogleIcon, useSnackbar } from "./components";
 import Image from "next/image";
-import { useAdmins } from "@/hooks/queries";
 import { isValidEmail } from "@/utils";
 import { useRouter } from "next/navigation";
 
-const muiCardStyles = (theme: any) => ({
+const muiCardStyles = (theme: Theme) => ({
   display: "flex",
   flexDirection: "column",
   alignSelf: "center",
@@ -43,7 +36,7 @@ const muiCardStyles = (theme: any) => ({
       : "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
 });
 
-const signInContainerStyles = (theme: any) => ({
+const signInContainerStyles = (theme: Theme) => ({
   height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
   minHeight: "100%",
   padding: theme.spacing(2),

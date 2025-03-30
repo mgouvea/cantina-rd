@@ -279,9 +279,8 @@ const ContactInfo = ({
   email?: string;
   telephone?: string;
 }) => (
-  <Stack direction="row" gap={1} marginBottom={3}>
+  <Stack direction="column" sx={{ marginY: 2 }}>
     {email && <Text>{email}</Text>}
-    {email && <Text>-</Text>}
     <Text>{telephone || "Telefone"}</Text>
   </Stack>
 );
