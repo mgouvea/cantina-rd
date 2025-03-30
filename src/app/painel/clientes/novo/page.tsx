@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import AddIcon from '@mui/icons-material/Add';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
-import GenericBreadcrumbs from '@/app/components/breadcrumb/GenericBreadcrumb';
-import Grid from '@mui/material/Grid2';
-import Paper from '@mui/material/Paper';
-import SwitchSelector from 'react-switch-selector';
-import Text from '@/app/components/ui/text/Text';
-import { Avatar, Box, IconButton, Stack, Tooltip } from '@mui/material';
-import { Botao, EntradaTexto, useSnackbar } from '@/app/components';
-import { ChangeEvent, useCallback, useEffect, useState } from 'react';
-import { styled } from '@mui/material/styles';
-import { useAddAdmin, useAddUser } from '@/hooks/mutations';
-import { useApp } from '@/contexts';
-import { useForm, useWatch } from 'react-hook-form';
-import { User, UserAdmin } from '@/types';
-import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
+import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ClearOutlinedIcon from "@mui/icons-material/ClearOutlined";
+import GenericBreadcrumbs from "@/app/components/breadcrumb/GenericBreadcrumb";
+import Grid from "@mui/material/Grid2";
+import Paper from "@mui/material/Paper";
+import SwitchSelector from "react-switch-selector";
+import Text from "@/app/components/ui/text/Text";
+import { Avatar, Box, IconButton, Stack, Tooltip } from "@mui/material";
+import { Botao, EntradaTexto, useSnackbar } from "@/app/components";
+import { ChangeEvent, useEffect, useState } from "react";
+import { styled } from "@mui/material/styles";
+import { useAddAdmin, useAddUser } from "@/hooks/mutations";
+import { useApp } from "@/contexts";
+import { useForm, useWatch, Control } from "react-hook-form";
+import { User, UserAdmin } from "@/types";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface fotoPerfilProps {
   base64: string;
@@ -27,33 +27,33 @@ interface fotoPerfilProps {
 }
 
 const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: '#fff',
+  backgroundColor: "#fff",
   ...theme.typography.body2,
   padding: theme.spacing(3),
-  textAlign: 'start',
-  borderRadius: '12px',
+  textAlign: "start",
+  borderRadius: "12px",
   color: theme.palette.text.secondary,
 }));
 
 const INITIAL_FORM_VALUES = {
-  name: '',
+  name: "",
   email: undefined,
-  telephone: '',
+  telephone: "",
   isAdmin: false,
-  password: '',
-  groupFamily: '',
+  password: "",
+  groupFamily: "",
 };
 
 const optionsSwitch = [
   {
-    label: 'Cliente',
+    label: "Cliente",
     value: 0,
-    selectedBackgroundColor: '#4caf50',
+    selectedBackgroundColor: "#4caf50",
   },
   {
-    label: 'Administrador',
+    label: "Administrador",
     value: 1,
-    selectedBackgroundColor: '#1565c0',
+    selectedBackgroundColor: "#1565c0",
   },
 ];
 
@@ -71,41 +71,42 @@ export default function NovoCliente() {
   const [isModified, setIsModified] = useState(false);
   const [hovering, setHovering] = useState(false);
   const [checked, setChecked] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const userForm = useForm<User>({ defaultValues: INITIAL_FORM_VALUES });
   const { control, getValues, reset } = userForm;
 
-  const [watchedNome, watchedEmail, watchedTelefone] = [
-    useWatch({ control, name: 'name' }),
-    useWatch({ control, name: 'email' }),
-    useWatch({ control, name: 'telephone' }),
-  ];
+  const watchedNome = useWatch<User>({ control, name: "name" }) as string;
+  const watchedEmail = useWatch<User>({ control, name: "email" }) as
+    | string
+    | undefined;
+  const watchedTelefone = useWatch<User>({
+    control,
+    name: "telephone",
+  }) as string;
 
   useEffect(() => {
     const requiredFields = [watchedNome, watchedTelefone];
     if (checked) {
       requiredFields.push(watchedEmail!);
     }
-    
+
     setIsModified(
-      requiredFields.every((field) => field?.trim?.() !== '')
+      requiredFields.every(
+        (field) => typeof field === "string" && field.trim() !== ""
+      )
     );
   }, [watchedNome, watchedEmail, watchedTelefone, checked]);
 
   const handleSaveClient = async () => {
-    setIsSubmitting(true);
-
     const userExists = userContext.some(
       (user) => user.telephone === watchedTelefone
     );
 
     if (userExists) {
       showSnackbar({
-        message: 'Cliente já cadastrado!',
-        severity: 'warning',
+        message: "Cliente já cadastrado!",
+        severity: "warning",
       });
-      setIsSubmitting(false);
       return;
     }
 
@@ -115,6 +116,7 @@ export default function NovoCliente() {
         ...userValues,
         name,
         isAdmin: checked,
+        imageBase64: fotoPerfil?.base64 || "",
       });
 
       if (checked) {
@@ -122,54 +124,56 @@ export default function NovoCliente() {
           idUser: newUser._id,
           name: name,
           email: email!,
-          password: 'udv@realeza',
+          password: "udv@realeza",
         };
         await addAdmin(adminPayload);
       }
 
-      router.replace('/painel/clientes');
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      router.replace("/painel/clientes");
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       reset();
       showSnackbar({
-        message: 'Cliente cadastrado com sucesso!',
-        severity: 'success',
+        message: "Cliente cadastrado com sucesso!",
+        severity: "success",
       });
     } catch (error) {
       showSnackbar({
         message: `Ocorreu um erro! - ${error}`,
-        severity: 'error',
+        severity: "error",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  const handleUploadFile = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () =>
-          setFotoPerfil({
-            base64: (reader.result as string).split(',')[1],
-            name: file.name,
-            size: file.size,
-            type: file.type,
-          });
-        reader.readAsDataURL(file);
-      }
-    },
-    []
-  );
+  const handleUploadFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      // Remove the data:image prefix from base64 string if it exists
+      const base64Clean = base64.includes("base64,")
+        ? base64
+        : base64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+
+      setFotoPerfil({
+        base64: base64Clean,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
 
   const breadcrumbItems = [
-    { label: 'Início', href: '/painel' },
-    { label: 'Cliente', href: '/painel/clientes' },
-    { label: 'Novo' },
+    { label: "Início", href: "/painel" },
+    { label: "Cliente", href: "/painel/clientes" },
+    { label: "Novo" },
   ];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ display: "flex", flexDirection: "column" }}>
       <GenericBreadcrumbs items={breadcrumbItems} />
 
       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -178,13 +182,13 @@ export default function NovoCliente() {
         </Text>
         <IconButton
           sx={{
-            backgroundColor: 'success.dark',
-            '&:hover': { backgroundColor: 'success.main', transition: '0.3s' },
+            backgroundColor: "success.dark",
+            "&:hover": { backgroundColor: "success.main", transition: "0.3s" },
           }}
-          onClick={() => router.replace('/painel/clientes')}
+          onClick={() => router.replace("/painel/clientes")}
         >
           <Tooltip title="Voltar">
-            <ArrowBackIcon fontSize="medium" sx={{ color: '#fff' }} />
+            <ArrowBackIcon fontSize="medium" sx={{ color: "#fff" }} />
           </Tooltip>
         </IconButton>
       </Stack>
@@ -199,8 +203,8 @@ export default function NovoCliente() {
                 onHover={setHovering}
                 hovering={hovering}
               />
-              <Text variant="h6">{watchedNome || 'Nome'}</Text>
-              <ContactInfo email={watchedEmail!} telephone={watchedTelefone} />
+              <Text variant="h6">{watchedNome || "Nome"}</Text>
+              <ContactInfo email={watchedEmail} telephone={watchedTelefone} />
               <UploadImageButton onUpload={handleUploadFile} />
             </Item>
           </Grid>
@@ -224,7 +228,6 @@ export default function NovoCliente() {
     </Box>
   );
 }
-
 const ProfilePicture = ({
   fotoPerfil,
   onRemove,
@@ -237,31 +240,33 @@ const ProfilePicture = ({
   hovering: boolean;
 }) => (
   <Box
-    sx={{ position: 'relative', display: 'inline-block' }}
+    sx={{ position: "relative", display: "inline-block" }}
     onMouseEnter={() => onHover(true)}
     onMouseLeave={() => onHover(false)}
   >
     <Avatar
       alt="Foto do Perfil"
-      sx={{ width: 56, height: 56, cursor: fotoPerfil ? 'pointer' : 'default' }}
-      src={
-        fotoPerfil ? `data:image/jpeg;base64,${fotoPerfil.base64}` : undefined
-      }
+      sx={{
+        width: 106,
+        height: 106,
+        cursor: fotoPerfil ? "pointer" : "default",
+      }}
+      src={fotoPerfil?.base64}
     >
-      {fotoPerfil ? '' : 'M'}
+      {fotoPerfil ? "" : "M"}
     </Avatar>
     {hovering && fotoPerfil && (
       <IconButton
         onClick={onRemove}
         sx={{
-          position: 'absolute',
+          position: "absolute",
           top: -8,
           right: -8,
-          backgroundColor: 'rgba(255,255,255,0.8)',
-          '&:hover': { backgroundColor: 'rgba(255,255,255,1)' },
+          backgroundColor: "rgba(255,255,255,0.8)",
+          "&:hover": { backgroundColor: "rgba(255,255,255,1)" },
         }}
       >
-        <ClearOutlinedIcon sx={{ color: 'error.main' }} />
+        <ClearOutlinedIcon sx={{ color: "error.main" }} />
       </IconButton>
     )}
   </Box>
@@ -272,12 +277,12 @@ const ContactInfo = ({
   telephone,
 }: {
   email?: string;
-  telephone: string;
+  telephone?: string;
 }) => (
   <Stack direction="row" gap={1} marginBottom={3}>
-    {email &&<Text>{email || 'Email'}</Text>}
+    {email && <Text>{email}</Text>}
     {email && <Text>-</Text>}
-    <Text>{telephone || 'Telefone'}</Text>
+    <Text>{telephone || "Telefone"}</Text>
   </Stack>
 );
 
@@ -286,12 +291,12 @@ const UploadImageButton = ({
 }: {
   onUpload: (event: ChangeEvent<HTMLInputElement>) => void;
 }) => (
-  <Box sx={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+  <Box sx={{ display: "flex", flexDirection: "column", gap: "3px" }}>
     <input
       type="file"
       accept=".pdf,.png,.jpg"
       onChange={onUpload}
-      style={{ display: 'none' }}
+      style={{ display: "none" }}
       id="file-input"
     />
     <label htmlFor="file-input">
@@ -300,7 +305,7 @@ const UploadImageButton = ({
         startIcon={<AddIcon />}
         color="primary"
         component="span"
-        sx={{ width: 'fit-content' }}
+        sx={{ width: "fit-content" }}
       >
         Alterar foto de perfil
       </Botao>
@@ -308,17 +313,37 @@ const UploadImageButton = ({
   </Box>
 );
 
-const ClientForm = ({ control, checked, onCheckChange }: any) => (
+const ClientForm = ({
+  control,
+  checked,
+  onCheckChange,
+}: {
+  control: Control<User>;
+  checked: boolean;
+  onCheckChange: (checked: boolean) => void;
+}) => (
   <Stack gap={2}>
     <Text fontWeight="bold">Dados do cliente</Text>
     <Stack direction="row" gap={1}>
       <EntradaTexto name="name" control={control} label="Nome" />
-      {!checked && <EntradaTexto name="telephone" control={control} label="Telefone" mask="(99) 99999-9999" />}
+      {!checked && (
+        <EntradaTexto
+          name="telephone"
+          control={control}
+          label="Telefone"
+          mask="(99) 99999-9999"
+        />
+      )}
     </Stack>
     {!!checked && (
       <Stack direction="row" gap={1}>
         <EntradaTexto name="email" control={control} label="Email" />
-        <EntradaTexto name="telephone" control={control} label="Telefone" mask="(99) 99999-9999" />
+        <EntradaTexto
+          name="telephone"
+          control={control}
+          label="Telefone"
+          mask="(99) 99999-9999"
+        />
       </Stack>
     )}
     <Text color="textSecondary" fontWeight="bold">
@@ -330,22 +355,30 @@ const ClientForm = ({ control, checked, onCheckChange }: any) => (
       initialSelectedIndex={optionsSwitch.findIndex(
         ({ value }) => value === (checked ? 1 : 0) // Compare with 1 for true (Admin) and 0 for false (Client)
       )}
-      backgroundColor={'#666666'}
-      fontColor={'#f5f6fa'}
+      backgroundColor={"#666666"}
+      fontColor={"#f5f6fa"}
       fontSize={17}
     />
   </Stack>
 );
 
-const FormActions = ({ onClear, onSave, disabled }: any) => (
+const FormActions = ({
+  onClear,
+  onSave,
+  disabled,
+}: {
+  onClear: () => void;
+  onSave: () => void;
+  disabled: boolean;
+}) => (
   <Box
-    sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, marginTop: 3 }}
+    sx={{ display: "flex", justifyContent: "flex-end", gap: 2, marginTop: 3 }}
   >
     <Botao
       variant="contained"
       color="error"
       onClick={onClear}
-      sx={{ paddingX: 7, borderRadius: '8px' }}
+      sx={{ paddingX: 7, borderRadius: "8px" }}
     >
       Limpar
     </Botao>
@@ -354,7 +387,7 @@ const FormActions = ({ onClear, onSave, disabled }: any) => (
       color="success"
       onClick={onSave}
       disabled={disabled}
-      sx={{ paddingX: 10, borderRadius: '8px' }}
+      sx={{ paddingX: 10, borderRadius: "8px" }}
     >
       Cadastrar
     </Botao>

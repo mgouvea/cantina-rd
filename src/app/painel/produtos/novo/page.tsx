@@ -1,10 +1,15 @@
 "use client";
 
+import { Control, UseFormReset, useForm } from "react-hook-form";
+import { Categories, Products, SubCategories } from "@/types/products";
+import { useCategories, useSubCategories } from "@/hooks/queries";
+import { capitalize } from "@/utils";
 import GenericBreadcrumbs from "@/app/components/breadcrumb/GenericBreadcrumb";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Text from "@/app/components/ui/text/Text";
 import {
+  Avatar,
   Box,
   FormControl,
   IconButton,
@@ -16,16 +21,14 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import FastfoodRoundedIcon from "@mui/icons-material/FastfoodRounded";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/navigation";
-import { Botao, EntradaTexto } from "@/app/components";
-import { useForm } from "react-hook-form";
-import { Categories, Products, SubCategories } from "@/types/products";
-import { useCategories, useSubCategories } from "@/hooks/queries";
-import { capitalize } from "@/utils";
-
+import { Botao, EntradaTexto, useSnackbar } from "@/app/components";
+import { useAddProduct } from "@/hooks/mutations/useProducts.mutation";
+import ClearOutlinedIcon from "@mui/icons-material/ClearOutlined";
+import AddIcon from "@mui/icons-material/Add";
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -34,7 +37,7 @@ interface TabPanelProps {
 }
 
 function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, dir, ...other } = props;
+  const { children, value, index, ...other } = props;
 
   return (
     <div
@@ -74,6 +77,8 @@ const INITIAL_PROD_FORM_VALUES = {
 export default function NovoProduto() {
   const { data: categories } = useCategories();
   const { data: subcategories } = useSubCategories();
+  const { mutateAsync: addProduct } = useAddProduct();
+  const { showSnackbar } = useSnackbar();
 
   const theme = useTheme();
   const router = useRouter();
@@ -87,6 +92,8 @@ export default function NovoProduto() {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(
     null
   ); // Store the ID
+  const [fotoProduto, setFotoProduto] = useState<fotoProdutoProps | null>(null);
+  const [hovering, setHovering] = useState(false);
 
   // --------------Products----------------
   const productsForm = useForm<Products>({
@@ -103,13 +110,53 @@ export default function NovoProduto() {
     setValue(newValue);
   };
 
+  const handleUploadFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      // Remove the data:image prefix from base64 string if it exists
+      const base64Clean = base64.includes("base64,")
+        ? base64
+        : base64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+
+      setFotoProduto({
+        base64: base64Clean,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSaveProducts = async () => {
     const productPayload: Products = {
       ...getProductValues(),
-      category: selectedCategory!,
-      subcategory: selectedSubcategory!,
+      categoryId: selectedCategory!,
+      subcategoryId: selectedSubcategory!,
+      price: Number(getProductValues().price),
+      imageBase64: fotoProduto?.base64 || "",
     };
-    console.log("Salvar produto", productPayload);
+
+    console.log(productPayload);
+
+    try {
+      await addProduct(productPayload);
+      showSnackbar({
+        message: "Produto cadastrado com sucesso!",
+        severity: "success",
+      });
+      resetProducts();
+      router.push("/painel/produtos");
+    } catch (error) {
+      showSnackbar({
+        message: `Erro ao salvar o produto - ${error}`,
+        severity: "error",
+      });
+    }
   };
 
   const handleSetCategory = (event: SelectChangeEvent<string>) => {
@@ -158,13 +205,13 @@ export default function NovoProduto() {
       <Stack
         sx={{
           width: "100%",
-          minHeight: "500px",
+          minHeight: { xs: "auto", md: "500px" },
           height: "100%",
           display: "flex",
           flexDirection: "column",
           backgroundColor: "#fff",
-          borderRadius: "16px",
-          mt: 5,
+          borderRadius: { xs: "8px", md: "16px" },
+          mt: { xs: 2, md: 5 },
         }}
       >
         <Box
@@ -203,11 +250,32 @@ export default function NovoProduto() {
             setSelectedCategory={setSelectedCategory}
             setSelectedSubcategory={setSelectedSubcategory}
             setFilteredSubcategories={setFilteredSubcategories}
+            fotoProduto={fotoProduto}
+            setFotoProduto={setFotoProduto}
+            hovering={hovering}
+            setHovering={setHovering}
+            handleUploadFile={handleUploadFile}
           />
         </CustomTabPanel>
       </Stack>
     </Stack>
   );
+}
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+  dir?: string;
+}
+
+interface FormActionsProps {
+  onClear: () => void;
+  onSave: () => void;
+  disabled?: boolean;
+  setSelectedCategory: (value: string | null) => void;
+  setSelectedSubcategory: (value: string | null) => void;
+  setFilteredSubcategories: (value: SubCategories[]) => void;
 }
 
 const FormActions = ({
@@ -217,9 +285,15 @@ const FormActions = ({
   setSelectedCategory,
   setSelectedSubcategory,
   setFilteredSubcategories,
-}: any) => (
+}: FormActionsProps) => (
   <Box
-    sx={{ display: "flex", justifyContent: "flex-end", gap: 2, marginTop: 3 }}
+    sx={{
+      display: "flex",
+      justifyContent: "flex-end",
+      gap: 2,
+      marginTop: 3,
+      px: { xs: 2, sm: 4 },
+    }}
   >
     <Botao
       variant="contained"
@@ -246,6 +320,33 @@ const FormActions = ({
   </Box>
 );
 
+interface ProductsFormProps {
+  control: Control<Products>;
+  handleSaveProducts: () => void;
+  reset: UseFormReset<Products>;
+  selectedCategory: string | null;
+  selectedSubcategory: string | null;
+  filteredSubcategories: SubCategories[];
+  handleSetCategory: (event: SelectChangeEvent<string>) => void;
+  handleSetSubcategory: (event: SelectChangeEvent<string>) => void;
+  categories: Categories[] | undefined;
+  setSelectedCategory: (value: string | null) => void;
+  setSelectedSubcategory: (value: string | null) => void;
+  setFilteredSubcategories: (value: SubCategories[]) => void;
+  fotoProduto: fotoProdutoProps | null;
+  setFotoProduto: (value: fotoProdutoProps | null) => void;
+  hovering: boolean;
+  setHovering: (value: boolean) => void;
+  handleUploadFile: (event: ChangeEvent<HTMLInputElement>) => void;
+}
+
+interface fotoProdutoProps {
+  base64: string;
+  name: string;
+  size: number;
+  type: string;
+}
+
 const ProductsForm = ({
   control,
   handleSaveProducts,
@@ -259,23 +360,45 @@ const ProductsForm = ({
   setSelectedCategory,
   setSelectedSubcategory,
   setFilteredSubcategories,
-}: any) => (
+  fotoProduto,
+  setFotoProduto,
+  hovering,
+  setHovering,
+  handleUploadFile,
+}: ProductsFormProps) => (
   <Stack gap={2}>
     <Stack
       sx={{
-        px: 25,
+        px: { xs: 2, sm: 4, md: 25 },
         pt: 2,
-        width: "80%",
+        width: { xs: "100%", md: "80%" },
         margin: "0 auto",
       }}
       gap={2}
     >
-      <Stack direction="row" gap={1}>
+      <Box
+        sx={{ display: "flex", flexDirection: "column", justifyContent: "end" }}
+        gap={1}
+      >
+        <ProductPicture
+          fotoProduto={fotoProduto}
+          onRemove={() => setFotoProduto(null)}
+          onHover={setHovering}
+          hovering={hovering}
+        />
+        <UploadImageButton onUpload={handleUploadFile} />
+      </Box>
+      <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
         <EntradaTexto name="name" control={control} label="Nome do produto" />
-        <EntradaTexto name="price" control={control} label="Preço de venda" />
+        <EntradaTexto
+          name="price"
+          control={control}
+          label="R$ - Preço de venda"
+          type="number"
+        />
       </Stack>
 
-      <Stack direction="row" gap={1}>
+      <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
         <FormControl
           sx={{
             width: "100%",
@@ -285,7 +408,7 @@ const ProductsForm = ({
           <Select
             labelId="category-select-label"
             id="category-select"
-            value={selectedCategory}
+            value={selectedCategory || ""}
             label="Categoria"
             onChange={handleSetCategory}
           >
@@ -314,7 +437,7 @@ const ProductsForm = ({
           <Select
             labelId="subcategory-select-label"
             id="subcategory-select"
-            value={selectedSubcategory}
+            value={selectedSubcategory || ""}
             label="Subcategoria"
             onChange={handleSetSubcategory}
             disabled={!selectedCategory || filteredSubcategories?.length === 0} // Disable if no category or no subcategories
@@ -335,7 +458,7 @@ const ProductsForm = ({
         </FormControl>
       </Stack>
 
-      <Stack direction="row" gap={1}>
+      <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
         <EntradaTexto
           name="description"
           control={control}
@@ -354,4 +477,75 @@ const ProductsForm = ({
       setFilteredSubcategories={setFilteredSubcategories}
     />
   </Stack>
+);
+
+const ProductPicture = ({
+  fotoProduto,
+  onRemove,
+  onHover,
+  hovering,
+}: {
+  fotoProduto: fotoProdutoProps | null;
+  onRemove: () => void;
+  onHover: (hover: boolean) => void;
+  hovering: boolean;
+}) => (
+  <Box
+    sx={{ position: "relative", display: "inline-block" }}
+    onMouseEnter={() => onHover(true)}
+    onMouseLeave={() => onHover(false)}
+  >
+    <Avatar
+      alt="Foto do Produto"
+      sx={{
+        width: 106,
+        height: 106,
+        cursor: fotoProduto ? "pointer" : "default",
+      }}
+      src={fotoProduto?.base64}
+    >
+      {fotoProduto ? "" : "Produto"}
+    </Avatar>
+    {hovering && fotoProduto && (
+      <IconButton
+        onClick={onRemove}
+        sx={{
+          position: "absolute",
+          top: -8,
+          right: -8,
+          backgroundColor: "rgba(255,255,255,0.8)",
+          "&:hover": { backgroundColor: "rgba(255,255,255,1)" },
+        }}
+      >
+        <ClearOutlinedIcon sx={{ color: "error.main" }} />
+      </IconButton>
+    )}
+  </Box>
+);
+
+const UploadImageButton = ({
+  onUpload,
+}: {
+  onUpload: (event: ChangeEvent<HTMLInputElement>) => void;
+}) => (
+  <Box sx={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+    <input
+      type="file"
+      accept=".png,.jpg"
+      onChange={onUpload}
+      style={{ display: "none" }}
+      id="file-input"
+    />
+    <label htmlFor="file-input">
+      <Botao
+        variant="outlined"
+        startIcon={<AddIcon />}
+        color="primary"
+        component="span"
+        sx={{ width: "fit-content" }}
+      >
+        Alterar foto do produto
+      </Botao>
+    </label>
+  </Box>
 );

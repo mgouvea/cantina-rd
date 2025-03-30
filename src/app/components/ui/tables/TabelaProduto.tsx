@@ -1,41 +1,48 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import * as React from "react";
+import Box from "@mui/material/Box";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import {
   GridRowModesModel,
   DataGrid,
-  GridColDef,
-  GridActionsCellItem,
   GridEventListener,
+  GridActionsCellItem,
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
-} from '@mui/x-data-grid';
-import { CircularProgress, IconButton, Stack } from '@mui/material';
-import { Filtros } from '../..';
-import { useRouter } from 'next/navigation';
-import Text from '../text/Text';
-import EmptyContent from '../emptyContent/EmptyContent';
-import { capitalize } from '@/utils';
+  GridColDef,
+} from "@mui/x-data-grid";
+import { CircularProgress, IconButton, Stack } from "@mui/material";
+import { useRouter } from "next/navigation";
+import { capitalize } from "@/utils";
+import { Categories, Products, SubCategories } from "@/types/products";
+import EmptyContent from "../emptyContent/EmptyContent";
+import Image from "next/image";
+import { Filtros } from "../../filtros/Filtros";
 
 interface TabelaProps {
-  data: any;
+  data: Products[];
   isLoading: boolean;
+  categories: Categories[];
+  subcategories: SubCategories[];
 }
 
-export default function TabelaProduto({ data, isLoading }: TabelaProps) {
+export default function TabelaProduto({
+  data,
+  isLoading,
+  categories,
+  subcategories,
+}: TabelaProps) {
   const router = useRouter();
   const [rows, setRows] = React.useState(data);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
 
-
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (
+  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
     event
   ) => {
@@ -49,12 +56,17 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
-    console.log('Delete row with id: ', id);
+    console.log("Delete row with id: ", id);
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row: any) => (row.id === newRow.id ? updatedRow : row)));
+  const processRowUpdate = (newRow: GridRowModel<Products>) => {
+    const updatedRow: Products = {
+      ...(newRow as Products),
+      updatedAt: new Date(),
+    };
+    setRows(
+      rows.map((row: Products) => (row._id === newRow._id ? updatedRow : row))
+    );
     return updatedRow;
   };
 
@@ -62,66 +74,117 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
     setRowModesModel(newRowModesModel);
   };
 
-  const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Nome', width: 300, editable: true, renderCell: (params) => (
-      capitalize(params.value)
-    )},
+  const columns: GridColDef<Products>[] = [
     {
-      field: 'description',
-      headerName: 'Descrição',
-      width: 300,
-      editable: true,renderCell: (params) => (
-        capitalize(params.value)
-      )
-    },
-    {
-      field: 'price',
-      headerName: 'Preço unitário',
-      width: 150,
-      editable: true,renderCell: (params) => (
-        `R$ ${params.value ?? 0}`
-      )
-    },
-    {
-      field: 'category',
-      headerName: 'Categoria',
-      width: 180,
-      editable: true,renderCell: (params) => (
-        capitalize(params.value)
-      )
-    },
-    {
-      field: 'subcategory',
-      headerName: 'Subcategoria',
-      width: 180,
-      editable: true,renderCell: (params) => (
-        capitalize(params.value)
-      )
-    },
-    {
-      field: 'quantity',
-      headerName: 'Quantidade',
-      width: 120,
-      editable: true,renderCell: (params) => (
-        capitalize(params.value)
-      )
-    },
-    {
-      field: 'actions',
-      type: 'actions',
-      headerName: '',
+      field: "imageBase64",
+      headerName: "Imagem",
       width: 100,
-      cellClassName: 'actions',
+      editable: false,
+      sortable: false,
+      align: "center",
+      renderCell: (params) => (
+        <Image
+          src={`data:image/${params.row.imageBase64}`}
+          alt={params.row.name}
+          width={55}
+          height={55}
+        />
+      ),
+    },
+    {
+      field: "name",
+      headerName: "Nome",
+      width: 200,
+      editable: true,
+      renderCell: (params) => (
+        <div style={rowStyle}>{capitalize(params.value)}</div>
+      ),
+    },
+    {
+      field: "description",
+      headerName: "Descrição",
+      width: 300,
+      editable: true,
+      renderCell: (params) => (
+        <div style={rowStyle}>{capitalize(params.value)}</div>
+      ),
+    },
+    {
+      field: "price",
+      headerName: "Preço unitário",
+      width: 150,
+      editable: true,
+      renderCell: (params) => (
+        <div style={rowStyle}>R$ {params.value ?? 0}</div>
+      ),
+    },
+    {
+      field: "categoryId",
+      headerName: "Categoria",
+      width: 200,
+      editable: true,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => {
+        const categoryId = params.row.categoryId;
+        const category =
+          typeof categoryId === "string"
+            ? categories?.find((cat) => cat._id === categoryId)
+            : categoryId;
+
+        return (
+          <div style={{ paddingTop: "8px" }}>
+            {capitalize(category?.name || "")}
+          </div>
+        );
+      },
+    },
+    {
+      field: "subcategoryId",
+      headerName: "Subcategoria",
+      width: 200,
+      editable: true,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => {
+        const subcategoryId = params.row.subcategoryId;
+        const subcategory =
+          typeof subcategoryId === "string"
+            ? subcategories?.find((subcat) => subcat._id === subcategoryId)
+            : subcategoryId;
+
+        return (
+          <div style={{ paddingTop: "8px" }}>
+            {capitalize(subcategory?.name || "")}
+          </div>
+        );
+      },
+    },
+    // {
+    //   field: "quantity",
+    //   headerName: "Quantidade",
+    //   width: 120,
+    //   editable: true,
+    //   renderCell: (params) => params.value,
+    // },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "",
+      width: 100,
+      cellClassName: "actions",
       getActions: ({ id }) => {
         return [
           <GridActionsCellItem
-            icon={<EditIcon sx={{ color: '#666666' }} />}
+            key={id}
+            icon={<EditIcon sx={{ color: "#666666" }} />}
             label="Edit"
             className="textPrimary"
             onClick={handleEditClick(id)}
           />,
           <GridActionsCellItem
-            icon={<DeleteIcon sx={{ color: '#9B0B00' }} />}
+            key={id}
+            icon={<DeleteIcon sx={{ color: "#9B0B00" }} />}
             label="Delete"
             onClick={handleDeleteClick(id)}
             color="inherit"
@@ -132,49 +195,44 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
   ];
 
   const handleAddClient = () => {
-    router.replace('/painel/produtos/novo');
+    router.replace("/painel/produtos/novo");
   };
 
   return (
     <Box
       sx={{
         padding: 2,
-        height: 'fit-content',
-        '& .actions': {
-          color: 'text.secondary',
+        height: "fit-content",
+        "& .actions": {
+          color: "text.secondary",
         },
-        '& .textPrimary': {
-          color: 'text.primary',
+        "& .textPrimary": {
+          color: "text.primary",
         },
       }}
     >
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Produtos Cadastrados</Text>
-
+      <Stack direction="row" justifyContent="flex-end">
         <IconButton
           aria-label="add"
-          sx={{ color: 'success.main' }}
+          sx={{ color: "success.main" }}
           onClick={handleAddClient}
         >
           <AddCircleIcon fontSize="large" />
         </IconButton>
       </Stack>
-
-      {!isLoading && (!data || data.length === 0) && (
-        <EmptyContent title="Ainda não há produtos para exibir" />
-      )}
-
       {!isLoading && data && data.length > 0 && (
         <Filtros rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
+            ) : data?.length === 0 ? (
+              <EmptyContent title="Nenhum produto cadastrado" />
             ) : (
               <DataGrid
                 rows={rowsFiltradas}
                 columns={columns}
                 editMode="row"
-                getRowId={(row) => row._id}
+                getRowId={(row) => row._id!}
                 rowModesModel={rowModesModel}
                 onRowModesModelChange={handleRowModesModelChange}
                 onRowEditStop={handleRowEditStop}
@@ -182,7 +240,9 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
                 slotProps={{
                   toolbar: { setRows, setRowModesModel },
                 }}
-                sx={{ borderRadius: '16px' }}
+                sx={{ borderRadius: "16px" }}
+                getRowHeight={() => "auto"}
+                getEstimatedRowHeight={() => 100}
               />
             )
           }
@@ -191,3 +251,15 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
     </Box>
   );
 }
+
+const rowStyle: React.CSSProperties = {
+  whiteSpace: "pre-wrap",
+  lineHeight: "1.2",
+  padding: "8px 0",
+  width: "100%",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  display: "-webkit-box" as const,
+  WebkitLineClamp: 3,
+  WebkitBoxOrient: "vertical" as const,
+};

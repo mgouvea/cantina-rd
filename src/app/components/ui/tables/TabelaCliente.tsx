@@ -1,10 +1,20 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import * as React from "react";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import Box from "@mui/material/Box";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import EditIcon from "@mui/icons-material/Edit";
+import EmptyContent from "../emptyContent/EmptyContent";
+import Text from "../text/Text";
+import { capitalize } from "@/utils";
+import { Avatar, CircularProgress, IconButton, Stack } from "@mui/material";
+import { Client } from "@/types/client";
+import { Filtros } from "../..";
+import { groupFamily } from "@/types/groupFamily";
+import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
+import { useRouter } from "next/navigation";
+
 import {
   GridRowModesModel,
   DataGrid,
@@ -14,32 +24,22 @@ import {
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
-} from '@mui/x-data-grid';
-import { CircularProgress, IconButton, Stack } from '@mui/material';
-import { Filtros } from '../..';
-import { useRouter } from 'next/navigation';
-import Text from '../text/Text';
-import EmptyContent from '../emptyContent/EmptyContent';
-import { capitalize } from '@/utils';
-import { useGroupFamily } from '@/hooks/queries/useGroupFamily.query';
-import { groupFamily } from '@/types/groupFamily';
-
+} from "@mui/x-data-grid";
 interface TabelaProps {
-  data: any;
+  data: Client[];
   isLoading: boolean;
 }
 
 export default function TabelaCliente({ data, isLoading }: TabelaProps) {
   const router = useRouter();
-  const [rows, setRows] = React.useState(data);
+  const [rows, setRows] = React.useState<Client[]>(data);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
 
   const { data: groupFamilies } = useGroupFamily();
 
-
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (
+  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
     event
   ) => {
@@ -53,12 +53,16 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
-    console.log('Delete row with id: ', id);
+    console.log("Delete row with id: ", id);
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row: any) => (row.id === newRow.id ? updatedRow : row)));
+    setRows(
+      rows.map((row: Client) =>
+        row._id === newRow._id ? updatedRow : row
+      ) as Client[]
+    );
     return updatedRow;
   };
 
@@ -67,44 +71,71 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
   };
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Nome', width: 500, editable: true, renderCell: (params) => (
-      capitalize(params.value)
-    )},
     {
-      field: 'telephone',
-      headerName: 'Telefone',
-      type: 'number',
+      field: "imageBase64",
+      headerName: "Imagem",
+      width: 100,
+      editable: false,
+      sortable: false,
+      align: "center",
+      renderCell: (params) => (
+        <Avatar
+          alt="Foto do Perfil"
+          sx={{
+            width: 50,
+            height: 50,
+            cursor: "default",
+          }}
+          src={`data:image/${params.row.imageBase64}`}
+        />
+      ),
+    },
+    {
+      field: "name",
+      headerName: "Nome",
+      width: 500,
+      editable: true,
+      renderCell: (params) => capitalize(params.value),
+    },
+    {
+      field: "telephone",
+      headerName: "Telefone",
+      type: "number",
       width: 300,
-      align: 'left',
-      headerAlign: 'left',
+      align: "left",
+      headerAlign: "left",
       editable: true,
     },
     {
-      field: 'groupFamily',
-      headerName: 'Grupo Familiar',
+      field: "groupFamily",
+      headerName: "Grupo Familiar",
       width: 300,
       editable: true,
       renderCell: (params) => {
-        const group = groupFamilies?.find((group: groupFamily) => group._id === params.value);
-        return group ? capitalize(group.name) : '-';
-      }
+        const group = groupFamilies?.find(
+          (group: groupFamily) => group._id === params.value
+        );
+        return group ? capitalize(group.name) : "-";
+      },
     },
     {
-      field: 'actions',
-      type: 'actions',
-      headerName: '',
+      field: "actions",
+      type: "actions",
+      headerName: "",
       width: 100,
-      cellClassName: 'actions',
+      cellClassName: "actions",
       getActions: ({ id }) => {
         return [
           <GridActionsCellItem
-            icon={<EditIcon sx={{ color: '#666666' }} />}
+            key={id}
+            icon={<EditIcon sx={{ color: "#666666" }} />}
             label="Edit"
             className="textPrimary"
             onClick={handleEditClick(id)}
           />,
           <GridActionsCellItem
-            icon={<DeleteIcon sx={{ color: '#9B0B00' }} />}
+            key={id}
+            icon={<DeleteIcon sx={{ color: "#9B0B00" }} />}
             label="Delete"
             onClick={handleDeleteClick(id)}
             color="inherit"
@@ -115,19 +146,19 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
   ];
 
   const handleAddClient = () => {
-    router.replace('/painel/clientes/novo');
+    router.replace("/painel/clientes/novo");
   };
 
   return (
     <Box
       sx={{
         padding: 2,
-        height: 'fit-content',
-        '& .actions': {
-          color: 'text.secondary',
+        height: "fit-content",
+        "& .actions": {
+          color: "text.secondary",
         },
-        '& .textPrimary': {
-          color: 'text.primary',
+        "& .textPrimary": {
+          color: "text.primary",
         },
       }}
     >
@@ -136,7 +167,7 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
 
         <IconButton
           aria-label="add"
-          sx={{ color: 'success.main' }}
+          sx={{ color: "success.main" }}
           onClick={handleAddClient}
         >
           <AddCircleIcon fontSize="large" />
@@ -165,7 +196,8 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
                 slotProps={{
                   toolbar: { setRows, setRowModesModel },
                 }}
-                sx={{ borderRadius: '16px' }}
+                sx={{ borderRadius: "16px" }}
+                rowHeight={60}
               />
             )
           }

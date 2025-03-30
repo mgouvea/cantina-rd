@@ -3,9 +3,9 @@ export type Products = {
   name: string;
   description: string;
   price: number | string;
-  category: string;
-  subcategory: string;
-  quantity: number;
+  categoryId: string | Categories;
+  subcategoryId: string | SubCategories;
+  imageBase64: string;
   createdAt: Date;
   updatedAt: Date;
 };
