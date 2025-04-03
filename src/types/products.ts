@@ -13,6 +13,7 @@ export type Products = {
 export type Categories = {
   _id?: string;
   name: string;
+  base64Image: string;
   createdAt?: Date;
   updatedAt?: Date;
 };

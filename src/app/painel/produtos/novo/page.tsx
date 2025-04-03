@@ -23,12 +23,15 @@ import {
 } from "@mui/material";
 import { ChangeEvent, useState } from "react";
 import FastfoodRoundedIcon from "@mui/icons-material/FastfoodRounded";
+import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
+import ListOutlinedIcon from "@mui/icons-material/ListOutlined";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/navigation";
 import { Botao, EntradaTexto, useSnackbar } from "@/app/components";
 import { useAddProduct } from "@/hooks/mutations/useProducts.mutation";
 import ClearOutlinedIcon from "@mui/icons-material/ClearOutlined";
 import AddIcon from "@mui/icons-material/Add";
+import { CategoriesForm } from "@/app/components/ui/forms/CategoriesForm";
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -228,11 +231,37 @@ export default function NovoProduto() {
             textColor="inherit"
             variant="fullWidth"
             aria-label="full width tabs example"
+            sx={{
+              "& .Mui-selected": {
+                backgroundColor: "background.paper",
+                color: "text.primary",
+                fontWeight: "bold",
+              },
+              "& .Mui-selected:hover": {
+                backgroundColor: "background.paper",
+                color: "text.primary",
+                fontWeight: "bold",
+              },
+              "& .MuiTab-root": {
+                backgroundColor: "background.paper",
+                color: "text.primary",
+              },
+            }}
           >
             <Tab
               icon={<FastfoodRoundedIcon />}
               label="Produto"
               {...a11yProps(0)}
+            />
+            <Tab
+              icon={<CategoryOutlinedIcon />}
+              label="Categoria"
+              {...a11yProps(1)}
+            />
+            <Tab
+              icon={<ListOutlinedIcon />}
+              label="Subcategoria"
+              {...a11yProps(2)}
             />
           </Tabs>
         </Box>
@@ -256,6 +285,9 @@ export default function NovoProduto() {
             setHovering={setHovering}
             handleUploadFile={handleUploadFile}
           />
+        </CustomTabPanel>
+        <CustomTabPanel value={value} index={1} dir={theme.direction}>
+          <CategoriesForm />
         </CustomTabPanel>
       </Stack>
     </Stack>
