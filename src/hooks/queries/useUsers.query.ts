@@ -1,4 +1,4 @@
-import { GetAllAdmins, GetAllUsers, GetUserById } from "@/services";
+import { GetAllAdmins, GetAllUsers, GetUserById } from "@/hooks/services";
 import { useQuery } from "@tanstack/react-query";
 
 export const useUsers = () => {

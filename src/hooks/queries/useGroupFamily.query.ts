@@ -1,4 +1,4 @@
-import { GetAllGroupFamilies } from "@/services/groupFamily";
+import { GetAllGroupFamilies } from "@/hooks/services/groupFamily";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGroupFamily = () => {

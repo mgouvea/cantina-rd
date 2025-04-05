@@ -1,4 +1,4 @@
-import { PostAddCategories, PostAddSubCategories } from "@/services";
+import { PostAddCategories, PostAddSubCategories } from "@/hooks/services";
 import { useMutation } from "@tanstack/react-query";
 
 export const useAddCategory = () => {

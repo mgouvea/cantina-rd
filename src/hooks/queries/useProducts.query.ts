@@ -1,4 +1,4 @@
-import { GetProducts } from "@/services";
+import { GetProducts } from "@/hooks/services";
 import { useQuery } from "@tanstack/react-query";
 
 export const useProducts = () => {

@@ -1,5 +1,5 @@
-import { PostAddGroupFamily } from '@/services/groupFamily';
-import { useMutation } from '@tanstack/react-query';
+import { PostAddGroupFamily } from "@/hooks/services/groupFamily";
+import { useMutation } from "@tanstack/react-query";
 
 export const useAddGroupFamily = () => {
   return useMutation({
