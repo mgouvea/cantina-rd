@@ -6,7 +6,7 @@ import { useProducts } from "@/hooks/queries/useProducts.query";
 import { useCategories, useSubCategories } from "@/hooks/queries";
 
 const breadcrumbItems = [
-  { label: "Início", href: "/painel" },
+  { label: "Início", href: "/dashboard" },
   { label: "Produtos" },
 ];
 

@@ -22,6 +22,7 @@ import { Categories, Products, SubCategories } from "@/types/products";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Image from "next/image";
 import { Filtros } from "../../filtros/Filtros";
+import Text from "../text/Text";
 
 interface TabelaProps {
   data: Products[];
@@ -52,7 +53,7 @@ export default function TabelaProduto({
   };
 
   const handleEditClick = (id: GridRowId) => () => {
-    router.replace(`/painel/produtos/editar/${id}`);
+    router.replace(`/produtos/editar/${id}`);
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
@@ -160,13 +161,6 @@ export default function TabelaProduto({
         );
       },
     },
-    // {
-    //   field: "quantity",
-    //   headerName: "Quantidade",
-    //   width: 120,
-    //   editable: true,
-    //   renderCell: (params) => params.value,
-    // },
     {
       field: "actions",
       type: "actions",
@@ -194,8 +188,8 @@ export default function TabelaProduto({
     },
   ];
 
-  const handleAddClient = () => {
-    router.replace("/painel/produtos/novo");
+  const handleAddProduto = () => {
+    router.replace("/produtos/novo");
   };
 
   return (
@@ -211,22 +205,27 @@ export default function TabelaProduto({
         },
       }}
     >
-      <Stack direction="row" justifyContent="flex-end">
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Text variant="h5">Produtos Cadastrados</Text>
+
         <IconButton
           aria-label="add"
           sx={{ color: "success.main" }}
-          onClick={handleAddClient}
+          onClick={handleAddProduto}
         >
           <AddCircleIcon fontSize="large" />
         </IconButton>
       </Stack>
+
+      {!isLoading && (!data || data.length === 0) && (
+        <EmptyContent title="Ainda não há produtos para exibir" />
+      )}
+
       {!isLoading && data && data.length > 0 && (
         <Filtros rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
-            ) : data?.length === 0 ? (
-              <EmptyContent title="Nenhum produto cadastrado" />
             ) : (
               <DataGrid
                 rows={rowsFiltradas}

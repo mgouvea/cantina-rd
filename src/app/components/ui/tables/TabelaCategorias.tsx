@@ -9,10 +9,7 @@ import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
 import { capitalize } from "@/utils";
 import { Avatar, CircularProgress, IconButton, Stack } from "@mui/material";
-import { Client } from "@/types/client";
 import { Filtros } from "../..";
-import { groupFamily } from "@/types/groupFamily";
-import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
 import { useRouter } from "next/navigation";
 
 import {
@@ -20,24 +17,23 @@ import {
   DataGrid,
   GridColDef,
   GridActionsCellItem,
-  GridEventListener,
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
+  GridEventListener,
 } from "@mui/x-data-grid";
+import { Categories } from "@/types";
 interface TabelaProps {
-  data: Client[];
+  data: Categories[];
   isLoading: boolean;
 }
 
-export default function TabelaCliente({ data, isLoading }: TabelaProps) {
+export default function TabelaCategorias({ data, isLoading }: TabelaProps) {
   const router = useRouter();
-  const [rows, setRows] = React.useState<Client[]>(data);
+  const [rows, setRows] = React.useState<Categories[]>(data);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
-
-  const { data: groupFamilies } = useGroupFamily();
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -49,7 +45,7 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
   };
 
   const handleEditClick = (id: GridRowId) => () => {
-    router.replace(`/clientes/editar/${id}`);
+    router.replace(`/categorias/editar/${id}`);
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
@@ -59,9 +55,9 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
   const processRowUpdate = (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false };
     setRows(
-      rows.map((row: Client) =>
+      rows.map((row: Categories) =>
         row._id === newRow._id ? updatedRow : row
-      ) as Client[]
+      ) as Categories[]
     );
     return updatedRow;
   };
@@ -98,27 +94,6 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
       renderCell: (params) => capitalize(params.value),
     },
     {
-      field: "telephone",
-      headerName: "Telefone",
-      type: "number",
-      width: 300,
-      align: "left",
-      headerAlign: "left",
-      editable: true,
-    },
-    {
-      field: "groupFamily",
-      headerName: "Grupo Familiar",
-      width: 300,
-      editable: true,
-      renderCell: (params) => {
-        const group = groupFamilies?.find(
-          (group: groupFamily) => group._id === params.value
-        );
-        return group ? capitalize(group.name) : "-";
-      },
-    },
-    {
       field: "actions",
       type: "actions",
       headerName: "",
@@ -145,8 +120,8 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
     },
   ];
 
-  const handleAddClient = () => {
-    router.replace("/clientes/novo");
+  const handleAddCategorias = (tab: number) => {
+    router.replace(`/categorias/novo?tab=${tab}`);
   };
 
   return (
@@ -163,19 +138,19 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Clientes Cadastrados</Text>
+        <Text variant="h5">Categorias Cadastradas</Text>
 
         <IconButton
           aria-label="add"
           sx={{ color: "success.main" }}
-          onClick={handleAddClient}
+          onClick={() => handleAddCategorias(0)}
         >
           <AddCircleIcon fontSize="large" />
         </IconButton>
       </Stack>
 
       {!isLoading && (!data || data.length === 0) && (
-        <EmptyContent title="Ainda não há clientes para exibir" />
+        <EmptyContent title="Ainda não há categorias para exibir" />
       )}
 
       {!isLoading && data && data.length > 0 && (

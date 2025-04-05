@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import TabelaCliente from '@/app/components/ui/tables/TabelaCliente';
-import { useApp } from '@/contexts';
-import { useEffect } from 'react';
-import { useUsers } from '@/hooks/queries';
-import Loading from '@/app/components/loading/Loading';
-import ContentWrapper from '@/app/components/ui/wrapper/ContentWrapper';
+import TabelaCliente from "@/app/components/ui/tables/TabelaCliente";
+import { useApp } from "@/contexts";
+import { useEffect } from "react";
+import { useUsers } from "@/hooks/queries";
+import Loading from "@/app/components/loading/Loading";
+import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 
 const breadcrumbItems = [
-  { label: 'Início', href: '/painel' },
-  { label: 'Clientes' },
+  { label: "Início", href: "/dashboard" },
+  { label: "Clientes" },
 ];
 
 export default function Clientes() {
@@ -20,7 +20,7 @@ export default function Clientes() {
     if (!isLoading && data) {
       setUserContext(data);
     }
-  }, [data]);
+  }, [data, isLoading, setUserContext]);
 
   const renderContent = () => {
     if (isLoading) {

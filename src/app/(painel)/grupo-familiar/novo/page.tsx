@@ -6,7 +6,7 @@ import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import GenericBreadcrumbs from "@/app/components/breadcrumb/GenericBreadcrumb";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import Paper from "@mui/material/Paper";
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
@@ -38,6 +38,7 @@ import StepConnector, {
   stepConnectorClasses,
 } from "@mui/material/StepConnector";
 import { capitalize } from "@/utils";
+import { User } from "@/types";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -158,23 +159,37 @@ export default function NovoGrupoFamiliar() {
   const router = useRouter();
   const { control, getValues, watch } = useForm<FormData>({
     defaultValues: INITIAL_FORM_VALUES,
+    mode: "onChange", // Enable validation on change
   });
 
   const [activeStep, setActiveStep] = useState(0);
   const [selectedMembers, setSelectedMembers] = useState<SelectedMember[]>([]);
   const [owner, setOwner] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const groupName = watch("name");
 
-  const handleMembersChange = (updatedMembers: SelectedMember[]) => {
-    setSelectedMembers(updatedMembers);
-  };
+  // Filter out users who already have a groupFamily
+  const availableUsers = useMemo(() => {
+    if (!users) return [];
+    return users.filter((user: User) => !user.groupFamily);
+  }, [users]);
 
-  const handleOwnerChange = (event: { target: { value: string } }) => {
-    setOwner(event.target.value);
-  };
+  const handleMembersChange = useCallback(
+    (updatedMembers: SelectedMember[]) => {
+      setSelectedMembers(updatedMembers);
+    },
+    []
+  );
 
-  const handleNext = () => {
+  const handleOwnerChange = useCallback(
+    (event: { target: { value: string } }) => {
+      setOwner(event.target.value);
+    },
+    []
+  );
+
+  const handleNext = useCallback(() => {
     if (activeStep === 0 && groupName === "") {
       showSnackbar({
         message: "Nome obrigatório!",
@@ -183,17 +198,17 @@ export default function NovoGrupoFamiliar() {
       return;
     }
     setActiveStep((prevStep) => prevStep + 1);
-  };
+  }, [activeStep, groupName, showSnackbar]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setActiveStep((prevStep) => prevStep - 1);
-  };
+  }, []);
 
-  const handleCancel = () => {
-    router.replace("/painel/grupo-familiar");
-  };
+  const handleCancel = useCallback(() => {
+    router.replace("/grupo-familiar");
+  }, [router]);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!owner) {
       showSnackbar({
         message: "Selecione um responsável",
@@ -201,6 +216,16 @@ export default function NovoGrupoFamiliar() {
       });
       return;
     }
+
+    if (selectedMembers.length === 0) {
+      showSnackbar({
+        message: "Selecione pelo menos um membro para o grupo",
+        severity: "warning",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
 
     const formValues = getValues();
     const finalData = {
@@ -221,137 +246,167 @@ export default function NovoGrupoFamiliar() {
         message: "Grupo familiar salvo com sucesso",
         severity: "success",
       });
-      router.replace("/painel/grupo-familiar");
+      router.replace("/grupo-familiar");
     } catch (error) {
       showSnackbar({
         message: `Erro ao salvar grupo familiar - ${error}`,
         severity: "error",
       });
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }, [
+    owner,
+    selectedMembers,
+    getValues,
+    addGroup,
+    updateUser,
+    showSnackbar,
+    router,
+  ]);
 
-  const RenderSaveStep = (title: string, value: string | SelectedMember[]) => {
-    const getOwnerName = (ownerId: string) => {
+  const getOwnerName = useCallback(
+    (ownerId: string) => {
       const ownerMember = selectedMembers.find(
         (member) => member.userId === ownerId
       );
       return ownerMember ? capitalize(ownerMember.name) : ownerId;
-    };
+    },
+    [selectedMembers]
+  );
 
-    // Processa o valor baseado no título e tipo
-    const processValue = (title: string, value: React.ReactNode) => {
-      if (title === "Responsável") {
-        return getOwnerName(value as string);
-      }
-      return value;
-    };
+  const RenderSaveStep = useCallback(
+    (title: string, value: string | SelectedMember[]) => {
+      // Processa o valor baseado no título e tipo
+      const processValue = (title: string, value: React.ReactNode) => {
+        if (title === "Responsável") {
+          return getOwnerName(value as string);
+        }
+        return value;
+      };
 
-    const displayValue = Array.isArray(value) ? (
-      <>
-        {value.map((item: SelectedMember) => (
-          <Text key={item.userId} sx={{ ml: 2 }}>
-            {capitalize(item.name)}
-          </Text>
-        ))}
-      </>
-    ) : (
-      <Text>{processValue(title, value)}</Text>
-    );
+      const displayValue = Array.isArray(value) ? (
+        <>
+          {value.map((item: SelectedMember) => (
+            <Text key={item.userId} sx={{ ml: 2 }}>
+              {capitalize(item.name)}
+            </Text>
+          ))}
+        </>
+      ) : (
+        <Text>{processValue(title, value)}</Text>
+      );
 
-    return (
-      <Stack
-        direction={Array.isArray(value) ? "column" : "row"}
-        sx={{ gap: 1 }}
-      >
-        <Text sx={{ fontWeight: "bold" }}>{title}:</Text>
-        {displayValue}
-      </Stack>
-    );
-  };
+      return (
+        <Stack
+          direction={Array.isArray(value) ? "column" : "row"}
+          sx={{ gap: 1 }}
+        >
+          <Text sx={{ fontWeight: "bold" }}>{title}:</Text>
+          {displayValue}
+        </Stack>
+      );
+    },
+    [getOwnerName]
+  );
 
-  const getStepContent = (step: number) => {
-    switch (step) {
-      case 0:
-        return (
-          <EntradaTexto
-            name="name"
-            control={control}
-            label="Nome do grupo"
-            sx={{
-              width: "70%",
-            }}
-          />
-        );
-      case 1:
-        return (
-          <Box sx={{ display: "flex", flexDirection: "column" }}>
-            <TransferList
-              users={users || []}
-              onSelectionChange={handleMembersChange}
-              initialSelected={selectedMembers}
+  const getStepContent = useCallback(
+    (step: number) => {
+      switch (step) {
+        case 0:
+          return (
+            <EntradaTexto
+              name="name"
+              control={control}
+              label="Nome do grupo"
+              sx={{
+                width: "70%",
+              }}
             />
-          </Box>
-        );
-      case 2:
-        return (
-          <FormControl
-            sx={{
-              width: "70%",
-            }}
-          >
-            <InputLabel id="owner-select-label">Responsável</InputLabel>
-            <Select
-              labelId="owner-select-label"
-              id="owner-select"
-              value={owner}
-              label="Responsável"
-              onChange={handleOwnerChange}
+          );
+        case 1:
+          return (
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              <TransferList
+                users={availableUsers || []}
+                onSelectionChange={handleMembersChange}
+                initialSelected={selectedMembers}
+              />
+            </Box>
+          );
+        case 2:
+          return (
+            <FormControl
+              sx={{
+                width: "70%",
+              }}
             >
-              {selectedMembers.length === 0 ? (
-                <MenuItem disabled value="">
-                  Nenhum membro selecionado
-                </MenuItem>
-              ) : (
-                selectedMembers.map((member) => (
-                  <MenuItem key={member.userId} value={member.userId}>
-                    {capitalize(member.name)}
+              <InputLabel id="owner-select-label">Responsável</InputLabel>
+              <Select
+                labelId="owner-select-label"
+                id="owner-select"
+                value={owner}
+                label="Responsável"
+                onChange={handleOwnerChange}
+              >
+                {selectedMembers.length === 0 ? (
+                  <MenuItem disabled value="">
+                    Nenhum membro selecionado
                   </MenuItem>
-                ))
-              )}
-            </Select>
-          </FormControl>
-        );
-      case 3:
-        const finalValues = getValues();
-        return (
-          <Stack
-            sx={{
-              border: "1px solid gray",
-              borderRadius: 4,
-              paddingX: 10,
-              paddingY: 3,
-              boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
-              backgroundColor: "white",
-              position: "relative",
-              transform: "translateY(-4px)",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.15)",
-                transform: "translateY(-6px)",
-              },
-            }}
-          >
-            {RenderSaveStep("Nome do grupo", finalValues.name)}
-            {RenderSaveStep("Responsável", owner)}
-            {RenderSaveStep("Membros", selectedMembers)}
-          </Stack>
-        );
-    }
-  };
+                ) : (
+                  selectedMembers.map((member) => (
+                    <MenuItem key={member.userId} value={member.userId}>
+                      {capitalize(member.name)}
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+            </FormControl>
+          );
+        case 3:
+          const finalValues = getValues();
+          return (
+            <Stack
+              sx={{
+                border: "1px solid gray",
+                borderRadius: 4,
+                paddingX: 10,
+                paddingY: 3,
+                boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.1)",
+                backgroundColor: "white",
+                position: "relative",
+                transform: "translateY(-4px)",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.15)",
+                  transform: "translateY(-6px)",
+                },
+              }}
+            >
+              {RenderSaveStep("Nome do grupo", finalValues.name)}
+              {RenderSaveStep("Responsável", owner)}
+              {RenderSaveStep("Membros", selectedMembers)}
+            </Stack>
+          );
+        default:
+          return null;
+      }
+    },
+    [
+      control,
+      availableUsers,
+      selectedMembers,
+      owner,
+      handleOwnerChange,
+      handleMembersChange,
+      getValues,
+      RenderSaveStep,
+    ]
+  );
 
   const breadcrumbItems = [
-    { label: "Início", href: "/painel" },
-    { label: "Grupo Familiar", href: "/painel/grupo-familiar" },
+    { label: "Início", href: "/dashboard" },
+    { label: "Grupo Familiar", href: "/grupo-familiar" },
     { label: "Novo" },
   ];
 
@@ -368,7 +423,7 @@ export default function NovoGrupoFamiliar() {
             backgroundColor: "success.dark",
             "&:hover": { backgroundColor: "success.main", transition: "0.3s" },
           }}
-          onClick={() => router.replace("/painel/grupo-familiar")}
+          onClick={handleCancel}
         >
           <Tooltip title="Voltar">
             <ArrowBackIcon fontSize="medium" sx={{ color: "#fff" }} />
@@ -433,8 +488,9 @@ export default function NovoGrupoFamiliar() {
                   variant="contained"
                   color="success"
                   onClick={handleSave}
+                  disabled={isSubmitting}
                 >
-                  Salvar
+                  {isSubmitting ? "Salvando..." : "Salvar"}
                 </Button>
               ) : (
                 <Button

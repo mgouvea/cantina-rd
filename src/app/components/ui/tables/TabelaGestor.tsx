@@ -1,10 +1,10 @@
-'use client';
-import * as React from 'react';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import Box from '@mui/material/Box';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import EditIcon from '@mui/icons-material/Edit';
-import Text from '../text/Text';
+"use client";
+import * as React from "react";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import Box from "@mui/material/Box";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import EditIcon from "@mui/icons-material/Edit";
+import Text from "../text/Text";
 import {
   Chip,
   CircularProgress,
@@ -18,10 +18,10 @@ import {
   Stack,
   Theme,
   useTheme,
-} from '@mui/material';
-import { Filtros } from '../..';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+} from "@mui/material";
+import { Filtros } from "../..";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import {
   GridRowModesModel,
@@ -32,9 +32,9 @@ import {
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
-} from '@mui/x-data-grid';
-import GenericModal from '../../modal/GenericModal';
-import EmptyContent from '../emptyContent/EmptyContent';
+} from "@mui/x-data-grid";
+import GenericModal from "../../modal/GenericModal";
+import EmptyContent from "../emptyContent/EmptyContent";
 
 interface TabelaProps {
   data: any;
@@ -49,7 +49,7 @@ export default function TabelaGestor({ data, isLoading }: TabelaProps) {
   );
   const [openModal, setOpenModal] = useState(false);
 
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (
+  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
     event
   ) => {
@@ -59,11 +59,11 @@ export default function TabelaGestor({ data, isLoading }: TabelaProps) {
   };
 
   const handleEditClick = (id: GridRowId) => () => {
-    router.replace(`/painel/clientes/editar/${id}`);
+    router.replace(`/clientes/editar/${id}`);
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
-    console.log('Delete row with id: ', id);
+    console.log("Delete row with id: ", id);
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
@@ -77,30 +77,32 @@ export default function TabelaGestor({ data, isLoading }: TabelaProps) {
   };
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Nome', width: 300, editable: true },
+    { field: "name", headerName: "Nome", width: 300, editable: true },
     {
-      field: 'email',
-      headerName: 'Email',
-      type: 'string',
+      field: "email",
+      headerName: "Email",
+      type: "string",
       width: 300,
       editable: true,
     },
     {
-      field: 'actions',
-      type: 'actions',
-      headerName: '',
+      field: "actions",
+      type: "actions",
+      headerName: "",
       width: 100,
-      cellClassName: 'actions',
+      cellClassName: "actions",
       getActions: ({ id }) => {
         return [
           <GridActionsCellItem
-            icon={<EditIcon sx={{ color: '#666666' }} />}
+            key={id}
+            icon={<EditIcon sx={{ color: "#666666" }} />}
             label="Edit"
             className="textPrimary"
             onClick={handleEditClick(id)}
           />,
           <GridActionsCellItem
-            icon={<DeleteIcon sx={{ color: '#9B0B00' }} />}
+            key={id}
+            icon={<DeleteIcon sx={{ color: "#9B0B00" }} />}
             label="Delete"
             onClick={handleDeleteClick(id)}
             color="inherit"
@@ -118,13 +120,13 @@ export default function TabelaGestor({ data, isLoading }: TabelaProps) {
     <Box
       sx={{
         padding: 2,
-        height: 'fit-content',
-        width: '100%',
-        '& .actions': {
-          color: 'text.secondary',
+        height: "fit-content",
+        width: "100%",
+        "& .actions": {
+          color: "text.secondary",
         },
-        '& .textPrimary': {
-          color: 'text.primary',
+        "& .textPrimary": {
+          color: "text.primary",
         },
       }}
     >
@@ -133,7 +135,7 @@ export default function TabelaGestor({ data, isLoading }: TabelaProps) {
 
         <IconButton
           aria-label="add"
-          sx={{ color: 'success.main' }}
+          sx={{ color: "success.main" }}
           onClick={handleAddClient}
         >
           <AddCircleIcon fontSize="large" />
@@ -162,7 +164,7 @@ export default function TabelaGestor({ data, isLoading }: TabelaProps) {
                 slotProps={{
                   toolbar: { setRows, setRowModesModel },
                 }}
-                sx={{ borderRadius: '16px' }}
+                sx={{ borderRadius: "16px" }}
               />
             )
           }
@@ -193,7 +195,7 @@ const RenderAddGestor = () => {
     } = event;
     setPersonName(
       // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value
+      typeof value === "string" ? value.split(",") : value
     );
   };
 
@@ -209,16 +211,16 @@ const RenderAddGestor = () => {
   };
 
   const names = [
-    'Oliver Hansen',
-    'Van Henry',
-    'April Tucker',
-    'Ralph Hubbard',
-    'Omar Alexander',
-    'Carlos Abbott',
-    'Miriam Wagner',
-    'Bradley Wilkerson',
-    'Virginia Andrews',
-    'Kelly Snyder',
+    "Oliver Hansen",
+    "Van Henry",
+    "April Tucker",
+    "Ralph Hubbard",
+    "Omar Alexander",
+    "Carlos Abbott",
+    "Miriam Wagner",
+    "Bradley Wilkerson",
+    "Virginia Andrews",
+    "Kelly Snyder",
   ];
 
   function getStyles(
@@ -245,7 +247,7 @@ const RenderAddGestor = () => {
           onChange={handleChange}
           input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
           renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
               {selected.map((value) => (
                 <Chip key={value} label={value} />
               ))}

@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import ContentWrapper from '@/app/components/ui/wrapper/ContentWrapper';
-import Loading from '@/app/components/loading/Loading';
-import TabelaGestor from '@/app/components/ui/tables/TabelaGestor';
-import { useAdmins } from '@/hooks/queries';
+import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
+import Loading from "@/app/components/loading/Loading";
+import TabelaGestor from "@/app/components/ui/tables/TabelaGestor";
+import { useAdmins } from "@/hooks/queries";
 
 const breadcrumbItems = [
-  { label: 'Início', href: '/painel' },
-  { label: 'Gestores' },
+  { label: "Início", href: "/dashboard" },
+  { label: "Gestores" },
 ];
 
 export default function Gestor() {

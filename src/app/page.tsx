@@ -100,7 +100,7 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
       return;
     }
 
-    router.replace("/painel");
+    router.replace("/dashboard");
   };
 
   return (

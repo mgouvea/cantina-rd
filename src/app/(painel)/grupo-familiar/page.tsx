@@ -8,7 +8,7 @@ import Loading from "@/app/components/loading/Loading";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 
 const breadcrumbItems = [
-  { label: "Início", href: "/painel" },
+  { label: "Início", href: "/dashboard" },
   { label: "Grupo Familiar" },
 ];
 

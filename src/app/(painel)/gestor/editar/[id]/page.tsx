@@ -1,23 +1,23 @@
-'use client';
-import { Avatar, Box, Stack } from '@mui/material';
-import { useParams, useRouter } from 'next/navigation';
-import { styled } from '@mui/material/styles';
-import Paper from '@mui/material/Paper';
-import Grid from '@mui/material/Grid2';
-import Text from '@/app/components/ui/text/Text';
-import { Botao, EntradaTexto } from '@/app/components';
-import { useForm } from 'react-hook-form';
-import GenericBreadcrumbs from '@/app/components/breadcrumb/GenericBreadcrumb';
+"use client";
+import { Avatar, Box, Stack } from "@mui/material";
+import { useParams, useRouter } from "next/navigation";
+import { styled } from "@mui/material/styles";
+import Paper from "@mui/material/Paper";
+import Grid from "@mui/material/Grid2";
+import Text from "@/app/components/ui/text/Text";
+import { Botao, EntradaTexto } from "@/app/components";
+import { useForm } from "react-hook-form";
+import GenericBreadcrumbs from "@/app/components/breadcrumb/GenericBreadcrumb";
 
 const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: '#fff',
+  backgroundColor: "#fff",
   ...theme.typography.body2,
   padding: theme.spacing(3),
-  textAlign: 'start',
-  borderRadius: '12px',
+  textAlign: "start",
+  borderRadius: "12px",
   color: theme.palette.text.secondary,
-  ...theme.applyStyles('dark', {
-    backgroundColor: '#1A2027',
+  ...theme.applyStyles("dark", {
+    backgroundColor: "#1A2027",
   }),
 }));
 
@@ -28,29 +28,28 @@ export default function EditarGestor() {
 
   const clienteForm = useForm<any>({
     defaultValues: {
-      nomeCompleto: '',
-      email: '',
-      telefone: '',
-      grupoFamiliar: '',
+      nomeCompleto: "",
+      email: "",
+      telefone: "",
+      grupoFamiliar: "",
     },
   });
 
   const handleUpdateClients = async () => {
-    console.log('Atualizar cliente', clienteForm.getValues());
+    console.log("Atualizar cliente", clienteForm.getValues());
   };
 
   const breadcrumbItems = [
-    { label: 'Início', href: '/painel' },
-    { label: 'Cliente', href: '/painel/clientes' },
-    { label: 'Editar' },
+    { label: "Início", href: "/dashboard" },
+    { label: "Gestores", href: "/gestores" },
+    { label: "Editar" },
   ];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ display: "flex", flexDirection: "column" }}>
       <GenericBreadcrumbs items={breadcrumbItems} />
-
       <Text variant="h5" fontWeight="bold">
-        Editar cliente
+        Editar gestor
       </Text>
 
       <Box sx={{ flexGrow: 1, marginTop: 5 }}>
@@ -76,7 +75,7 @@ export default function EditarGestor() {
           <Grid size={8}>
             <Item>
               <Stack gap={2}>
-                <Text fontWeight="bold">Dados do cliente</Text>
+                <Text fontWeight="bold">Dados do gestor</Text>
                 <EntradaTexto
                   name="nomeCompleto"
                   control={clienteForm.control}
@@ -103,8 +102,8 @@ export default function EditarGestor() {
 
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
+                  display: "flex",
+                  justifyContent: "flex-end",
                   gap: 2,
                   marginTop: 3,
                 }}
@@ -112,8 +111,8 @@ export default function EditarGestor() {
                 <Botao
                   variant="contained"
                   color="error"
-                  onClick={() => router.replace('/painel/clientes')}
-                  sx={{ paddingX: 7, borderRadius: '8px' }}
+                  onClick={() => router.replace("/gestores")}
+                  sx={{ paddingX: 7, borderRadius: "8px" }}
                 >
                   Cancelar
                 </Botao>
@@ -121,7 +120,7 @@ export default function EditarGestor() {
                   variant="contained"
                   color="success"
                   onClick={handleUpdateClients}
-                  sx={{ paddingX: 10, borderRadius: '8px' }}
+                  sx={{ paddingX: 10, borderRadius: "8px" }}
                 >
                   Atualizar
                 </Botao>

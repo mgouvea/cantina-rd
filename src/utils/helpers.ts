@@ -46,8 +46,10 @@ interface FormDataValidation {
   formData: Record<string, string | number | boolean>;
 }
 
-export const validarInputsObrigatorios = ({ formData }: FormDataValidation): boolean => {
-  return Object.values(formData).every((value) => value !== '');
+export const validarInputsObrigatorios = ({
+  formData,
+}: FormDataValidation): boolean => {
+  return Object.values(formData).every((value) => value !== "");
 };
 
 export const gerarDataAtual = (
@@ -164,4 +166,24 @@ export function formatDate(date: Date | string | undefined): string {
 export function extrairNumero(string: string): number | null {
   const resultado = string?.match(/\d+/);
   return resultado ? parseInt(resultado[0], 10) : null;
+}
+
+export function a11yProps(index: number) {
+  return {
+    id: `full-width-tab-${index}`,
+    "aria-controls": `full-width-tabpanel-${index}`,
+  };
+}
+
+interface Category {
+  id: string;
+  name: string;
+  [key: string]: string | number | boolean | null | undefined;
+}
+
+export function getCategoryNameById(categoryId: string, categories: Category[]): string {
+  if (!categories || !categoryId) return "N/A";
+  
+  const category = categories.find((cat) => cat.id === categoryId);
+  return category ? category.name : "N/A";
 }
