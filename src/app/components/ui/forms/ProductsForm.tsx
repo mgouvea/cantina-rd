@@ -20,6 +20,7 @@ import { useAddProduct } from "@/hooks/mutations/useProducts.mutation";
 import { useSnackbar } from "../../snackbar/SnackbarProvider";
 import { useRouter } from "next/navigation";
 import { UploadPicture } from "../uploadFoto/UploadPicture";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Define partial type for form initialization
 type ProductFormValues = Omit<Products, "createdAt" | "updatedAt">;
@@ -34,6 +35,7 @@ const INITIAL_PROD_FORM_VALUES: ProductFormValues = {
 };
 
 export const ProductsForm = () => {
+  const queryClient = useQueryClient();
   const { data: categories } = useCategories();
   const { data: subcategories } = useSubCategories();
   const { mutateAsync: addProduct } = useAddProduct();
@@ -108,6 +110,7 @@ export const ProductsForm = () => {
       setSelectedSubcategory(null);
       setFilteredSubcategories([]);
       setFotoProduto(null);
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       router.push("/produtos");
     } catch (error) {
       showSnackbar({
@@ -126,6 +129,7 @@ export const ProductsForm = () => {
     resetProducts,
     router,
     showSnackbar,
+    queryClient,
   ]);
 
   const handleSetCategory = useCallback(

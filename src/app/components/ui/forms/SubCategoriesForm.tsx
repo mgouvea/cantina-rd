@@ -5,18 +5,27 @@ import { capitalize } from "@/utils";
 import { Categories, SubCategories } from "@/types/products";
 import { EntradaTexto } from "../entradaTexto/EntradaTexto";
 import { FormActions } from "./FormActions";
-import { MenuItem, Select, SelectChangeEvent, Stack, FormControl, InputLabel } from "@mui/material";
+import {
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
 import { useAddSubCategory } from "@/hooks/mutations";
 import { useCategories } from "@/hooks/queries";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "../../snackbar/SnackbarProvider";
+import { useQueryClient } from "@tanstack/react-query";
 
 const INITIAL_CATEGORY_FORM_VALUES = {
   name: "",
 };
 
 export const SubCategoriesForm = () => {
+  const queryClient = useQueryClient();
   const { showSnackbar } = useSnackbar();
   const router = useRouter();
 
@@ -75,6 +84,9 @@ export const SubCategoriesForm = () => {
         severity: "success",
       });
       resetSubCategories(INITIAL_CATEGORY_FORM_VALUES);
+
+      queryClient.invalidateQueries({ queryKey: ["subcategories"] });
+
       router.push("/categorias");
     } catch (error) {
       showSnackbar({
@@ -91,6 +103,7 @@ export const SubCategoriesForm = () => {
     router,
     selectedCategory,
     showSnackbar,
+    queryClient,
   ]);
 
   const handleClearForm = useCallback(() => {
@@ -117,7 +130,12 @@ export const SubCategoriesForm = () => {
         </Stack>
         <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
           <FormControl fullWidth variant="outlined">
-            <InputLabel id="category-select-label" sx={{ backgroundColor: 'white', px: 1 }}>Categoria pai</InputLabel>
+            <InputLabel
+              id="category-select-label"
+              sx={{ backgroundColor: "white", px: 1 }}
+            >
+              Categoria pai
+            </InputLabel>
             <Select
               labelId="category-select-label"
               id="category-select"

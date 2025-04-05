@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useSnackbar } from "../../snackbar/SnackbarProvider";
 import { FormActions } from "./FormActions";
 import { UploadPicture } from "../uploadFoto/UploadPicture";
+import { useQueryClient } from "@tanstack/react-query";
 
 const INITIAL_CATEGORY_FORM_VALUES: Categories = {
   name: "",
@@ -17,9 +18,9 @@ const INITIAL_CATEGORY_FORM_VALUES: Categories = {
 };
 
 export const CategoriesForm = () => {
+  const queryClient = useQueryClient();
   const { showSnackbar } = useSnackbar();
   const router = useRouter();
-
   const { mutateAsync: addCategory } = useAddCategory();
 
   const categoriesForm = useForm<Categories>({
@@ -64,6 +65,7 @@ export const CategoriesForm = () => {
       });
       resetCategories();
       setFotoCategory(null);
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
       router.push("/categorias");
     } catch (error) {
       showSnackbar({
@@ -80,6 +82,7 @@ export const CategoriesForm = () => {
     resetCategories,
     router,
     showSnackbar,
+    queryClient,
   ]);
 
   const handleClearForm = useCallback(() => {
