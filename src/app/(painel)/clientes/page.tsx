@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useUsers } from "@/hooks/queries";
 import Loading from "@/app/components/loading/Loading";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
+import { useQueryClient } from "@tanstack/react-query";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -13,6 +14,7 @@ const breadcrumbItems = [
 ];
 
 export default function Clientes() {
+  const queryClient = useQueryClient();
   const { data, isLoading } = useUsers();
   const { setUserContext } = useApp();
 
@@ -22,12 +24,22 @@ export default function Clientes() {
     }
   }, [data, isLoading, setUserContext]);
 
+  const handleDeleteUser = () => {
+    queryClient.invalidateQueries({ queryKey: ["users"] });
+  };
+
   const renderContent = () => {
     if (isLoading) {
       return <Loading />;
     }
 
-    return <TabelaCliente data={data} isLoading={isLoading} />;
+    return (
+      <TabelaCliente
+        data={data}
+        isLoading={isLoading}
+        onDeleteUser={handleDeleteUser}
+      />
+    );
   };
 
   return (

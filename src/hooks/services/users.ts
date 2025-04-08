@@ -5,8 +5,18 @@ export const PostAddUser = async (user: User) => {
   return (await http.post("users", user)).data;
 };
 
-export const UpdateUser = async (user: User) => {
-  return (await http.patch(`users/${user._id}`, user)).data;
+export const UpdateUser = async ({
+  user,
+  userId,
+}: {
+  user: User;
+  userId: string;
+}) => {
+  return (await http.patch(`users/${userId}`, user)).data;
+};
+
+export const DeleteUser = async (userId: string) => {
+  return (await http.delete(`users/${userId}`)).data;
 };
 
 export const UpdateUserGroupFamily = async ({

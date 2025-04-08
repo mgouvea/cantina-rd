@@ -183,7 +183,6 @@ export const ProductsForm = () => {
       updatedAt: isEditing && productToEdit ? new Date() : undefined,
     };
 
-    console.log("Product payload:", productPayload, isEditing, productId);
     try {
       if (isEditing) {
         await updateProduct({

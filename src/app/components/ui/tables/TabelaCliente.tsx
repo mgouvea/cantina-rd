@@ -10,7 +10,7 @@ import Text from "../text/Text";
 import { capitalize } from "@/utils";
 import { Avatar, CircularProgress, IconButton, Stack } from "@mui/material";
 import { Client } from "@/types/client";
-import { Filtros } from "../..";
+import { Filtros, useSnackbar } from "../..";
 import { groupFamily } from "@/types/groupFamily";
 import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
 import { useRouter } from "next/navigation";
@@ -21,16 +21,23 @@ import {
   GridColDef,
   GridActionsCellItem,
   GridEventListener,
-  GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
 } from "@mui/x-data-grid";
+import { useUserStore } from "@/contexts/store/users.store";
+import { User } from "@/types";
+import { useDeleteUser } from "@/hooks/mutations";
 interface TabelaProps {
   data: Client[];
   isLoading: boolean;
+  onDeleteUser: () => void;
 }
 
-export default function TabelaCliente({ data, isLoading }: TabelaProps) {
+export default function TabelaCliente({
+  data,
+  isLoading,
+  onDeleteUser,
+}: TabelaProps) {
   const router = useRouter();
   const [rows, setRows] = React.useState<Client[]>(data);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
@@ -38,6 +45,9 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
   );
 
   const { data: groupFamilies } = useGroupFamily();
+  const { mutateAsync: deleteUser } = useDeleteUser();
+  const { updateUserToEdit, updateIsEditing } = useUserStore();
+  const { showSnackbar } = useSnackbar();
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -48,12 +58,20 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
     }
   };
 
-  const handleEditClick = (id: GridRowId) => () => {
-    router.replace(`/clientes/editar/${id}`);
+  const handleEditClick = (row: GridRowModel) => () => {
+    updateUserToEdit(row as User);
+    updateIsEditing(true);
+    router.replace("/clientes/novo");
   };
 
-  const handleDeleteClick = (id: GridRowId) => () => {
-    console.log("Delete row with id: ", id);
+  const handleDeleteClick = (id: string) => async () => {
+    await deleteUser(id);
+    onDeleteUser();
+    showSnackbar({
+      message: "Cliente deletado com sucesso!",
+      severity: "success",
+      duration: 3000,
+    });
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
@@ -124,20 +142,20 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
       headerName: "",
       width: 100,
       cellClassName: "actions",
-      getActions: ({ id }) => {
+      getActions: (params) => {
         return [
           <GridActionsCellItem
-            key={id}
+            key={params.id}
             icon={<EditIcon sx={{ color: "#666666" }} />}
             label="Edit"
             className="textPrimary"
-            onClick={handleEditClick(id)}
+            onClick={handleEditClick(params.row)}
           />,
           <GridActionsCellItem
-            key={id}
+            key={params.id}
             icon={<DeleteIcon sx={{ color: "#9B0B00" }} />}
             label="Delete"
-            onClick={handleDeleteClick(id)}
+            onClick={handleDeleteClick(String(params.id))}
             color="inherit"
           />,
         ];

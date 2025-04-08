@@ -1,4 +1,5 @@
 import {
+  DeleteUser,
   PostAddAdmin,
   PostAddUser,
   UpdateUser,
@@ -15,6 +16,12 @@ export const useAddUser = () => {
 export const useUpdateUser = () => {
   return useMutation({
     mutationFn: UpdateUser,
+  });
+};
+
+export const useDeleteUser = () => {
+  return useMutation({
+    mutationFn: DeleteUser,
   });
 };
 

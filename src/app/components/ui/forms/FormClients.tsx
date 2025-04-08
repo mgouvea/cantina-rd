@@ -10,8 +10,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useApp } from "@/contexts";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "../../snackbar/SnackbarProvider";
-import { useAddAdmin, useAddUser } from "@/hooks/mutations";
+import { useAddAdmin, useAddUser, useUpdateUser } from "@/hooks/mutations";
 import { UploadPicture } from "../uploadFoto/UploadPicture";
+import { useUserStore } from "@/contexts/store/users.store";
 
 const optionsSwitch = [
   {
@@ -36,12 +37,19 @@ const INITIAL_FORM_VALUES = {
 };
 
 export const FormClients = () => {
+  const { userToEdit, isEditing, updateUserToEdit, updateIsEditing } =
+    useUserStore();
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const userForm = useForm<User>({ 
-    defaultValues: INITIAL_FORM_VALUES,
-    mode: "onChange", // Enable validation on change for immediate feedback
+  const EDITING_FORM_VALUES = {
+    name: userToEdit?.name || "",
+    telephone: userToEdit?.telephone || "",
+  };
+
+  const userForm = useForm<User>({
+    defaultValues: isEditing ? EDITING_FORM_VALUES : INITIAL_FORM_VALUES,
+    mode: "onChange",
   });
   const { control, getValues, reset } = userForm;
   const { showSnackbar } = useSnackbar();
@@ -49,6 +57,7 @@ export const FormClients = () => {
   const { userContext } = useApp();
 
   const { mutateAsync: addUser } = useAddUser();
+  const { mutateAsync: updateUser } = useUpdateUser();
   const { mutateAsync: addAdmin } = useAddAdmin();
 
   const [checked, setChecked] = useState(false);
@@ -89,7 +98,9 @@ export const FormClients = () => {
   const handleClearForm = useCallback(() => {
     reset(INITIAL_FORM_VALUES);
     setFotoPerfil(null);
-  }, [reset]);
+    updateIsEditing(false);
+    updateUserToEdit(null);
+  }, [reset, updateIsEditing, updateUserToEdit]);
 
   const handleRemoveFoto = useCallback(() => {
     setFotoPerfil(null);
@@ -101,7 +112,7 @@ export const FormClients = () => {
       (user) => user.telephone === watchedTelefone
     );
 
-    if (userExists) {
+    if (userExists && !isEditing) {
       showSnackbar({
         message: "Cliente já cadastrado!",
         severity: "warning",
@@ -112,25 +123,38 @@ export const FormClients = () => {
 
     try {
       const { name, email, ...userValues } = getValues();
-      const newUser = await addUser({
+      const isEditingFotoPerfil = userToEdit?.imageBase64 || "";
+
+      const userPayload: User = {
         ...userValues,
         name,
         isAdmin: checked,
-        imageBase64: fotoPerfil?.base64 || "",
-      });
+        imageBase64: isEditing ? isEditingFotoPerfil : fotoPerfil?.base64 || "",
+      };
 
-      if (checked) {
-        const adminPayload: UserAdmin = {
-          idUser: newUser._id,
-          name: name,
-          email: email!,
-          password: "udv@realeza",
-        };
-        await addAdmin(adminPayload);
+      if (isEditing && userToEdit) {
+        await updateUser({
+          user: userPayload,
+          userId: userToEdit._id!,
+        });
+      } else {
+        const newUser = await addUser(userPayload);
+
+        if (checked) {
+          const adminPayload: UserAdmin = {
+            idUser: newUser._id,
+            name: name,
+            email: email!,
+            password: "udv@realeza",
+          };
+          await addAdmin(adminPayload);
+        }
       }
 
       router.replace("/clientes");
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      updateIsEditing(false);
+      updateUserToEdit(null);
       reset(INITIAL_FORM_VALUES);
       setFotoPerfil(null);
       showSnackbar({
@@ -146,17 +170,22 @@ export const FormClients = () => {
       setIsSubmitting(false);
     }
   }, [
-    addAdmin, 
-    addUser, 
-    checked, 
-    fotoPerfil, 
-    getValues, 
-    queryClient, 
-    reset, 
-    router, 
-    showSnackbar, 
-    userContext, 
-    watchedTelefone
+    checked,
+    fotoPerfil,
+    queryClient,
+    router,
+    userContext,
+    watchedTelefone,
+    userToEdit,
+    isEditing,
+    addAdmin,
+    addUser,
+    getValues,
+    reset,
+    showSnackbar,
+    updateIsEditing,
+    updateUserToEdit,
+    updateUser,
   ]);
 
   return (
@@ -185,6 +214,7 @@ export const FormClients = () => {
             hovering={hovering}
             avatarTitle="Perfil"
             setFotoUpload={setFotoPerfil}
+            fotoUpdate={userToEdit?.imageBase64}
           />
         </Box>
         <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
@@ -209,25 +239,32 @@ export const FormClients = () => {
             />
           </Stack>
         )}
-        <Text color="textSecondary" fontWeight="bold">
-          Perfil do usuário
-        </Text>
-        <SwitchSelector
-          onChange={handleSetChecked}
-          options={optionsSwitch}
-          initialSelectedIndex={optionsSwitch.findIndex(
-            ({ value }) => value === (checked ? 1 : 0) // Compare with 1 for true (Admin) and 0 for false (Client)
-          )}
-          backgroundColor={"#666666"}
-          fontColor={"#f5f6fa"}
-          fontSize={17}
-        />
+
+        {!isEditing && (
+          <>
+            <Text color="textSecondary" fontWeight="bold">
+              Perfil do usuário
+            </Text>
+
+            <SwitchSelector
+              onChange={handleSetChecked}
+              options={optionsSwitch}
+              initialSelectedIndex={optionsSwitch.findIndex(
+                ({ value }) => value === (checked ? 1 : 0) // Compare with 1 for true (Admin) and 0 for false (Client)
+              )}
+              backgroundColor={"#666666"}
+              fontColor={"#f5f6fa"}
+              fontSize={17}
+            />
+          </>
+        )}
       </Stack>
       <FormActions
         onClear={handleClearForm}
         onSave={handleSaveClient}
         disabled={!isFormValid}
         isSubmitting={isSubmitting}
+        isEditing={isEditing}
       />
     </Stack>
   );
