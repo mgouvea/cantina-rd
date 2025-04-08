@@ -10,12 +10,17 @@ import {
   DataGrid,
   GridEventListener,
   GridActionsCellItem,
-  GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
   GridColDef,
 } from "@mui/x-data-grid";
-import { CircularProgress, IconButton, Stack } from "@mui/material";
+import {
+  CircularProgress,
+  IconButton,
+  Stack,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import { useRouter } from "next/navigation";
 import { capitalize } from "@/utils";
 import { Categories, Products, SubCategories } from "@/types/products";
@@ -23,12 +28,15 @@ import EmptyContent from "../emptyContent/EmptyContent";
 import Image from "next/image";
 import { Filtros } from "../../filtros/Filtros";
 import Text from "../text/Text";
+import { useProductStore } from "@/contexts/store/products.store";
+import { useDeleteProduct } from "@/hooks/mutations/useProducts.mutation";
 
 interface TabelaProps {
   data: Products[];
   isLoading: boolean;
   categories: Categories[];
   subcategories: SubCategories[];
+  onDeleteProduct: () => void;
 }
 
 export default function TabelaProduto({
@@ -36,12 +44,20 @@ export default function TabelaProduto({
   isLoading,
   categories,
   subcategories,
+  onDeleteProduct,
 }: TabelaProps) {
   const router = useRouter();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
+  const { mutateAsync: deleteProduct } = useDeleteProduct();
+
   const [rows, setRows] = React.useState(data);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+  const { updateProductToEdit, updateIsEditing } = useProductStore();
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -52,12 +68,15 @@ export default function TabelaProduto({
     }
   };
 
-  const handleEditClick = (id: GridRowId) => () => {
-    router.replace(`/produtos/editar/${id}`);
+  const handleEditClick = (row: Products) => () => {
+    updateProductToEdit(row);
+    updateIsEditing(true);
+    router.replace("/produtos/novo");
   };
 
-  const handleDeleteClick = (id: GridRowId) => () => {
-    console.log("Delete row with id: ", id);
+  const handleDeleteClick = (id: string) => async () => {
+    await deleteProduct({ productId: id });
+    onDeleteProduct();
   };
 
   const processRowUpdate = (newRow: GridRowModel<Products>) => {
@@ -75,118 +94,157 @@ export default function TabelaProduto({
     setRowModesModel(newRowModesModel);
   };
 
-  const columns: GridColDef<Products>[] = [
-    {
-      field: "imageBase64",
-      headerName: "Imagem",
-      width: 100,
-      editable: false,
-      sortable: false,
-      align: "center",
-      renderCell: (params) => (
-        <Image
-          src={`data:image/${params.row.imageBase64}`}
-          alt={params.row.name}
-          width={55}
-          height={55}
-        />
-      ),
-    },
-    {
-      field: "name",
-      headerName: "Nome",
-      width: 200,
-      editable: true,
-      renderCell: (params) => (
-        <div style={rowStyle}>{capitalize(params.value)}</div>
-      ),
-    },
-    {
-      field: "description",
-      headerName: "Descrição",
-      width: 300,
-      editable: true,
-      renderCell: (params) => (
-        <div style={rowStyle}>{capitalize(params.value)}</div>
-      ),
-    },
-    {
-      field: "price",
-      headerName: "Preço unitário",
-      width: 150,
-      editable: true,
-      renderCell: (params) => (
-        <div style={rowStyle}>R$ {params.value ?? 0}</div>
-      ),
-    },
-    {
-      field: "categoryId",
-      headerName: "Categoria",
-      width: 200,
-      editable: true,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => {
-        const categoryId = params.row.categoryId;
-        const category =
-          typeof categoryId === "string"
-            ? categories?.find((cat) => cat._id === categoryId)
-            : categoryId;
+  // Responsive column configuration
+  const getColumnConfig = () => {
+    const baseColumns: GridColDef<Products>[] = [
+      {
+        field: "imageBase64",
+        headerName: "Imagem",
+        width: isMobile ? 60 : 100,
+        editable: false,
+        sortable: false,
+        align: "center",
+        renderCell: (params) => (
+          <Image
+            src={`data:image/${params.row.imageBase64}`}
+            alt={params.row.name}
+            width={isMobile ? 40 : 55}
+            height={isMobile ? 40 : 55}
+            style={{ objectFit: "contain" }}
+          />
+        ),
+      },
+      {
+        field: "name",
+        headerName: "Nome",
+        width: isMobile ? 120 : isTablet ? 150 : 200,
+        editable: true,
+        renderCell: (params) => (
+          <div style={rowStyle}>{capitalize(params.value)}</div>
+        ),
+      },
+      {
+        field: "price",
+        headerName: "Preço",
+        width: isMobile ? 80 : 120,
+        editable: true,
+        renderCell: (params) => (
+          <div style={rowStyle}>R$ {params.value ?? 0}</div>
+        ),
+      },
+      {
+        field: "actions",
+        type: "actions",
+        headerName: "",
+        width: 80,
+        cellClassName: "actions",
+        getActions: (params) => {
+          return [
+            <GridActionsCellItem
+              key={`edit-${params.id}`}
+              icon={<EditIcon sx={{ color: "#666666" }} />}
+              label="Edit"
+              className="textPrimary"
+              onClick={handleEditClick(params.row)}
+            />,
+            <GridActionsCellItem
+              key={`delete-${params.id}`}
+              icon={<DeleteIcon sx={{ color: "#9B0B00" }} />}
+              label="Delete"
+              onClick={handleDeleteClick(params.id.toString())}
+              color="inherit"
+            />,
+          ];
+        },
+      },
+    ];
 
-        return (
-          <div style={{ paddingTop: "8px" }}>
-            {capitalize(category?.name || "")}
-          </div>
-        );
-      },
-    },
-    {
-      field: "subcategoryId",
-      headerName: "Subcategoria",
-      width: 200,
-      editable: true,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => {
-        const subcategoryId = params.row.subcategoryId;
-        const subcategory =
-          typeof subcategoryId === "string"
-            ? subcategories?.find((subcat) => subcat._id === subcategoryId)
-            : subcategoryId;
+    // Add columns for non-mobile views
+    if (!isMobile) {
+      baseColumns.splice(2, 0, {
+        field: "tag",
+        headerName: "Tag",
+        width: isTablet ? 70 : 100,
+        editable: true,
+        renderCell: (params) => (
+          <div style={rowStyle}>{capitalize(params.value)}</div>
+        ),
+      });
 
-        return (
-          <div style={{ paddingTop: "8px" }}>
-            {capitalize(subcategory?.name || "")}
-          </div>
+      // Add category and subcategory for tablet and desktop
+      if (!isTablet || theme.breakpoints.up("md")) {
+        baseColumns.splice(
+          3,
+          0,
+          {
+            field: "categoryId",
+            headerName: "Categoria",
+            width: isTablet ? 100 : 120,
+            editable: true,
+            headerAlign: "center",
+            align: "center",
+            renderCell: (params) => {
+              const categoryId = params.row.categoryId;
+              const category =
+                typeof categoryId === "string"
+                  ? categories?.find((cat) => cat._id === categoryId)
+                  : categoryId;
+
+              return (
+                <div style={{ ...rowStyle, textAlign: "center" }}>
+                  {capitalize(category?.name || "")}
+                </div>
+              );
+            },
+          },
+          {
+            field: "subcategoryId",
+            headerName: "Subcategoria",
+            width: isTablet ? 100 : 120,
+            editable: true,
+            headerAlign: "center",
+            align: "center",
+            renderCell: (params) => {
+              const subcategoryId = params.row.subcategoryId;
+              const subcategory =
+                typeof subcategoryId === "string"
+                  ? subcategories?.find(
+                      (subcat) => subcat._id === subcategoryId
+                    )
+                  : subcategoryId;
+
+              return (
+                <div style={{ ...rowStyle, textAlign: "center" }}>
+                  {capitalize(subcategory?.name || "")}
+                </div>
+              );
+            },
+          }
         );
-      },
-    },
-    {
-      field: "actions",
-      type: "actions",
-      headerName: "",
-      width: 100,
-      cellClassName: "actions",
-      getActions: ({ id }) => {
-        return [
-          <GridActionsCellItem
-            key={id}
-            icon={<EditIcon sx={{ color: "#666666" }} />}
-            label="Edit"
-            className="textPrimary"
-            onClick={handleEditClick(id)}
-          />,
-          <GridActionsCellItem
-            key={id}
-            icon={<DeleteIcon sx={{ color: "#9B0B00" }} />}
-            label="Delete"
-            onClick={handleDeleteClick(id)}
-            color="inherit"
-          />,
-        ];
-      },
-    },
-  ];
+      }
+
+      // Add description for desktop only
+      if (!isTablet) {
+        baseColumns.splice(3, 0, {
+          field: "description",
+          headerName: "Descrição",
+          width: 300,
+          editable: true,
+          renderCell: (params) => (
+            <div style={rowStyle}>{capitalize(params.value)}</div>
+          ),
+        });
+      }
+    }
+
+    return baseColumns;
+  };
+
+  const columns = React.useMemo(
+    () => getColumnConfig(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isMobile, isTablet, categories, subcategories]
+  );
 
   const handleAddProduto = () => {
     router.replace("/produtos/novo");
@@ -195,8 +253,9 @@ export default function TabelaProduto({
   return (
     <Box
       sx={{
-        padding: 2,
+        padding: isMobile ? 1 : 2,
         height: "fit-content",
+        width: "100%",
         "& .actions": {
           color: "text.secondary",
         },
@@ -205,15 +264,20 @@ export default function TabelaProduto({
         },
       }}
     >
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Produtos Cadastrados</Text>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={isMobile ? 1 : 2}
+      >
+        <Text variant={isMobile ? "h6" : "h5"}>Produtos Cadastrados</Text>
 
         <IconButton
           aria-label="add"
           sx={{ color: "success.main" }}
           onClick={handleAddProduto}
         >
-          <AddCircleIcon fontSize="large" />
+          <AddCircleIcon fontSize={isMobile ? "medium" : "large"} />
         </IconButton>
       </Stack>
 
@@ -239,9 +303,24 @@ export default function TabelaProduto({
                 slotProps={{
                   toolbar: { setRows, setRowModesModel },
                 }}
-                sx={{ borderRadius: "16px" }}
+                sx={{
+                  borderRadius: "16px",
+                  "& .MuiDataGrid-cell": {
+                    padding: isMobile ? "4px" : "8px 16px",
+                  },
+                  "& .MuiDataGrid-columnHeaders": {
+                    backgroundColor: "#f5f5f5",
+                    borderBottom: "1px solid #ccc",
+                  },
+                  "& .MuiDataGrid-virtualScroller": {
+                    overflowX: "auto",
+                  },
+                }}
+                density={isMobile ? "compact" : "standard"}
                 getRowHeight={() => "auto"}
-                getEstimatedRowHeight={() => 100}
+                getEstimatedRowHeight={() => (isMobile ? 70 : 100)}
+                disableColumnMenu
+                autoHeight
               />
             )
           }

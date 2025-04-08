@@ -3,6 +3,7 @@
 import { Categories, fotoUploadProps, Products, SubCategories } from "@/types";
 import {
   Box,
+  Chip,
   FormControl,
   InputLabel,
   MenuItem,
@@ -14,13 +15,17 @@ import { EntradaTexto } from "../entradaTexto/EntradaTexto";
 import { capitalize } from "@/utils";
 import { FormActions } from "./FormActions";
 import { useForm } from "react-hook-form";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useCategories, useSubCategories } from "@/hooks/queries";
-import { useAddProduct } from "@/hooks/mutations/useProducts.mutation";
+import {
+  useAddProduct,
+  useUpdateProduct,
+} from "@/hooks/mutations/useProducts.mutation";
 import { useSnackbar } from "../../snackbar/SnackbarProvider";
 import { useRouter } from "next/navigation";
 import { UploadPicture } from "../uploadFoto/UploadPicture";
 import { useQueryClient } from "@tanstack/react-query";
+import { useProductStore } from "@/contexts/store/products.store";
 
 // Define partial type for form initialization
 type ProductFormValues = Omit<Products, "createdAt" | "updatedAt">;
@@ -29,6 +34,7 @@ const INITIAL_PROD_FORM_VALUES: ProductFormValues = {
   name: "",
   description: "",
   price: "",
+  tag: "",
   categoryId: "",
   subcategoryId: "",
   imageBase64: "",
@@ -36,11 +42,19 @@ const INITIAL_PROD_FORM_VALUES: ProductFormValues = {
 
 export const ProductsForm = () => {
   const queryClient = useQueryClient();
+
   const { data: categories } = useCategories();
   const { data: subcategories } = useSubCategories();
+
   const { mutateAsync: addProduct } = useAddProduct();
+  const { mutateAsync: updateProduct } = useUpdateProduct();
+
   const { showSnackbar } = useSnackbar();
   const router = useRouter();
+  const { isEditing, updateIsEditing, productToEdit, updateProductToEdit } =
+    useProductStore();
+  // Ensure productId is a string, not an object
+  const productId = productToEdit && productToEdit._id ? productToEdit._id : "";
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filteredSubcategories, setFilteredSubcategories] = useState<
@@ -54,8 +68,53 @@ export const ProductsForm = () => {
   const [hovering, setHovering] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Initialize form values when in edit mode
+  useEffect(() => {
+    if (isEditing && productToEdit) {
+      // Set category
+      if (typeof productToEdit.categoryId === "string") {
+        setSelectedCategory(productToEdit.categoryId);
+      }
+
+      // Set subcategory
+      if (typeof productToEdit.subcategoryId === "string") {
+        setSelectedSubcategory(productToEdit.subcategoryId);
+
+        // Filter subcategories based on selected category
+        if (subcategories && typeof productToEdit.categoryId === "string") {
+          const filtered = subcategories.filter(
+            (subcat: SubCategories) =>
+              subcat.categoryId === productToEdit.categoryId
+          );
+          setFilteredSubcategories(filtered);
+        }
+      }
+
+      // Set image if available
+      if (productToEdit.imageBase64 && !fotoProduto) {
+        // Create a placeholder fotoUpload object for the existing image
+        setFotoProduto({
+          base64: productToEdit.imageBase64,
+          name: "existing-image.jpg",
+          size: 0,
+          type: "image/jpeg",
+        });
+      }
+    }
+  }, [isEditing, productToEdit, subcategories, fotoProduto]);
+
+  const EDIT_PROD_FORM_VALUES: ProductFormValues = {
+    name: productToEdit?.name || "",
+    description: productToEdit?.description || "",
+    price: productToEdit?.price || "",
+    tag: productToEdit?.tag || "",
+    categoryId: productToEdit?.categoryId || "",
+    subcategoryId: productToEdit?.subcategoryId || "",
+    imageBase64: productToEdit?.imageBase64 || "",
+  };
+
   const productsForm = useForm<ProductFormValues>({
-    defaultValues: INITIAL_PROD_FORM_VALUES,
+    defaultValues: isEditing ? EDIT_PROD_FORM_VALUES : INITIAL_PROD_FORM_VALUES,
     mode: "onChange", // Enable validation on change for immediate feedback
   });
 
@@ -69,22 +128,46 @@ export const ProductsForm = () => {
   // Watch the required fields for validation
   const productName = watch("name");
   const productPrice = watch("price");
+  const productTag = watch("tag");
 
   // Memoize the form validation to prevent unnecessary re-renders
   const isFormValid = useMemo(() => {
+    // In edit mode, we might already have an image in productToEdit
+    const hasImage = isEditing
+      ? fotoProduto !== null ||
+        (productToEdit?.imageBase64 && productToEdit.imageBase64 !== "")
+      : fotoProduto !== null;
+
+    // In edit mode, we might already have category and subcategory from productToEdit
+    const hasCategory = isEditing
+      ? selectedCategory !== null ||
+        (typeof productToEdit?.categoryId === "string" &&
+          productToEdit.categoryId !== "")
+      : selectedCategory !== null;
+
+    const hasSubcategory = isEditing
+      ? selectedSubcategory !== null ||
+        (typeof productToEdit?.subcategoryId === "string" &&
+          productToEdit.subcategoryId !== "")
+      : selectedSubcategory !== null;
+
     return (
       productName !== "" &&
       productPrice !== "" &&
-      fotoProduto !== null &&
-      selectedCategory !== null &&
-      selectedSubcategory !== null
+      productTag !== "" &&
+      hasImage &&
+      hasCategory &&
+      hasSubcategory
     );
   }, [
     productName,
     productPrice,
+    productTag,
     fotoProduto,
     selectedCategory,
     selectedSubcategory,
+    isEditing,
+    productToEdit,
   ]);
 
   const handleSaveProducts = useCallback(async () => {
@@ -95,41 +178,63 @@ export const ProductsForm = () => {
       subcategoryId: selectedSubcategory!,
       price: Number(getProductValues().price),
       imageBase64: fotoProduto?.base64 || "",
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt:
+        isEditing && productToEdit ? productToEdit.createdAt : new Date(),
+      updatedAt: isEditing && productToEdit ? new Date() : undefined,
     };
 
+    console.log("Product payload:", productPayload, isEditing, productId);
     try {
-      await addProduct(productPayload);
+      if (isEditing) {
+        await updateProduct({
+          productId: productId,
+          product: productPayload,
+        });
+      } else {
+        await addProduct(productPayload);
+      }
       showSnackbar({
-        message: "Produto cadastrado com sucesso!",
+        message: isEditing
+          ? "Produto atualizado com sucesso!"
+          : "Produto cadastrado com sucesso!",
         severity: "success",
       });
+
       resetProducts();
       setSelectedCategory(null);
       setSelectedSubcategory(null);
       setFilteredSubcategories([]);
       setFotoProduto(null);
+      updateIsEditing(false);
+      updateProductToEdit(null);
+
       queryClient.invalidateQueries({ queryKey: ["products"] });
       router.push("/produtos");
     } catch (error) {
       showSnackbar({
-        message: `Erro ao salvar o produto - ${error}`,
+        message: `Erro ao ${isEditing ? "atualizar" : "cadastrar"} o produto`,
         severity: "error",
       });
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   }, [
-    addProduct,
-    getProductValues,
+    isEditing,
     selectedCategory,
     selectedSubcategory,
     fotoProduto,
-    resetProducts,
     router,
-    showSnackbar,
     queryClient,
+    productToEdit,
+    productId,
+    addProduct,
+    updateProduct,
+    getProductValues,
+    resetProducts,
+    showSnackbar,
+    updateIsEditing,
+    updateProductToEdit,
   ]);
 
   const handleSetCategory = useCallback(
@@ -138,7 +243,7 @@ export const ProductsForm = () => {
       setSelectedCategory(categoryId);
 
       const filtered = subcategories?.filter(
-        (subcategory: SubCategories) => subcategory.categoryId === categoryId
+        (subcat: SubCategories) => subcat.categoryId === categoryId
       );
       setFilteredSubcategories(filtered);
       setSelectedSubcategory(null); // Reset subcategory selection when category changes
@@ -160,7 +265,9 @@ export const ProductsForm = () => {
     setSelectedSubcategory(null);
     setFilteredSubcategories([]);
     setFotoProduto(null);
-  }, [resetProducts]);
+    updateIsEditing(false);
+    updateProductToEdit(null);
+  }, [resetProducts, updateIsEditing, updateProductToEdit]);
 
   const handleHover = useCallback((value: boolean) => {
     setHovering(value);
@@ -202,6 +309,7 @@ export const ProductsForm = () => {
             hovering={hovering}
             avatarTitle="Produto"
             setFotoUpload={setFotoProduto}
+            fotoUpdate={productToEdit?.imageBase64 || ""}
           />
         </Box>
         <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
@@ -281,6 +389,23 @@ export const ProductsForm = () => {
           </FormControl>
         </Stack>
 
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          alignItems="center"
+          gap={2}
+        >
+          <Box sx={{ width: "80%" }}>
+            <EntradaTexto
+              name="tag"
+              control={productsControl}
+              label="Tag do produto"
+            />
+          </Box>
+          {getProductValues().tag && (
+            <Chip label={`${getProductValues().tag || ""}`} color="success" />
+          )}
+        </Stack>
+
         <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
           <EntradaTexto
             name="description"
@@ -296,6 +421,7 @@ export const ProductsForm = () => {
         onSave={handleSaveProducts}
         disabled={!isFormValid}
         isSubmitting={isSubmitting}
+        isEditing={isEditing}
       />
     </Stack>
   );

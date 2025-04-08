@@ -12,6 +12,7 @@ const UploadPictureComponent = ({
   hovering,
   avatarTitle,
   setFotoUpload,
+  fotoUpdate,
 }: {
   fotoUpload: fotoUploadProps | null;
   onRemove: () => void;
@@ -19,50 +20,54 @@ const UploadPictureComponent = ({
   hovering: boolean;
   avatarTitle: string;
   setFotoUpload: React.Dispatch<React.SetStateAction<fotoUploadProps | null>>;
+  fotoUpdate?: string;
 }) => {
-  const handleUploadFile = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleUploadFile = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    // Use a web worker for image processing if available
-    if (typeof window !== 'undefined' && window.Worker) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result as string;
-        // Remove the data:image prefix from base64 string if it exists
-        const base64Clean = base64.includes("base64,")
-          ? base64
-          : base64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+      // Use a web worker for image processing if available
+      if (typeof window !== "undefined" && window.Worker) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result as string;
+          // Remove the data:image prefix from base64 string if it exists
+          const base64Clean = base64.includes("base64,")
+            ? base64
+            : base64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
 
-        setFotoUpload({
-          base64: base64Clean,
-          name: file.name,
-          size: file.size,
-          type: file.type,
-        });
-      };
-      
-      // Use smaller chunk size for better UI responsiveness
-      reader.readAsDataURL(file);
-    } else {
-      // Fallback for browsers without Worker support
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result as string;
-        const base64Clean = base64.includes("base64,")
-          ? base64
-          : base64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+          setFotoUpload({
+            base64: base64Clean,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+          });
+        };
 
-        setFotoUpload({
-          base64: base64Clean,
-          name: file.name,
-          size: file.size,
-          type: file.type,
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  }, [setFotoUpload]);
+        // Use smaller chunk size for better UI responsiveness
+        reader.readAsDataURL(file);
+      } else {
+        // Fallback for browsers without Worker support
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result as string;
+          const base64Clean = base64.includes("base64,")
+            ? base64
+            : base64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+
+          setFotoUpload({
+            base64: base64Clean,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    [setFotoUpload]
+  );
 
   return (
     <>
@@ -78,7 +83,7 @@ const UploadPictureComponent = ({
             height: 106,
             cursor: fotoUpload ? "pointer" : "default",
           }}
-          src={fotoUpload?.base64}
+          src={fotoUpdate || fotoUpload?.base64}
         >
           {fotoUpload ? "" : avatarTitle}
         </Avatar>
@@ -132,7 +137,7 @@ const UploadImageButtonComponent = ({
 
 // Add display names to the memo components
 const UploadImageButton = memo(UploadImageButtonComponent);
-UploadImageButton.displayName = 'UploadImageButton';
+UploadImageButton.displayName = "UploadImageButton";
 
 export const UploadPicture = memo(UploadPictureComponent);
-UploadPicture.displayName = 'UploadPicture';
+UploadPicture.displayName = "UploadPicture";

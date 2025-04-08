@@ -85,8 +85,7 @@ export const SubCategoriesForm = () => {
       });
       resetSubCategories(INITIAL_CATEGORY_FORM_VALUES);
 
-      queryClient.invalidateQueries({ queryKey: ["subcategories"] });
-
+      queryClient.invalidateQueries({ queryKey: ["subCategories"] });
       router.push("/categorias");
     } catch (error) {
       showSnackbar({

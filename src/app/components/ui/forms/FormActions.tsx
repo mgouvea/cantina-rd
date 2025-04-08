@@ -6,6 +6,7 @@ interface FormActionsProps {
   onSave: () => void;
   disabled?: boolean;
   isSubmitting: boolean;
+  isEditing?: boolean;
 }
 
 export const FormActions = ({
@@ -13,6 +14,7 @@ export const FormActions = ({
   onSave,
   disabled,
   isSubmitting,
+  isEditing,
 }: FormActionsProps) => (
   <Box
     sx={{
@@ -40,7 +42,13 @@ export const FormActions = ({
       disabled={disabled || isSubmitting}
       sx={{ paddingX: 10, borderRadius: "8px" }}
     >
-      {isSubmitting ? "Cadastrando..." : "Cadastrar"}
+      {isSubmitting && !isEditing
+        ? "Cadastrando..."
+        : isSubmitting && isEditing
+        ? "Atualizando..."
+        : !isSubmitting && isEditing
+        ? "Atualizar"
+        : "Cadastrar"}
     </Botao>
   </Box>
 );

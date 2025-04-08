@@ -5,13 +5,14 @@ import Loading from "@/app/components/loading/Loading";
 import TabelaCategorias from "@/app/components/ui/tables/TabelaCategorias";
 import { useCategories } from "@/hooks/queries";
 import { Box, Stack, Tabs, Tab, useTheme } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import ListOutlinedIcon from "@mui/icons-material/ListOutlined";
 import { a11yProps } from "@/utils";
 import { CustomTabPanel } from "@/app/components";
 import TabelaSubcategorias from "@/app/components/ui/tables/TabelaSubcategoria";
 import { useSubCategories } from "@/hooks/queries";
+import { useCategoryStore } from "@/contexts/store/categories.store";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -20,10 +21,15 @@ const breadcrumbItems = [
 
 export default function CategoriasPage() {
   const theme = useTheme();
-  const { data, isLoading } = useCategories();
+  const { data: categories, isLoading } = useCategories();
   const { data: subCategories, isLoading: subCategoriesLoading } =
     useSubCategories();
   const [value, setValue] = useState(0);
+  const { update } = useCategoryStore();
+
+  useEffect(() => {
+    update(categories);
+  }, [categories, update]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -80,7 +86,7 @@ export default function CategoriasPage() {
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0} dir={theme.direction}>
-          <TabelaCategorias data={data} isLoading={isLoading} />
+          <TabelaCategorias data={categories} isLoading={isLoading} />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1} dir={theme.direction}>
           <TabelaSubcategorias

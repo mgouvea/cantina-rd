@@ -1,3 +1,4 @@
+import { Categories } from "@/types";
 import { format, parseISO, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -175,15 +176,12 @@ export function a11yProps(index: number) {
   };
 }
 
-interface Category {
-  id: string;
-  name: string;
-  [key: string]: string | number | boolean | null | undefined;
-}
-
-export function getCategoryNameById(categoryId: string, categories: Category[]): string {
+export function getCategoryNameById(
+  categoryId: string,
+  categories: Categories[]
+): string {
   if (!categories || !categoryId) return "N/A";
-  
-  const category = categories.find((cat) => cat.id === categoryId);
+
+  const category = categories.find((cat) => cat._id === categoryId);
   return category ? category.name : "N/A";
 }

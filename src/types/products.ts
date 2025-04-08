@@ -7,11 +7,12 @@ export type Products = {
   name: string;
   description: string;
   price: number | string;
+  tag: string;
   categoryId: string | Categories;
   subcategoryId: string | SubCategories;
   imageBase64: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export type Categories = {

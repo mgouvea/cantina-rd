@@ -11,7 +11,6 @@ import { capitalize, getCategoryNameById } from "@/utils";
 import { CircularProgress, IconButton, Stack } from "@mui/material";
 import { Filtros } from "../..";
 import { useRouter } from "next/navigation";
-import { useCategories } from "@/hooks/queries";
 
 import {
   GridRowModesModel,
@@ -24,6 +23,7 @@ import {
   GridEventListener,
 } from "@mui/x-data-grid";
 import { Categories } from "@/types";
+import { useCategoryStore } from "@/contexts/store/categories.store";
 
 interface TabelaProps {
   data: Categories[];
@@ -37,8 +37,8 @@ export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
     {}
   );
 
-  // Fetch categories to use for displaying category names
-  const { data: categories } = useCategories();
+  const { category } = useCategoryStore();
+  console.log("category", category);
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -85,8 +85,9 @@ export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
       width: 500,
       editable: true,
       renderCell: (params) => {
-        // Use the helper function to get the category name
-        return capitalize(getCategoryNameById(params.value, categories || []));
+        return capitalize(
+          getCategoryNameById(params.value, category as unknown as Categories[])
+        );
       },
     },
     {
