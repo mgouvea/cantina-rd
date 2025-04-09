@@ -13,30 +13,48 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
-import { useAddSubCategory } from "@/hooks/mutations";
+import { useAddSubCategory, useUpdateSubCategory } from "@/hooks/mutations";
 import { useCategories } from "@/hooks/queries";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "../../snackbar/SnackbarProvider";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSubCategoryStore } from "@/contexts/store/subcategories.store";
 
-const INITIAL_CATEGORY_FORM_VALUES = {
+const INITIAL_SUBCATEGORY_FORM_VALUES = {
   name: "",
 };
 
 export const SubCategoriesForm = () => {
+  const {
+    isEditing,
+    subCategoryToEdit,
+    updateIsEditing,
+    updateSubCategoryToEdit,
+  } = useSubCategoryStore();
   const queryClient = useQueryClient();
-  const { showSnackbar } = useSnackbar();
   const router = useRouter();
 
+  const { showSnackbar } = useSnackbar();
+
   const { mutateAsync: addSubCategory } = useAddSubCategory();
+  const { mutateAsync: updateSubCategory } = useUpdateSubCategory();
+
   const { data: categories } = useCategories();
 
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    isEditing && subCategoryToEdit ? subCategoryToEdit.categoryId : null
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const EDITING_SUBCATEGORY_FORM_VALUES = {
+    name: subCategoryToEdit?.name || "",
+  };
+
   const subCategoriesForm = useForm<SubCategories>({
-    defaultValues: INITIAL_CATEGORY_FORM_VALUES,
+    defaultValues: isEditing
+      ? EDITING_SUBCATEGORY_FORM_VALUES
+      : INITIAL_SUBCATEGORY_FORM_VALUES,
     mode: "onChange", // Enable validation on change for immediate feedback
   });
   const {
@@ -54,11 +72,11 @@ export const SubCategoriesForm = () => {
       const lanchesCategory = categories.find(
         (category: Categories) => category.name.toLowerCase() === "lanches"
       );
-      if (lanchesCategory) {
+      if (lanchesCategory && !isEditing) {
         setSelectedCategory(lanchesCategory._id);
       }
     }
-  }, [categories]);
+  }, [categories, isEditing]);
 
   // Memoize the form validation to prevent unnecessary re-renders
   const isFormValid = useMemo(() => {
@@ -72,42 +90,63 @@ export const SubCategoriesForm = () => {
 
   const handleSaveSubCategory = useCallback(async () => {
     setIsSubmitting(true);
+    const subCategoryId = subCategoryToEdit?._id || "";
     const subCategoryPayload: SubCategories = {
       ...getSubCategoriesValues(),
       categoryId: selectedCategory!,
     };
 
     try {
-      await addSubCategory(subCategoryPayload);
+      if (isEditing) {
+        await updateSubCategory({
+          subCategoriesId: subCategoryId,
+          subCategories: subCategoryPayload,
+        });
+      } else {
+        await addSubCategory(subCategoryPayload);
+      }
       showSnackbar({
-        message: "Subcategoria cadastrada com sucesso!",
+        message: `Subcategoria ${
+          isEditing ? "editada" : "cadastrada"
+        } com sucesso!`,
         severity: "success",
       });
-      resetSubCategories(INITIAL_CATEGORY_FORM_VALUES);
+      resetSubCategories(INITIAL_SUBCATEGORY_FORM_VALUES);
+      setSelectedCategory(null);
+      updateIsEditing(false);
+      updateSubCategoryToEdit(null);
 
       queryClient.invalidateQueries({ queryKey: ["subCategories"] });
-      router.push("/categorias");
+      router.push("/categorias?tab=1");
     } catch (error) {
       showSnackbar({
-        message: `Erro ao salvar a subcategoria - ${error}`,
+        message: `Erro ao ${isEditing ? "editar" : "cadastrar"} a subcategoria`,
         severity: "error",
       });
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   }, [
+    router,
+    selectedCategory,
+    queryClient,
+    isEditing,
+    subCategoryToEdit,
+    updateSubCategory,
+    showSnackbar,
     addSubCategory,
     getSubCategoriesValues,
     resetSubCategories,
-    router,
-    selectedCategory,
-    showSnackbar,
-    queryClient,
+    updateIsEditing,
+    updateSubCategoryToEdit,
   ]);
 
   const handleClearForm = useCallback(() => {
-    resetSubCategories(INITIAL_CATEGORY_FORM_VALUES);
-  }, [resetSubCategories]);
+    resetSubCategories(INITIAL_SUBCATEGORY_FORM_VALUES);
+    updateIsEditing(false);
+    updateSubCategoryToEdit(null);
+  }, [resetSubCategories, updateIsEditing, updateSubCategoryToEdit]);
 
   return (
     <Stack gap={2}>
@@ -172,6 +211,7 @@ export const SubCategoriesForm = () => {
         onSave={handleSaveSubCategory}
         disabled={!isFormValid}
         isSubmitting={isSubmitting}
+        isEditing={isEditing}
       />
     </Stack>
   );

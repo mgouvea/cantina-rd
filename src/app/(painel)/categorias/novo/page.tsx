@@ -50,7 +50,15 @@ export default function NovoCategoria() {
             backgroundColor: "success.dark",
             "&:hover": { backgroundColor: "success.main", transition: "0.3s" },
           }}
-          onClick={() => router.replace("/categorias")}
+          onClick={() => {
+            if (value === 1) {
+              // Se estiver na tab de subcategorias, voltar para a página de categorias com a tab de subcategorias selecionada
+              router.replace("/categorias?tab=1");
+            } else {
+              // Se estiver na tab de categorias, voltar para a página de categorias com a tab de categorias selecionada
+              router.replace("/categorias");
+            }
+          }}
         >
           <Tooltip title="Voltar">
             <ArrowBackIcon fontSize="medium" sx={{ color: "#fff" }} />

@@ -13,6 +13,8 @@ import { CustomTabPanel } from "@/app/components";
 import TabelaSubcategorias from "@/app/components/ui/tables/TabelaSubcategoria";
 import { useSubCategories } from "@/hooks/queries";
 import { useCategoryStore } from "@/contexts/store/categories.store";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -20,11 +22,18 @@ const breadcrumbItems = [
 ];
 
 export default function CategoriasPage() {
+  const queryClient = useQueryClient();
   const theme = useTheme();
   const { data: categories, isLoading } = useCategories();
   const { data: subCategories, isLoading: subCategoriesLoading } =
     useSubCategories();
-  const [value, setValue] = useState(0);
+  const searchParams = useSearchParams();
+
+  // Get tab from URL query parameter or default to 0
+  const initialTab = searchParams.get("tab")
+    ? parseInt(searchParams.get("tab")!)
+    : 0;
+  const [value, setValue] = useState(initialTab);
   const { update } = useCategoryStore();
 
   useEffect(() => {
@@ -33,6 +42,11 @@ export default function CategoriasPage() {
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
+  };
+
+  const handleDeleteCategory = () => {
+    queryClient.invalidateQueries({ queryKey: ["categories"] });
+    queryClient.invalidateQueries({ queryKey: ["subCategories"] });
   };
 
   const renderContent = () => {
@@ -86,12 +100,17 @@ export default function CategoriasPage() {
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0} dir={theme.direction}>
-          <TabelaCategorias data={categories} isLoading={isLoading} />
+          <TabelaCategorias
+            data={categories}
+            isLoading={isLoading}
+            onDeleteCategory={handleDeleteCategory}
+          />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1} dir={theme.direction}>
           <TabelaSubcategorias
             data={subCategories}
             isLoading={subCategoriesLoading}
+            onDeleteSubCategory={handleDeleteCategory}
           />
         </CustomTabPanel>
       </Stack>

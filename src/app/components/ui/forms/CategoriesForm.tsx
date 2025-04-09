@@ -4,13 +4,14 @@ import React, { useState, useMemo, useCallback } from "react";
 import { Box, Stack } from "@mui/material";
 import { Categories, fotoUploadProps } from "@/types/products";
 import { EntradaTexto } from "../entradaTexto/EntradaTexto";
-import { useAddCategory } from "@/hooks/mutations";
+import { useAddCategory, useUpdateCategory } from "@/hooks/mutations";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "../../snackbar/SnackbarProvider";
 import { FormActions } from "./FormActions";
 import { UploadPicture } from "../uploadFoto/UploadPicture";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCategoryStore } from "@/contexts/store/categories.store";
 
 const INITIAL_CATEGORY_FORM_VALUES: Categories = {
   name: "",
@@ -18,13 +19,24 @@ const INITIAL_CATEGORY_FORM_VALUES: Categories = {
 };
 
 export const CategoriesForm = () => {
+  const { updateCategoryToEdit, updateIsEditing, isEditing, categoryToEdit } =
+    useCategoryStore();
   const queryClient = useQueryClient();
-  const { showSnackbar } = useSnackbar();
   const router = useRouter();
+
   const { mutateAsync: addCategory } = useAddCategory();
+  const { mutateAsync: updateCategory } = useUpdateCategory();
+  const { showSnackbar } = useSnackbar();
+
+  const EDITING_CATEGORY_FORM_VALUES: Categories = {
+    name: categoryToEdit?.name || "",
+    imageBase64: categoryToEdit?.imageBase64 || "",
+  };
 
   const categoriesForm = useForm<Categories>({
-    defaultValues: INITIAL_CATEGORY_FORM_VALUES,
+    defaultValues: isEditing
+      ? EDITING_CATEGORY_FORM_VALUES
+      : INITIAL_CATEGORY_FORM_VALUES,
     mode: "onChange", // Enable validation on change for immediate feedback
   });
 
@@ -35,32 +47,50 @@ export const CategoriesForm = () => {
     watch,
   } = categoriesForm;
 
-  // Watch the name field for changes
   const categoryName = watch("name");
 
   const [fotoCategory, setFotoCategory] = useState<fotoUploadProps | null>(
-    null
+    categoryToEdit?.imageBase64
+      ? { base64: categoryToEdit.imageBase64, name: "", size: 0, type: "" }
+      : null
   );
   const [hovering, setHovering] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Memoize the form validation to prevent unnecessary re-renders
   const isFormValid = useMemo(() => {
-    return categoryName !== "" && fotoCategory !== null;
-  }, [categoryName, fotoCategory]);
+    // Quando estiver editando, considere válido se tiver nome e (fotoCategory OU imageBase64 existente)
+    return (
+      categoryName !== "" &&
+      (fotoCategory !== null || (isEditing && categoryToEdit?.imageBase64))
+    );
+  }, [categoryName, fotoCategory, isEditing, categoryToEdit?.imageBase64]);
 
-  // Use useCallback to memoize functions
   const handleSaveCategory = useCallback(async () => {
     setIsSubmitting(true);
+
+    const categoryId = categoryToEdit?._id || "";
+    const imageBase64ToEditing = fotoCategory?.base64 || "";
+
     const categoryPayload: Categories = {
       ...getCategoriesValues(),
-      imageBase64: fotoCategory?.base64 || "",
+      imageBase64: isEditing
+        ? imageBase64ToEditing
+        : fotoCategory?.base64 || "",
     };
 
     try {
-      await addCategory(categoryPayload);
+      if (isEditing) {
+        await updateCategory({
+          categoriesId: categoryId,
+          categories: categoryPayload,
+        });
+      } else {
+        await addCategory(categoryPayload);
+      }
       showSnackbar({
-        message: "Categoria cadastrada com sucesso!",
+        message: `Categoria ${
+          isEditing ? "editada" : "cadastrada"
+        } com sucesso!`,
         severity: "success",
       });
       resetCategories();
@@ -69,26 +99,32 @@ export const CategoriesForm = () => {
       router.push("/categorias");
     } catch (error) {
       showSnackbar({
-        message: `Erro ao salvar a categoria - ${error}`,
+        message: `Erro ao ${isEditing ? "editar" : "cadastrar"} a categoria`,
         severity: "error",
       });
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   }, [
-    addCategory,
-    getCategoriesValues,
-    fotoCategory,
-    resetCategories,
-    router,
-    showSnackbar,
+    categoryToEdit?._id,
+    fotoCategory?.base64,
+    isEditing,
     queryClient,
+    router,
+    getCategoriesValues,
+    showSnackbar,
+    resetCategories,
+    updateCategory,
+    addCategory,
   ]);
 
   const handleClearForm = useCallback(() => {
     resetCategories(INITIAL_CATEGORY_FORM_VALUES);
     setFotoCategory(null);
-  }, [resetCategories]);
+    updateIsEditing(false);
+    updateCategoryToEdit(null);
+  }, [resetCategories, updateIsEditing, updateCategoryToEdit]);
 
   const handleHover = useCallback((value: boolean) => {
     setHovering(value);
@@ -120,6 +156,7 @@ export const CategoriesForm = () => {
             hovering={hovering}
             avatarTitle="Categoria"
             setFotoUpload={setFotoCategory}
+            fotoUpdate={categoryToEdit?.imageBase64}
           />
         </Box>
         <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
@@ -136,6 +173,7 @@ export const CategoriesForm = () => {
         onSave={handleSaveCategory}
         disabled={!isFormValid}
         isSubmitting={isSubmitting}
+        isEditing={isEditing}
       />
     </Stack>
   );

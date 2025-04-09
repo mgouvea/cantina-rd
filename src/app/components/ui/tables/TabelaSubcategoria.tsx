@@ -9,7 +9,7 @@ import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
 import { capitalize, getCategoryNameById } from "@/utils";
 import { CircularProgress, IconButton, Stack } from "@mui/material";
-import { Filtros } from "../..";
+import { Filtros, useSnackbar } from "../..";
 import { useRouter } from "next/navigation";
 
 import {
@@ -17,28 +17,38 @@ import {
   DataGrid,
   GridColDef,
   GridActionsCellItem,
-  GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
   GridEventListener,
 } from "@mui/x-data-grid";
-import { Categories } from "@/types";
+import { Categories, SubCategories } from "@/types";
 import { useCategoryStore } from "@/contexts/store/categories.store";
+import { useSubCategoryStore } from "@/contexts/store/subcategories.store";
+import { useDeleteSubCategory } from "@/hooks/mutations";
 
 interface TabelaProps {
   data: Categories[];
   isLoading: boolean;
+  onDeleteSubCategory: () => void;
 }
 
-export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
+export default function TabelaSubcategorias({
+  data,
+  isLoading,
+  onDeleteSubCategory,
+}: TabelaProps) {
   const router = useRouter();
   const [rows, setRows] = React.useState<Categories[]>(data);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
 
+  const { mutateAsync: deleteSubCategory } = useDeleteSubCategory();
+
   const { category } = useCategoryStore();
-  console.log("category", category);
+  const { updateIsEditing, updateSubCategoryToEdit } = useSubCategoryStore();
+
+  const { showSnackbar } = useSnackbar();
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -49,12 +59,29 @@ export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
     }
   };
 
-  const handleEditClick = (id: GridRowId) => () => {
-    router.replace(`/subcategorias/editar/${id}`);
+  const handleEditClick = (row: SubCategories, tab: number) => () => {
+    updateIsEditing(true);
+    updateSubCategoryToEdit(row);
+    router.replace(`/categorias/novo?tab=${tab}`);
   };
 
-  const handleDeleteClick = (id: GridRowId) => () => {
-    console.log("Delete row with id: ", id);
+  const handleDeleteClick = (id: string) => async () => {
+    try {
+      await deleteSubCategory(id);
+      onDeleteSubCategory();
+      showSnackbar({
+        message: "Subcategoria deletada com sucesso!",
+        severity: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      showSnackbar({
+        message: "Erro ao deletar subcategoria",
+        severity: "error",
+        duration: 3000,
+      });
+      console.error(error);
+    }
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
@@ -96,20 +123,20 @@ export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
       headerName: "",
       width: 100,
       cellClassName: "actions",
-      getActions: ({ id }) => {
+      getActions: ({ id, row }) => {
         return [
           <GridActionsCellItem
             key={id}
             icon={<EditIcon sx={{ color: "#666666" }} />}
             label="Edit"
             className="textPrimary"
-            onClick={handleEditClick(id)}
+            onClick={handleEditClick(row, 1)}
           />,
           <GridActionsCellItem
             key={id}
             icon={<DeleteIcon sx={{ color: "#9B0B00" }} />}
             label="Delete"
-            onClick={handleDeleteClick(id)}
+            onClick={handleDeleteClick(String(id))}
             color="inherit"
           />,
         ];
@@ -118,6 +145,8 @@ export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
   ];
 
   const handleAddCategorias = (tab: number) => {
+    updateIsEditing(false);
+    updateSubCategoryToEdit(null);
     router.replace(`/categorias/novo?tab=${tab}`);
   };
 
