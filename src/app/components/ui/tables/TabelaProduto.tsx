@@ -30,6 +30,7 @@ import { Filtros } from "../../filtros/Filtros";
 import Text from "../text/Text";
 import { useProductStore } from "@/contexts/store/products.store";
 import { useDeleteProduct } from "@/hooks/mutations/useProducts.mutation";
+import { useSnackbar } from "../../snackbar/SnackbarProvider";
 
 interface TabelaProps {
   data: Products[];
@@ -53,6 +54,8 @@ export default function TabelaProduto({
 
   const { mutateAsync: deleteProduct } = useDeleteProduct();
 
+  const { showSnackbar } = useSnackbar();
+
   const [rows, setRows] = React.useState(data);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
@@ -75,8 +78,22 @@ export default function TabelaProduto({
   };
 
   const handleDeleteClick = (id: string) => async () => {
-    await deleteProduct({ productId: id });
-    onDeleteProduct();
+    try {
+      await deleteProduct({ productId: id });
+      onDeleteProduct();
+      showSnackbar({
+        message: "Produto deletado com sucesso!",
+        severity: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      showSnackbar({
+        message: "Erro ao deletar o produto",
+        severity: "error",
+        duration: 3000,
+      });
+      console.error(error);
+    }
   };
 
   const processRowUpdate = (newRow: GridRowModel<Products>) => {
@@ -247,6 +264,8 @@ export default function TabelaProduto({
   );
 
   const handleAddProduto = () => {
+    updateIsEditing(false);
+    updateProductToEdit(null);
     router.replace("/produtos/novo");
   };
 

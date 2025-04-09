@@ -65,13 +65,22 @@ export default function TabelaCliente({
   };
 
   const handleDeleteClick = (id: string) => async () => {
-    await deleteUser(id);
-    onDeleteUser();
-    showSnackbar({
-      message: "Cliente deletado com sucesso!",
-      severity: "success",
-      duration: 3000,
-    });
+    try {
+      await deleteUser(id);
+      onDeleteUser();
+      showSnackbar({
+        message: "Cliente deletado com sucesso!",
+        severity: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      showSnackbar({
+        message: "Erro ao deletar o cliente",
+        severity: "error",
+        duration: 3000,
+      });
+      console.error(error);
+    }
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
@@ -164,6 +173,8 @@ export default function TabelaCliente({
   ];
 
   const handleAddClient = () => {
+    updateIsEditing(false);
+    updateUserToEdit(null);
     router.replace("/clientes/novo");
   };
 

@@ -193,9 +193,7 @@ export const ProductsForm = () => {
         await addProduct(productPayload);
       }
       showSnackbar({
-        message: isEditing
-          ? "Produto atualizado com sucesso!"
-          : "Produto cadastrado com sucesso!",
+        message: `Produto ${isEditing ? "editado" : "cadastrado"} com sucesso!`,
         severity: "success",
       });
 

@@ -158,14 +158,17 @@ export const FormClients = () => {
       reset(INITIAL_FORM_VALUES);
       setFotoPerfil(null);
       showSnackbar({
-        message: "Cliente cadastrado com sucesso!",
+        message: `Cliente ${isEditing ? "editado" : "cadastrado"} com sucesso!`,
         severity: "success",
       });
     } catch (error) {
       showSnackbar({
-        message: `Ocorreu um erro ao cadastrar o cliente! - ${error}`,
+        message: `Ocorreu um erro ao ${
+          isEditing ? "editar" : "cadastrar"
+        } o cliente! `,
         severity: "error",
       });
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
