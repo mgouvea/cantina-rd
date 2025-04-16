@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Box from "@mui/material/Box";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
@@ -17,170 +16,66 @@ import {
   TextField,
 } from "@mui/material";
 import { Client } from "@/types/client";
-import { Filtros, useSnackbar } from "../..";
-import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
-import { useRouter } from "next/navigation";
+import { Filtros } from "../..";
 
 import {
-  GridRowModesModel,
   DataGrid,
   GridColDef,
   GridActionsCellItem,
-  GridEventListener,
   GridRowModel,
-  GridRowEditStopReasons,
+  GridEventListener,
+  GridRowModesModel,
 } from "@mui/x-data-grid";
-import { useUserStore } from "@/contexts/store/users.store";
 import { GroupFamily, User } from "@/types";
-import {
-  useAddAdmin,
-  useDeleteAdmin,
-  useDeleteUser,
-  useRemoveMemberFromGroupFamily,
-  useUpdateUser,
-} from "@/hooks/mutations";
 import GenericModal from "../../modal/GenericModal";
-import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 interface TabelaProps {
   data: Client[];
   isLoading: boolean;
-  onDeleteUser: () => void;
+  groupFamilies: GroupFamily[];
+  enableOrDisableAdmin: boolean;
+  openModal: boolean;
+  userClicked: User | null;
+  email: string;
+  rowModesModel: GridRowModesModel;
+  handleEditClick: (row: GridRowModel) => () => void;
+  handleDeleteClick: (userId: string) => () => void;
+  handleRowEditStop: GridEventListener<"rowEditStop">;
+  handleRowModesModelChange: (newRowModesModel: GridRowModesModel) => void;
+  handleOpenModal: (row: User) => void;
+  handleEnableOrDisableAdmin: () => void;
+  setEmail: (email: string) => void;
+  processRowUpdate: (newRow: GridRowModel) => GridRowModel;
+  updateIsEditing: (isEditing: boolean) => void;
+  updateUserToEdit: (user: User | null) => void;
+  setRowModesModel: (rowModesModel: GridRowModesModel) => void;
+  setRows: (rows: Client[]) => void;
+  setOpenModal: (open: boolean) => void;
 }
 
 export default function TabelaCliente({
   data,
   isLoading,
-  onDeleteUser,
+  groupFamilies,
+  enableOrDisableAdmin,
+  openModal,
+  email,
+  rowModesModel,
+  handleEditClick,
+  handleDeleteClick,
+  handleRowEditStop,
+  handleRowModesModelChange,
+  handleOpenModal,
+  handleEnableOrDisableAdmin,
+  setEmail,
+  updateIsEditing,
+  updateUserToEdit,
+  setRowModesModel,
+  processRowUpdate,
+  setRows,
+  setOpenModal,
 }: TabelaProps) {
-  const queryClient = useQueryClient();
   const router = useRouter();
-  const [rows, setRows] = useState<Client[]>(data);
-  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-
-  const [openModal, setOpenModal] = useState(false);
-  const [enableOrDisableAdmin, setEnableOrDisableAdmin] = useState(false);
-  const [userClicked, setUserClicked] = useState<User | null>(null);
-  const [email, setEmail] = useState("");
-
-  const { data: groupFamilies } = useGroupFamily();
-
-  const { mutateAsync: deleteUser } = useDeleteUser();
-  const { mutateAsync: updateUser } = useUpdateUser();
-  const { mutateAsync: addAdmin } = useAddAdmin();
-  const { mutateAsync: deleteAdmin } = useDeleteAdmin();
-  const { mutateAsync: removeMemberFromGroupFamily } =
-    useRemoveMemberFromGroupFamily();
-
-  const { updateUserToEdit, updateIsEditing } = useUserStore();
-  const { showSnackbar } = useSnackbar();
-
-  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
-
-  const handleEditClick = (row: GridRowModel) => () => {
-    updateUserToEdit(row as User);
-    updateIsEditing(true);
-    router.replace("/clientes/novo");
-  };
-
-  const handleDeleteClick = (userId: string) => async () => {
-    try {
-      await deleteUser(userId);
-      await removeMemberFromGroupFamily({ id: userId });
-      onDeleteUser();
-      showSnackbar({
-        message: "Cliente deletado com sucesso!",
-        severity: "success",
-        duration: 3000,
-      });
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-    } catch (error) {
-      showSnackbar({
-        message: "Erro ao deletar o cliente",
-        severity: "error",
-        duration: 3000,
-      });
-      console.error(error);
-    }
-  };
-
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(
-      rows.map((row: Client) =>
-        row._id === newRow._id ? updatedRow : row
-      ) as Client[]
-    );
-    return updatedRow;
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
-  };
-
-  const handleOpenModal = (row: User) => {
-    if (row.isAdmin) {
-      setEnableOrDisableAdmin(false);
-    } else {
-      setEnableOrDisableAdmin(true);
-    }
-    setOpenModal(true);
-    setUserClicked(row);
-  };
-
-  const handleEnableOrDisableAdmin = async () => {
-    const payloadAdmin = {
-      idUser: userClicked?._id ?? "",
-      name: userClicked?.name ?? "",
-      email: email,
-      password: "udv@realeza",
-      createdAt: new Date(),
-    };
-
-    try {
-      if (enableOrDisableAdmin) {
-        await addAdmin(payloadAdmin);
-        await updateUser({
-          user: { isAdmin: true },
-          userId: userClicked?._id ?? "",
-        });
-      } else {
-        await deleteAdmin(userClicked?._id ?? "");
-        await updateUser({
-          user: { isAdmin: false },
-          userId: userClicked?._id ?? "",
-        });
-      }
-
-      setEmail("");
-      setOpenModal(false);
-      showSnackbar({
-        message:
-          "Administrador " +
-          (enableOrDisableAdmin ? "habilitado" : "desabilitado") +
-          " com sucesso!",
-        severity: "success",
-        duration: 3000,
-      });
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-    } catch (error) {
-      showSnackbar({
-        message:
-          "Erro ao " +
-          (enableOrDisableAdmin ? "habilitar" : "desabilitar") +
-          " o administrador",
-        severity: "error",
-        duration: 3000,
-      });
-      console.error(error);
-    }
-  };
 
   const columns: GridColDef[] = [
     {
