@@ -6,66 +6,53 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import {
-  GridRowModesModel,
   DataGrid,
   GridColDef,
   GridActionsCellItem,
-  GridEventListener,
-  GridRowId,
   GridRowModel,
-  GridRowEditStopReasons,
+  GridRowModesModel,
+  GridEventListener,
 } from "@mui/x-data-grid";
 import { CircularProgress, IconButton, Stack } from "@mui/material";
 import { Filtros } from "../..";
-import { useRouter } from "next/navigation";
 import Text from "../text/Text";
 import EmptyContent from "../emptyContent/EmptyContent";
+import { GroupFamily, SelectedMember } from "@/types/groupFamily";
+import { capitalize, findUserById } from "@/utils";
+import { User } from "@/types";
+import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
+import GroupRemoveOutlinedIcon from "@mui/icons-material/GroupRemoveOutlined";
+import { useRouter } from "next/navigation";
 
 interface TabelaProps {
-  data: any;
+  data: GroupFamily[];
+  dataUser: User[] | null;
   isLoading: boolean;
+  getOwnerName: (ownerId: string, row: GroupFamily) => string;
+  handleEditClick: (row: GridRowModel) => () => void;
+  handleDeleteClick: (id: string) => () => void;
+  processRowUpdate: (newRow: GridRowModel) => GroupFamily;
+  handleRowModesModelChange: (newRowModesModel: GridRowModesModel) => void;
+  handleRowEditStop: GridEventListener<"rowEditStop">;
+  rows?: GroupFamily[];
+  rowModesModel: GridRowModesModel;
+  setRows: (rows: GroupFamily[]) => void;
 }
 
-export default function TabelaGrupoFamiliar({ data, isLoading }: TabelaProps) {
+export default function TabelaGrupoFamiliar({
+  data,
+  dataUser,
+  isLoading,
+  getOwnerName,
+  handleEditClick,
+  handleDeleteClick,
+  processRowUpdate,
+  handleRowModesModelChange,
+  handleRowEditStop,
+  rowModesModel,
+  setRows,
+}: TabelaProps) {
   const router = useRouter();
-  const [rows, setRows] = React.useState(data);
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {}
-  );
-
-  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
-
-  const handleEditClick = (id: GridRowId) => () => {
-    router.replace(`/clientes/editar/${id}`);
-  };
-
-  const handleDeleteClick = (id: GridRowId) => () => {
-    console.log("Delete row with id: ", id);
-  };
-
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row: any) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
-  };
-
-  const getOwnerName = (ownerId: string, row: any) => {
-    const ownerMember = row.members.find(
-      (member: any) => member.userId === ownerId
-    );
-    return ownerMember ? ownerMember.name : ownerId;
-  };
 
   const columns: GridColDef[] = [
     { field: "name", headerName: "Nome", width: 300, editable: true },
@@ -83,8 +70,10 @@ export default function TabelaGrupoFamiliar({ data, isLoading }: TabelaProps) {
       width: 250,
       renderCell: (params) => (
         <Stack spacing={1} sx={{ py: 1, width: "100%" }}>
-          {params.value.map((member: any, index: number) => (
-            <div key={index}>{member.name}</div>
+          {params.value.map((member: SelectedMember, index: number) => (
+            <div key={index}>
+              {capitalize(findUserById(member.userId, dataUser)?.name)}
+            </div>
           ))}
         </Stack>
       ),
@@ -93,22 +82,42 @@ export default function TabelaGrupoFamiliar({ data, isLoading }: TabelaProps) {
       field: "actions",
       type: "actions",
       headerName: "",
-      width: 100,
+      width: 250,
       cellClassName: "actions",
-      getActions: ({ id }) => {
+      getActions: ({ id, row }) => {
         return [
           <GridActionsCellItem
             key={id}
-            icon={<EditIcon sx={{ color: "#666666" }} />}
+            icon={<EditIcon sx={{ color: "#666666", fontSize: 25 }} />}
             label="Edit"
             className="textPrimary"
-            onClick={handleEditClick(id)}
+            onClick={handleEditClick(row)}
           />,
           <GridActionsCellItem
             key={id}
-            icon={<DeleteIcon sx={{ color: "#9B0B00" }} />}
+            icon={
+              <GroupAddOutlinedIcon sx={{ color: "#1ab86d", fontSize: 25 }} />
+            }
+            label="Add Member"
+            // onClick={handleAddMember(String(id))}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key={id}
+            icon={
+              <GroupRemoveOutlinedIcon
+                sx={{ color: "#9B0B00", fontSize: 25 }}
+              />
+            }
+            label="Remove Member"
+            onClick={handleDeleteClick(String(id))}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key={id}
+            icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 25 }} />}
             label="Delete"
-            onClick={handleDeleteClick(id)}
+            onClick={handleDeleteClick(String(id))}
             color="inherit"
           />,
         ];
@@ -168,7 +177,7 @@ export default function TabelaGrupoFamiliar({ data, isLoading }: TabelaProps) {
                 getRowHeight={() => "auto"}
                 getEstimatedRowHeight={() => 100}
                 slotProps={{
-                  toolbar: { setRows, setRowModesModel },
+                  toolbar: { setRows, rowModesModel },
                 }}
                 sx={{ borderRadius: "16px" }}
               />

@@ -7,7 +7,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
-import { Avatar, CircularProgress, IconButton, Stack } from "@mui/material";
+import { CircularProgress, IconButton, Stack } from "@mui/material";
 import { capitalize } from "@/utils";
 import { Categories } from "@/types";
 import { Filtros, useSnackbar } from "../..";
@@ -24,6 +24,7 @@ import {
   GridRowEditStopReasons,
   GridEventListener,
 } from "@mui/x-data-grid";
+import Image from "next/image";
 interface TabelaProps {
   data: Categories[];
   isLoading: boolean;
@@ -95,13 +96,10 @@ export default function TabelaCategorias({
       sortable: false,
       align: "center",
       renderCell: (params) => (
-        <Avatar
+        <Image
           alt="Foto do Perfil"
-          sx={{
-            width: 50,
-            height: 50,
-            cursor: "default",
-          }}
+          width={50}
+          height={50}
           src={`data:image/${params.row.imageBase64}`}
         />
       ),
@@ -123,14 +121,14 @@ export default function TabelaCategorias({
         return [
           <GridActionsCellItem
             key={params.id}
-            icon={<EditIcon sx={{ color: "#666666" }} />}
+            icon={<EditIcon sx={{ color: "#666666", fontSize: 25 }} />}
             label="Edit"
             className="textPrimary"
             onClick={handleEditClick(params.row)}
           />,
           <GridActionsCellItem
             key={params.id}
-            icon={<DeleteIcon sx={{ color: "#9B0B00" }} />}
+            icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 25 }} />}
             label="Delete"
             onClick={handleDeleteClick(String(params.id))}
             color="inherit"

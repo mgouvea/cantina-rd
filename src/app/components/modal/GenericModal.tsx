@@ -1,12 +1,12 @@
-import * as React from 'react';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Slide from '@mui/material/Slide';
-import { TransitionProps } from '@mui/material/transitions';
+import * as React from "react";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Slide from "@mui/material/Slide";
+import { TransitionProps } from "@mui/material/transitions";
+import { Botao } from "../ui/botao/Botao";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -22,6 +22,7 @@ interface GenericModalProps {
   children: React.ReactNode;
   cancelButtonText: string;
   confirmButtonText: string;
+  buttonColor?: "success" | "error";
   open: boolean;
   handleClose: () => void;
   handleConfirm: () => void;
@@ -32,6 +33,7 @@ export default function GenericModal({
   children,
   cancelButtonText,
   confirmButtonText,
+  buttonColor,
   open,
   handleClose,
   handleConfirm,
@@ -44,12 +46,22 @@ export default function GenericModal({
         keepMounted
         onClose={handleClose}
         aria-describedby="alert-dialog-slide-description"
+        fullWidth
+        maxWidth="sm"
       >
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>{children}</DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>{cancelButtonText}</Button>
-          <Button onClick={handleConfirm}>{confirmButtonText}</Button>
+          <Botao variant="outlined" color="warning" onClick={handleClose}>
+            {cancelButtonText}
+          </Botao>
+          <Botao
+            variant="contained"
+            color={buttonColor}
+            onClick={handleConfirm}
+          >
+            {confirmButtonText}
+          </Botao>
         </DialogActions>
       </Dialog>
     </React.Fragment>

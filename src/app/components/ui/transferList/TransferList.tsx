@@ -1,15 +1,15 @@
-import * as React from 'react';
-import Grid from '@mui/material/Grid';
-import List from '@mui/material/List';
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Checkbox from '@mui/material/Checkbox';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import { capitalize } from '@/utils';
+import * as React from "react";
+import Grid from "@mui/material/Grid";
+import List from "@mui/material/List";
+import Card from "@mui/material/Card";
+import CardHeader from "@mui/material/CardHeader";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Checkbox from "@mui/material/Checkbox";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import { capitalize } from "@/utils";
 
 interface User {
   _id: string;
@@ -75,7 +75,7 @@ export default function TransferList({
     if (onSelectionChange) {
       const selectedUsers = right.map((userId) => ({
         userId,
-        name: userMap.get(userId)?.name || '',
+        name: userMap.get(userId)?.name || "",
       }));
       onSelectionChange(selectedUsers);
     }
@@ -133,7 +133,7 @@ export default function TransferList({
             }
             disabled={items.length === 0}
             inputProps={{
-              'aria-label': 'all items selected',
+              "aria-label": "all items selected",
             }}
           />
         }
@@ -145,39 +145,49 @@ export default function TransferList({
         sx={{
           width: 300,
           height: 230,
-          bgcolor: 'background.paper',
-          overflow: 'auto',
+          bgcolor: "background.paper",
+          overflow: "auto",
         }}
         dense
         component="div"
         role="list"
       >
-        {items.map((userId: string) => {
-          const user = userMap.get(userId);
-          if (!user) return null;
+        {items
+          .map((userId: string) => ({
+            userId,
+            user: userMap.get(userId),
+          }))
+          .filter((item) => item.user !== undefined)
+          .sort((a, b) => {
+            const nameA = a.user?.name.toLowerCase() || "";
+            const nameB = b.user?.name.toLowerCase() || "";
+            return nameA.localeCompare(nameB);
+          })
+          .map(({ userId, user }) => {
+            if (!user) return null;
 
-          const labelId = `transfer-list-item-${userId}-label`;
+            const labelId = `transfer-list-item-${userId}-label`;
 
-          return (
-            <ListItemButton
-              key={userId}
-              role="listitem"
-              onClick={handleToggle(userId)}
-            >
-              <ListItemIcon>
-                <Checkbox
-                  checked={checked.includes(userId)}
-                  tabIndex={-1}
-                  disableRipple
-                  inputProps={{
-                    'aria-labelledby': labelId,
-                  }}
-                />
-              </ListItemIcon>
-              <ListItemText id={labelId} primary={capitalize(user.name)} />
-            </ListItemButton>
-          );
-        })}
+            return (
+              <ListItemButton
+                key={userId}
+                role="listitem"
+                onClick={handleToggle(userId)}
+              >
+                <ListItemIcon>
+                  <Checkbox
+                    checked={checked.includes(userId)}
+                    tabIndex={-1}
+                    disableRipple
+                    inputProps={{
+                      "aria-labelledby": labelId,
+                    }}
+                  />
+                </ListItemIcon>
+                <ListItemText id={labelId} primary={capitalize(user.name)} />
+              </ListItemButton>
+            );
+          })}
       </List>
     </Card>
   );
@@ -186,11 +196,11 @@ export default function TransferList({
     <Grid
       container
       spacing={2}
-      sx={{ justifyContent: 'flex-start', alignItems: 'center' }}
+      sx={{ justifyContent: "flex-start", alignItems: "center" }}
     >
-      <Grid item>{customList('Usuários Disponíveis', left)}</Grid>
+      <Grid item>{customList("Usuários Disponíveis", left)}</Grid>
       <Grid item>
-        <Grid container direction="column" sx={{ alignItems: 'center' }}>
+        <Grid container direction="column" sx={{ alignItems: "center" }}>
           <Button
             sx={{ my: 0.5 }}
             variant="outlined"
@@ -213,7 +223,7 @@ export default function TransferList({
           </Button>
         </Grid>
       </Grid>
-      <Grid item>{customList('Usuários Selecionados', right)}</Grid>
+      <Grid item>{customList("Usuários Selecionados", right)}</Grid>
     </Grid>
   );
 }

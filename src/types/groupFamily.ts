@@ -1,4 +1,4 @@
-export type groupFamily = {
+export type GroupFamily = {
   _id?: string;
   name: string;
   members: SelectedMember[];
@@ -7,7 +7,11 @@ export type groupFamily = {
   updatedAt?: Date;
 };
 
-interface SelectedMember {
+export interface SelectedMember {
+  userId: string;
+}
+
+export interface TransferMember {
   userId: string;
   name: string;
 }

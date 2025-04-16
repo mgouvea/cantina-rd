@@ -1,6 +1,5 @@
 "use client";
 
-import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import DashboardCustomizeRoundedIcon from "@mui/icons-material/DashboardCustomizeRounded";
 import FamilyRestroomOutlinedIcon from "@mui/icons-material/FamilyRestroomOutlined";
@@ -19,7 +18,13 @@ export function NewSidebar() {
   const drawerWidth = 260;
 
   // Define a type for navigation item titles to ensure type safety
-  type NavigationTitle = "Dashboard" | "Faturas" | "Clientes" | "Grupo Familiar" | "Gestores" | "Produtos" | "Categorias";
+  type NavigationTitle =
+    | "Dashboard"
+    | "Faturas"
+    | "Clientes"
+    | "Grupo Familiar"
+    | "Produtos"
+    | "Categorias";
 
   // Memoize the navigation items to prevent unnecessary re-renders
   const navigationItems = useMemo(
@@ -28,7 +33,6 @@ export function NewSidebar() {
       { title: "Faturas" as NavigationTitle, route: "/faturas" },
       { title: "Clientes" as NavigationTitle, route: "/clientes" },
       { title: "Grupo Familiar" as NavigationTitle, route: "/grupo-familiar" },
-      { title: "Gestores" as NavigationTitle, route: "/gestor" },
       { title: "Produtos" as NavigationTitle, route: "/produtos" },
       { title: "Categorias" as NavigationTitle, route: "/categorias" },
     ],
@@ -37,15 +41,15 @@ export function NewSidebar() {
 
   // Memoize the icons mapping to prevent recreation on each render
   const icons = useMemo(
-    () => ({
-      Dashboard: <DashboardCustomizeRoundedIcon />,
-      Faturas: <LocalAtmOutlinedIcon />,
-      Clientes: <SupervisorAccountRoundedIcon />,
-      "Grupo Familiar": <FamilyRestroomOutlinedIcon />,
-      Gestores: <AdminPanelSettingsOutlinedIcon />,
-      Produtos: <FastfoodRoundedIcon />,
-      Categorias: <CategoryIcon />,
-    } as Record<NavigationTitle, JSX.Element>),
+    () =>
+      ({
+        Dashboard: <DashboardCustomizeRoundedIcon />,
+        Faturas: <LocalAtmOutlinedIcon />,
+        Clientes: <SupervisorAccountRoundedIcon />,
+        "Grupo Familiar": <FamilyRestroomOutlinedIcon />,
+        Produtos: <FastfoodRoundedIcon />,
+        Categorias: <CategoryIcon />,
+      } as Record<NavigationTitle, JSX.Element>),
     []
   );
 

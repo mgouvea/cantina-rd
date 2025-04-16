@@ -1,4 +1,5 @@
 import {
+  DeleteAdminByUserId,
   DeleteUser,
   PostAddAdmin,
   PostAddUser,
@@ -34,5 +35,11 @@ export const useUpdateUsersGroupFamily = () => {
 export const useAddAdmin = () => {
   return useMutation({
     mutationFn: PostAddAdmin,
+  });
+};
+
+export const useDeleteAdmin = () => {
+  return useMutation({
+    mutationFn: DeleteAdminByUserId,
   });
 };

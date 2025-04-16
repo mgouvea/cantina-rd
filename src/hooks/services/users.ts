@@ -9,7 +9,7 @@ export const UpdateUser = async ({
   user,
   userId,
 }: {
-  user: User;
+  user: Partial<User>;
   userId: string;
 }) => {
   return (await http.patch(`users/${userId}`, user)).data;

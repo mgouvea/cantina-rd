@@ -159,14 +159,14 @@ export default function TabelaProduto({
           return [
             <GridActionsCellItem
               key={`edit-${params.id}`}
-              icon={<EditIcon sx={{ color: "#666666" }} />}
+              icon={<EditIcon sx={{ color: "#666666", fontSize: 25 }} />}
               label="Edit"
               className="textPrimary"
               onClick={handleEditClick(params.row)}
             />,
             <GridActionsCellItem
               key={`delete-${params.id}`}
-              icon={<DeleteIcon sx={{ color: "#9B0B00" }} />}
+              icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 25 }} />}
               label="Delete"
               onClick={handleDeleteClick(params.id.toString())}
               color="inherit"

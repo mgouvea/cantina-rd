@@ -1,4 +1,4 @@
-import { Categories } from "@/types";
+import { Categories, User } from "@/types";
 import { format, parseISO, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -184,4 +184,12 @@ export function getCategoryNameById(
 
   const category = categories.find((cat) => cat._id === categoryId);
   return category ? category.name : "N/A";
+}
+
+export function findUserById(
+  userId: string,
+  users: User[] | null
+): User | null {
+  if (!users) return null;
+  return users.find((user) => user._id === userId) || null;
 }

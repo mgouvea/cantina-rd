@@ -7,6 +7,7 @@ interface FormActionsProps {
   disabled?: boolean;
   isSubmitting: boolean;
   isEditing?: boolean;
+  isGroupFamilyEdit?: boolean;
 }
 
 export const FormActions = ({
@@ -15,6 +16,7 @@ export const FormActions = ({
   disabled,
   isSubmitting,
   isEditing,
+  isGroupFamilyEdit,
 }: FormActionsProps) => (
   <Box
     sx={{
@@ -33,7 +35,7 @@ export const FormActions = ({
       }}
       sx={{ paddingX: 7, borderRadius: "8px" }}
     >
-      Limpar
+      {isGroupFamilyEdit ? "Voltar" : "Limpar"}
     </Botao>
     <Botao
       variant="contained"

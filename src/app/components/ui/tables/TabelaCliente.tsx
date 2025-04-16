@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Box from "@mui/material/Box";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
@@ -8,10 +8,16 @@ import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
 import { capitalize } from "@/utils";
-import { Avatar, CircularProgress, IconButton, Stack } from "@mui/material";
+import {
+  Avatar,
+  CircularProgress,
+  IconButton,
+  Stack,
+  Switch,
+  TextField,
+} from "@mui/material";
 import { Client } from "@/types/client";
 import { Filtros, useSnackbar } from "../..";
-import { groupFamily } from "@/types/groupFamily";
 import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
 import { useRouter } from "next/navigation";
 
@@ -25,8 +31,16 @@ import {
   GridRowEditStopReasons,
 } from "@mui/x-data-grid";
 import { useUserStore } from "@/contexts/store/users.store";
-import { User } from "@/types";
-import { useDeleteUser } from "@/hooks/mutations";
+import { GroupFamily, User } from "@/types";
+import {
+  useAddAdmin,
+  useDeleteAdmin,
+  useDeleteUser,
+  useRemoveMemberFromGroupFamily,
+  useUpdateUser,
+} from "@/hooks/mutations";
+import GenericModal from "../../modal/GenericModal";
+import { useQueryClient } from "@tanstack/react-query";
 interface TabelaProps {
   data: Client[];
   isLoading: boolean;
@@ -38,14 +52,25 @@ export default function TabelaCliente({
   isLoading,
   onDeleteUser,
 }: TabelaProps) {
+  const queryClient = useQueryClient();
   const router = useRouter();
-  const [rows, setRows] = React.useState<Client[]>(data);
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {}
-  );
+  const [rows, setRows] = useState<Client[]>(data);
+  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+
+  const [openModal, setOpenModal] = useState(false);
+  const [enableOrDisableAdmin, setEnableOrDisableAdmin] = useState(false);
+  const [userClicked, setUserClicked] = useState<User | null>(null);
+  const [email, setEmail] = useState("");
 
   const { data: groupFamilies } = useGroupFamily();
+
   const { mutateAsync: deleteUser } = useDeleteUser();
+  const { mutateAsync: updateUser } = useUpdateUser();
+  const { mutateAsync: addAdmin } = useAddAdmin();
+  const { mutateAsync: deleteAdmin } = useDeleteAdmin();
+  const { mutateAsync: removeMemberFromGroupFamily } =
+    useRemoveMemberFromGroupFamily();
+
   const { updateUserToEdit, updateIsEditing } = useUserStore();
   const { showSnackbar } = useSnackbar();
 
@@ -64,15 +89,17 @@ export default function TabelaCliente({
     router.replace("/clientes/novo");
   };
 
-  const handleDeleteClick = (id: string) => async () => {
+  const handleDeleteClick = (userId: string) => async () => {
     try {
-      await deleteUser(id);
+      await deleteUser(userId);
+      await removeMemberFromGroupFamily({ id: userId });
       onDeleteUser();
       showSnackbar({
         message: "Cliente deletado com sucesso!",
         severity: "success",
         duration: 3000,
       });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     } catch (error) {
       showSnackbar({
         message: "Erro ao deletar o cliente",
@@ -95,6 +122,64 @@ export default function TabelaCliente({
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
     setRowModesModel(newRowModesModel);
+  };
+
+  const handleOpenModal = (row: User) => {
+    if (row.isAdmin) {
+      setEnableOrDisableAdmin(false);
+    } else {
+      setEnableOrDisableAdmin(true);
+    }
+    setOpenModal(true);
+    setUserClicked(row);
+  };
+
+  const handleEnableOrDisableAdmin = async () => {
+    const payloadAdmin = {
+      idUser: userClicked?._id ?? "",
+      name: userClicked?.name ?? "",
+      email: email,
+      password: "udv@realeza",
+      createdAt: new Date(),
+    };
+
+    try {
+      if (enableOrDisableAdmin) {
+        await addAdmin(payloadAdmin);
+        await updateUser({
+          user: { isAdmin: true },
+          userId: userClicked?._id ?? "",
+        });
+      } else {
+        await deleteAdmin(userClicked?._id ?? "");
+        await updateUser({
+          user: { isAdmin: false },
+          userId: userClicked?._id ?? "",
+        });
+      }
+
+      setEmail("");
+      setOpenModal(false);
+      showSnackbar({
+        message:
+          "Administrador " +
+          (enableOrDisableAdmin ? "habilitado" : "desabilitado") +
+          " com sucesso!",
+        severity: "success",
+        duration: 3000,
+      });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    } catch (error) {
+      showSnackbar({
+        message:
+          "Erro ao " +
+          (enableOrDisableAdmin ? "habilitar" : "desabilitar") +
+          " o administrador",
+        severity: "error",
+        duration: 3000,
+      });
+      console.error(error);
+    }
   };
 
   const columns: GridColDef[] = [
@@ -120,7 +205,7 @@ export default function TabelaCliente({
     {
       field: "name",
       headerName: "Nome",
-      width: 500,
+      width: 350,
       editable: true,
       renderCell: (params) => capitalize(params.value),
     },
@@ -128,7 +213,7 @@ export default function TabelaCliente({
       field: "telephone",
       headerName: "Telefone",
       type: "number",
-      width: 300,
+      width: 200,
       align: "left",
       headerAlign: "left",
       editable: true,
@@ -136,14 +221,30 @@ export default function TabelaCliente({
     {
       field: "groupFamily",
       headerName: "Grupo Familiar",
-      width: 300,
+      width: 200,
       editable: true,
       renderCell: (params) => {
         const group = groupFamilies?.find(
-          (group: groupFamily) => group._id === params.value
+          (group: GroupFamily) => group._id === params.value
         );
         return group ? capitalize(group.name) : "-";
       },
+    },
+    {
+      field: "isAdmin",
+      headerName: "Administrador",
+      type: "boolean",
+      width: 150,
+      align: "center",
+      headerAlign: "center",
+      editable: true,
+      renderCell: (params) => (
+        <Switch
+          checked={params.value}
+          onChange={() => handleOpenModal(params.row)}
+          inputProps={{ "aria-label": "controlled" }}
+        />
+      ),
     },
     {
       field: "actions",
@@ -232,6 +333,47 @@ export default function TabelaCliente({
           }
         </Filtros>
       )}
+
+      <GenericModal
+        title={
+          enableOrDisableAdmin
+            ? "Habilitar administrador"
+            : "Desabilitar administrador"
+        }
+        open={openModal}
+        handleClose={() => {
+          setOpenModal(false);
+          setEmail("");
+        }}
+        cancelButtonText="Cancelar"
+        confirmButtonText={enableOrDisableAdmin ? "Habilitar" : "Desabilitar"}
+        buttonColor={enableOrDisableAdmin ? "success" : "error"}
+        handleConfirm={handleEnableOrDisableAdmin}
+      >
+        <Stack sx={{ flexDirection: "column", gap: 3 }}>
+          <Text>
+            Você realmete deseja{" "}
+            {enableOrDisableAdmin ? "habilitar" : "desabilitar"} esse
+            administrador?
+          </Text>
+
+          {enableOrDisableAdmin && (
+            <TextField
+              autoFocus
+              required
+              margin="dense"
+              id="name"
+              name="email"
+              label="Email"
+              type="email"
+              fullWidth
+              variant="outlined"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          )}
+        </Stack>
+      </GenericModal>
     </Box>
   );
 }

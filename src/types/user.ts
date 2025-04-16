@@ -6,6 +6,7 @@ export type User = {
   telephone: string;
   imageBase64: string;
   groupFamily: string;
+  isChild: boolean;
   createdAt?: Date;
   updatedAt?: Date | null;
 };

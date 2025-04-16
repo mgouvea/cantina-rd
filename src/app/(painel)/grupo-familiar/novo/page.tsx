@@ -230,7 +230,7 @@ export default function NovoGrupoFamiliar() {
     const formValues = getValues();
     const finalData = {
       ...formValues,
-      members: selectedMembers,
+      members: selectedMembers.map(({ userId }) => ({ userId })),
       owner: owner,
     };
 

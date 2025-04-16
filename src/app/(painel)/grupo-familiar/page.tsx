@@ -1,11 +1,26 @@
 "use client";
 
 import { useApp } from "@/contexts";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import TabelaGrupoFamiliar from "@/app/components/ui/tables/TabelaGrupoFamiliar";
 import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
 import Loading from "@/app/components/loading/Loading";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
+import { useUsers } from "@/hooks/queries";
+import { useUserStore } from "@/contexts/store/users.store";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import type { GroupFamily, SelectedMember } from "@/types";
+import {
+  GridEventListener,
+  GridRowEditStopReasons,
+  GridRowModel,
+  GridRowModesModel,
+} from "@mui/x-data-grid";
+import { useSnackbar } from "@/app/components";
+import { useDeleteGroupFamily } from "@/hooks/mutations";
+import { useGroupFamilyStore } from "@/contexts/store/groupFamily.store";
+import { capitalizeFirstLastName, findUserById } from "@/utils";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -14,20 +29,105 @@ const breadcrumbItems = [
 
 export default function GroupFamily() {
   const { data, isLoading } = useGroupFamily();
+  const { data: dataUser } = useUsers();
   const { setUserContext } = useApp();
+
+  const { updateAllUsers } = useUserStore();
 
   useEffect(() => {
     if (!isLoading && data) {
       setUserContext(data);
+      updateAllUsers(dataUser);
     }
-  }, [data, isLoading, setUserContext]);
+  }, [data, isLoading, setUserContext, dataUser, updateAllUsers]);
+
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const [rows, setRows] = useState<GroupFamily[]>(data);
+  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+  const { showSnackbar } = useSnackbar();
+
+  const { mutateAsync: deleteGroupFamily } = useDeleteGroupFamily();
+  const { updateGroupFamilyToEdit, updateIsEditing } = useGroupFamilyStore();
+
+  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
+    params,
+    event
+  ) => {
+    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+      event.defaultMuiPrevented = true;
+    }
+  };
+
+  const handleEditClick = (row: GridRowModel) => () => {
+    updateGroupFamilyToEdit(row as GroupFamily);
+    updateIsEditing(true);
+    router.replace("/grupo-familiar/edit");
+  };
+
+  const handleDeleteClick = (id: string) => async () => {
+    try {
+      await deleteGroupFamily(id);
+      queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      showSnackbar({
+        message: "Grupo Familiar deletado com sucesso!",
+        severity: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      showSnackbar({
+        message: "Erro ao deletar grupo familiar",
+        severity: "error",
+        duration: 3000,
+      });
+      console.error(error);
+    }
+  };
+
+  const processRowUpdate = (newRow: GridRowModel) => {
+    const typedNewRow = newRow as unknown as GroupFamily;
+    const updatedRow = { ...typedNewRow, isNew: false };
+    setRows(
+      rows.map((row) => (row._id === typedNewRow._id ? updatedRow : row))
+    );
+    return updatedRow;
+  };
+
+  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
+    setRowModesModel(newRowModesModel);
+  };
+
+  const getOwnerName = (ownerId: string, row: GroupFamily) => {
+    const ownerMember = row.members.find(
+      (member: SelectedMember) => member.userId === ownerId
+    );
+    return ownerMember
+      ? capitalizeFirstLastName(findUserById(ownerId, dataUser)?.name)
+      : ownerId;
+  };
 
   const renderContent = () => {
     if (isLoading) {
       return <Loading />;
     }
 
-    return <TabelaGrupoFamiliar data={data} isLoading={isLoading} />;
+    return (
+      <TabelaGrupoFamiliar
+        data={data}
+        dataUser={dataUser}
+        isLoading={isLoading}
+        getOwnerName={getOwnerName}
+        handleEditClick={handleEditClick}
+        handleDeleteClick={handleDeleteClick}
+        processRowUpdate={processRowUpdate}
+        handleRowModesModelChange={handleRowModesModelChange}
+        handleRowEditStop={handleRowEditStop}
+        rows={rows}
+        rowModesModel={rowModesModel}
+        setRows={setRows}
+      />
+    );
   };
 
   return (
