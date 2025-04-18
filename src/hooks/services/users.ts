@@ -19,14 +19,14 @@ export const DeleteUser = async (userId: string) => {
   return (await http.delete(`users/${userId}`)).data;
 };
 
-export const UpdateUserGroupFamily = async ({
-  id,
+export const UpdateUserFromGroupFamily = async ({
+  groupFamilyId,
   users,
 }: {
-  id: string;
+  groupFamilyId: string;
   users: GroupFamilyUser[];
 }) => {
-  return (await http.patch(`users/group-family/${id}`, users)).data;
+  return (await http.patch(`users/group-family/${groupFamilyId}`, users)).data;
 };
 
 export const GetAllUsers = async () => {

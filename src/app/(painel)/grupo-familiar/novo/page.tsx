@@ -19,7 +19,6 @@ import { StepIconProps } from "@mui/material/StepIcon";
 import { styled } from "@mui/material/styles";
 import { useAddGroupFamily } from "@/hooks/mutations/useGroupFamily.mutation";
 import { useRouter } from "next/navigation";
-import { useUsers } from "@/hooks/queries";
 import { useUpdateUsersGroupFamily } from "@/hooks/mutations/useUsers.mutation";
 
 import {
@@ -39,6 +38,8 @@ import StepConnector, {
 } from "@mui/material/StepConnector";
 import { capitalize } from "@/utils";
 import { User } from "@/types";
+import { useUserStore } from "@/contexts/store/users.store";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -150,7 +151,9 @@ function ColorlibStepIcon(props: StepIconProps) {
 const steps = ["Nome do grupo", "Membros", "Responsável", "Salvar"];
 
 export default function NovoGrupoFamiliar() {
-  const { data: users } = useUsers();
+  const queryClient = useQueryClient();
+
+  const { allUsers } = useUserStore();
   const { showSnackbar } = useSnackbar();
 
   const { mutateAsync: addGroup } = useAddGroupFamily();
@@ -171,9 +174,9 @@ export default function NovoGrupoFamiliar() {
 
   // Filter out users who already have a groupFamily
   const availableUsers = useMemo(() => {
-    if (!users) return [];
-    return users.filter((user: User) => !user.groupFamily);
-  }, [users]);
+    if (!allUsers) return [];
+    return allUsers.filter((user: User) => !user.groupFamily);
+  }, [allUsers]);
 
   const handleMembersChange = useCallback(
     (updatedMembers: SelectedMember[]) => {
@@ -238,7 +241,7 @@ export default function NovoGrupoFamiliar() {
       const result = await addGroup(finalData);
 
       await updateUser({
-        id: result._id,
+        groupFamilyId: result._id,
         users: selectedMembers,
       });
 
@@ -246,6 +249,8 @@ export default function NovoGrupoFamiliar() {
         message: "Grupo familiar salvo com sucesso",
         severity: "success",
       });
+      queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       router.replace("/grupo-familiar");
     } catch (error) {
       showSnackbar({
@@ -263,6 +268,7 @@ export default function NovoGrupoFamiliar() {
     updateUser,
     showSnackbar,
     router,
+    queryClient,
   ]);
 
   const getOwnerName = useCallback(

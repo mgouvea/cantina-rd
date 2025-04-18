@@ -22,6 +22,6 @@ export type UserAdmin = {
 };
 
 export type GroupFamilyUser = {
-  name: string;
+  name?: string;
   userId: string;
 };

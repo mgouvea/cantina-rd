@@ -1,15 +1,20 @@
 "use client";
 
-import { useApp } from "@/contexts";
-import { useEffect, useState } from "react";
-import TabelaGrupoFamiliar from "@/app/components/ui/tables/TabelaGrupoFamiliar";
-import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
-import Loading from "@/app/components/loading/Loading";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
-import { useUsers } from "@/hooks/queries";
-import { useUserStore } from "@/contexts/store/users.store";
+import Loading from "@/app/components/loading/Loading";
+import TabelaGrupoFamiliar from "@/app/components/ui/tables/TabelaGrupoFamiliar";
+import { capitalizeFirstLastName, findUserById } from "@/utils";
+import { useApp } from "@/contexts";
+import { useDeleteGroupFamily } from "@/hooks/mutations";
+import { useEffect, useState } from "react";
+import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
+import { useGroupFamilyStore } from "@/contexts/store/groupFamily.store";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { MemberModal, useSnackbar } from "@/app/components";
+import { useUsers } from "@/hooks/queries";
+import { useUserStore } from "@/contexts/store/users.store";
+
 import type { GroupFamily, SelectedMember } from "@/types";
 import {
   GridEventListener,
@@ -17,10 +22,6 @@ import {
   GridRowModel,
   GridRowModesModel,
 } from "@mui/x-data-grid";
-import { useSnackbar } from "@/app/components";
-import { useDeleteGroupFamily } from "@/hooks/mutations";
-import { useGroupFamilyStore } from "@/contexts/store/groupFamily.store";
-import { capitalizeFirstLastName, findUserById } from "@/utils";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -32,14 +33,7 @@ export default function GroupFamily() {
   const { data: dataUser } = useUsers();
   const { setUserContext } = useApp();
 
-  const { updateAllUsers } = useUserStore();
-
-  useEffect(() => {
-    if (!isLoading && data) {
-      setUserContext(data);
-      updateAllUsers(dataUser);
-    }
-  }, [data, isLoading, setUserContext, dataUser, updateAllUsers]);
+  const { updateAllUsers, allUsers } = useUserStore();
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -47,8 +41,21 @@ export default function GroupFamily() {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
   const { showSnackbar } = useSnackbar();
 
+  const [openModal, setOpenModal] = useState(false);
+  const [addOrRemove, setAddOrRemove] = useState<"add" | "remove">("add");
+  const [members, setMembers] = useState<SelectedMember[]>([]);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [idGroupFamily, setIdGroupFamily] = useState<string | null>(null);
+
   const { mutateAsync: deleteGroupFamily } = useDeleteGroupFamily();
   const { updateGroupFamilyToEdit, updateIsEditing } = useGroupFamilyStore();
+
+  useEffect(() => {
+    if (!isLoading && data) {
+      setUserContext(data);
+      updateAllUsers(dataUser);
+    }
+  }, [data, isLoading, setUserContext, dataUser, updateAllUsers]);
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -107,6 +114,15 @@ export default function GroupFamily() {
       : ownerId;
   };
 
+  const handleEditMembers =
+    (row: GroupFamily, addOrRemove: "add" | "remove") => () => {
+      setAddOrRemove(addOrRemove);
+      setMembers(row.members);
+      setSelectedUserIds([]);
+      setOpenModal(true);
+      setIdGroupFamily(row._id!);
+    };
+
   const renderContent = () => {
     if (isLoading) {
       return <Loading />;
@@ -125,6 +141,7 @@ export default function GroupFamily() {
         handleRowEditStop={handleRowEditStop}
         rows={rows}
         rowModesModel={rowModesModel}
+        handleEditMembers={handleEditMembers}
         setRows={setRows}
       />
     );
@@ -133,6 +150,18 @@ export default function GroupFamily() {
   return (
     <ContentWrapper breadcrumbItems={breadcrumbItems}>
       {renderContent()}
+      <MemberModal
+        allUsers={allUsers}
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+        addOrRemove={addOrRemove}
+        idGroupFamily={idGroupFamily!}
+        members={members}
+        setMembers={setMembers}
+        selectedUserIds={selectedUserIds}
+        setSelectedUserIds={setSelectedUserIds}
+        setIdGroupFamily={setIdGroupFamily}
+      />
     </ContentWrapper>
   );
 }

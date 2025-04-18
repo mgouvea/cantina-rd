@@ -19,18 +19,19 @@ export const UpdateGroupFamily = async ({
   return (await http.patch(`group-family/${id}`, groupFamily)).data;
 };
 
-export const AddMember = async ({
+export const AddOrRemoveMember = async ({
   id,
-  AddMember,
+  members,
 }: {
   id: string;
-  AddMember: SelectedMember[];
+  members: SelectedMember[];
 }) => {
-  return (await http.patch(`group-family/add-member/${id}`, AddMember)).data;
+  return (await http.patch(`group-family/add-or-remove-member/${id}`, members))
+    .data;
 };
 
-export const RemoveMember = async ({ id }: { id: string }) => {
-  return (await http.patch(`group-family/remove-member/${id}`)).data;
+export const RemoveMember = async (memberIds: string[]) => {
+  return (await http.patch(`group-family/remove-member`, { memberIds })).data;
 };
 
 export const DeleteGroupFamily = async (id: string) => {

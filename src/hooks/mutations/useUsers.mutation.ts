@@ -4,7 +4,7 @@ import {
   PostAddAdmin,
   PostAddUser,
   UpdateUser,
-  UpdateUserGroupFamily,
+  UpdateUserFromGroupFamily,
 } from "@/hooks/services";
 import { useMutation } from "@tanstack/react-query";
 
@@ -28,7 +28,7 @@ export const useDeleteUser = () => {
 
 export const useUpdateUsersGroupFamily = () => {
   return useMutation({
-    mutationFn: UpdateUserGroupFamily,
+    mutationFn: UpdateUserFromGroupFamily,
   });
 };
 

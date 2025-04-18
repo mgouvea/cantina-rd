@@ -1,10 +1,21 @@
 "use client";
 
 import * as React from "react";
-import Box from "@mui/material/Box";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import Box from "@mui/material/Box";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import EditIcon from "@mui/icons-material/Edit";
+import EmptyContent from "../emptyContent/EmptyContent";
+import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
+import GroupRemoveOutlinedIcon from "@mui/icons-material/GroupRemoveOutlined";
+import Text from "../text/Text";
+import { capitalize, findUserById } from "@/utils";
+import { CircularProgress, IconButton, Stack } from "@mui/material";
+import { Filtros } from "../..";
+import { GroupFamily, SelectedMember } from "@/types/groupFamily";
+import { User } from "@/types";
+import { useRouter } from "next/navigation";
+
 import {
   DataGrid,
   GridColDef,
@@ -13,30 +24,24 @@ import {
   GridRowModesModel,
   GridEventListener,
 } from "@mui/x-data-grid";
-import { CircularProgress, IconButton, Stack } from "@mui/material";
-import { Filtros } from "../..";
-import Text from "../text/Text";
-import EmptyContent from "../emptyContent/EmptyContent";
-import { GroupFamily, SelectedMember } from "@/types/groupFamily";
-import { capitalize, findUserById } from "@/utils";
-import { User } from "@/types";
-import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
-import GroupRemoveOutlinedIcon from "@mui/icons-material/GroupRemoveOutlined";
-import { useRouter } from "next/navigation";
 
 interface TabelaProps {
   data: GroupFamily[];
   dataUser: User[] | null;
   isLoading: boolean;
+  rows?: GroupFamily[];
+  rowModesModel: GridRowModesModel;
+  handleRowEditStop: GridEventListener<"rowEditStop">;
   getOwnerName: (ownerId: string, row: GroupFamily) => string;
   handleEditClick: (row: GridRowModel) => () => void;
   handleDeleteClick: (id: string) => () => void;
   processRowUpdate: (newRow: GridRowModel) => GroupFamily;
   handleRowModesModelChange: (newRowModesModel: GridRowModesModel) => void;
-  handleRowEditStop: GridEventListener<"rowEditStop">;
-  rows?: GroupFamily[];
-  rowModesModel: GridRowModesModel;
   setRows: (rows: GroupFamily[]) => void;
+  handleEditMembers: (
+    row: GroupFamily,
+    addOrRemove: "add" | "remove"
+  ) => () => void;
 }
 
 export default function TabelaGrupoFamiliar({
@@ -51,6 +56,7 @@ export default function TabelaGrupoFamiliar({
   handleRowEditStop,
   rowModesModel,
   setRows,
+  handleEditMembers,
 }: TabelaProps) {
   const router = useRouter();
 
@@ -99,7 +105,7 @@ export default function TabelaGrupoFamiliar({
               <GroupAddOutlinedIcon sx={{ color: "#1ab86d", fontSize: 25 }} />
             }
             label="Add Member"
-            // onClick={handleAddMember(String(id))}
+            onClick={handleEditMembers(row, "add")}
             color="inherit"
           />,
           <GridActionsCellItem
@@ -110,7 +116,7 @@ export default function TabelaGrupoFamiliar({
               />
             }
             label="Remove Member"
-            onClick={handleDeleteClick(String(id))}
+            onClick={handleEditMembers(row, "remove")}
             color="inherit"
           />,
           <GridActionsCellItem

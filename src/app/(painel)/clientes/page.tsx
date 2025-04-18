@@ -81,7 +81,7 @@ export default function Clientes() {
   const handleDeleteClick = (userId: string) => async () => {
     try {
       await deleteUser(userId);
-      await removeMemberFromGroupFamily({ id: userId });
+      await removeMemberFromGroupFamily([userId]);
       queryClient.invalidateQueries({ queryKey: ["users"] });
       showSnackbar({
         message: "Cliente deletado com sucesso!",

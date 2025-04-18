@@ -1,5 +1,5 @@
 import {
-  AddMember,
+  AddOrRemoveMember,
   DeleteGroupFamily,
   PostAddGroupFamily,
   RemoveMember,
@@ -19,9 +19,9 @@ export const useUpdateGroupFamily = () => {
   });
 };
 
-export const useAddMemberToGroupFamily = () => {
+export const useUpdateMembersGroupFamily = () => {
   return useMutation({
-    mutationFn: AddMember,
+    mutationFn: AddOrRemoveMember,
   });
 };
 

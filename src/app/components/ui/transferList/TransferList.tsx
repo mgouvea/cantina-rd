@@ -10,16 +10,7 @@ import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import { capitalize } from "@/utils";
-
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  isAdmin: boolean;
-  telephone: string;
-  groupFamily: string;
-  createdAt: string;
-}
+import { User } from "@/types";
 
 interface TransferListProps {
   users: User[];
@@ -53,9 +44,10 @@ export default function TransferList({
       initialSelected.map((user) => user.userId)
     );
     return users
-      .map((user) => user._id)
+      .map((user) => user._id!)
       .filter((id) => !initialSelectedIds.has(id));
   });
+
   const [right, setRight] = React.useState<readonly string[]>(() =>
     // Inicializa a lista da direita com os IDs dos usuários selecionados
     initialSelected.map((user) => user.userId)
@@ -64,7 +56,7 @@ export default function TransferList({
   // Mapa para buscar usuários por ID rapidamente
   const userMap = React.useMemo(() => {
     const map = new Map<string, User>();
-    users.forEach((user) => map.set(user._id, user));
+    users.forEach((user) => map.set(user._id!, user));
     return map;
   }, [users]);
 
