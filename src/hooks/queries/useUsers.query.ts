@@ -13,7 +13,7 @@ export const useUsers = () => {
 
 export const useUserById = (id: string) => {
   return useQuery({
-    queryKey: ["users", id],
+    queryKey: ["usersId", id],
     queryFn: () => GetUserById(id),
   });
 };

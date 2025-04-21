@@ -5,7 +5,7 @@ export type User = {
   isAdmin: boolean;
   telephone: string;
   imageBase64: string;
-  groupFamily: string;
+  groupFamily: string | null;
   isChild: boolean;
   createdAt?: Date;
   updatedAt?: Date | null;

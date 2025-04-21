@@ -6,13 +6,13 @@ export const PostAddUser = async (user: User) => {
 };
 
 export const UpdateUser = async ({
-  user,
   userId,
+  userPayload,
 }: {
-  user: Partial<User>;
   userId: string;
+  userPayload: Partial<User>;
 }) => {
-  return (await http.patch(`users/${userId}`, user)).data;
+  return (await http.patch(`users/${userId}`, userPayload)).data;
 };
 
 export const DeleteUser = async (userId: string) => {

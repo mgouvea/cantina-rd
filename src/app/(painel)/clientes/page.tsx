@@ -22,7 +22,6 @@ import {
   useAddAdmin,
   useDeleteAdmin,
   useDeleteUser,
-  useRemoveMemberFromGroupFamily,
   useUpdateUser,
 } from "@/hooks/mutations";
 
@@ -57,8 +56,6 @@ export default function Clientes() {
   const { mutateAsync: updateUser } = useUpdateUser();
   const { mutateAsync: addAdmin } = useAddAdmin();
   const { mutateAsync: deleteAdmin } = useDeleteAdmin();
-  const { mutateAsync: removeMemberFromGroupFamily } =
-    useRemoveMemberFromGroupFamily();
 
   const { updateUserToEdit, updateIsEditing } = useUserStore();
   const { showSnackbar } = useSnackbar();
@@ -81,8 +78,6 @@ export default function Clientes() {
   const handleDeleteClick = (userId: string) => async () => {
     try {
       await deleteUser(userId);
-      await removeMemberFromGroupFamily([userId]);
-      queryClient.invalidateQueries({ queryKey: ["users"] });
       showSnackbar({
         message: "Cliente deletado com sucesso!",
         severity: "success",

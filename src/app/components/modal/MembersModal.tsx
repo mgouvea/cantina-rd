@@ -51,6 +51,12 @@ export const MemberModal = ({
       name: item.name,
     }));
 
+    const removeGroupFamilyFromUsers = clickedUsersFromListMembers.map(
+      (item) => item._id!
+    );
+
+    console.log("removeGroupFamilyFromUsers", removeGroupFamilyFromUsers);
+
     try {
       await updateMembersGroupFamily({
         id: idGroupFamily,
