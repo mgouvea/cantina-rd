@@ -15,6 +15,7 @@ import {
   GridActionsCellItem,
   GridRowModel,
 } from "@mui/x-data-grid";
+import Text from "../text/Text";
 
 // Define the product structure based on the actual data
 interface ProductItem {
@@ -190,7 +191,7 @@ export default function TabelaFaturas({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="h5">Compras realizadas</Typography>
+        <Text variant="h5">Compras realizadas</Text>
 
         {/* <IconButton
           aria-label="add"

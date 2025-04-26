@@ -20,7 +20,7 @@ export function NewSidebar() {
   // Define a type for navigation item titles to ensure type safety
   type NavigationTitle =
     | "Dashboard"
-    | "Faturas"
+    | "Financeiro"
     | "Clientes"
     | "Grupo Familiar"
     | "Produtos"
@@ -30,7 +30,7 @@ export function NewSidebar() {
   const navigationItems = useMemo(
     () => [
       { title: "Dashboard" as NavigationTitle, route: "/dashboard" },
-      { title: "Faturas" as NavigationTitle, route: "/faturas" },
+      { title: "Financeiro" as NavigationTitle, route: "/financeiro" },
       { title: "Clientes" as NavigationTitle, route: "/clientes" },
       { title: "Grupo Familiar" as NavigationTitle, route: "/grupo-familiar" },
       { title: "Produtos" as NavigationTitle, route: "/produtos" },
@@ -44,7 +44,7 @@ export function NewSidebar() {
     () =>
       ({
         Dashboard: <DashboardCustomizeRoundedIcon />,
-        Faturas: <LocalAtmOutlinedIcon />,
+        Financeiro: <LocalAtmOutlinedIcon />,
         Clientes: <SupervisorAccountRoundedIcon />,
         "Grupo Familiar": <FamilyRestroomOutlinedIcon />,
         Produtos: <FastfoodRoundedIcon />,
