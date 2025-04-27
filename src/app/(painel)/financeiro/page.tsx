@@ -1,7 +1,12 @@
 "use client";
 import Loading from "@/app/components/loading/Loading";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
-import { useGroupFamily, useOrders, useUsers } from "@/hooks/queries";
+import {
+  useGroupFamily,
+  useGroupFamilyWithOwner,
+  useOrders,
+  useUsers,
+} from "@/hooks/queries";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GridRowModel } from "@mui/x-data-grid";
@@ -39,6 +44,10 @@ export default function Faturas() {
   const { data: dataUser, isLoading: isLoadingUser } = useUsers();
   const { data: groupFamilies, isLoading: isLoadingGroupFamily } =
     useGroupFamily();
+  const {
+    data: groupFamiliesWithOwner,
+    isLoading: isLoadingGroupFamilyWithOwner,
+  } = useGroupFamilyWithOwner();
 
   const [allInvoicesIds, setAllInvoicesIds] = useState<string[] | null>(null);
 
@@ -77,7 +86,12 @@ export default function Faturas() {
   };
 
   const renderContent = () => {
-    if (isLoading || isLoadingGroupFamily || isLoadingUser) {
+    if (
+      isLoading ||
+      isLoadingGroupFamily ||
+      isLoadingUser ||
+      isLoadingGroupFamilyWithOwner
+    ) {
       return <Loading />;
     }
 
@@ -138,6 +152,7 @@ export default function Faturas() {
             groupFamilies={groupFamilies}
             dataUser={dataUser}
             allInvoicesIds={allInvoicesIds}
+            groupFamiliesWithOwner={groupFamiliesWithOwner}
           />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={2} dir={theme.direction}>

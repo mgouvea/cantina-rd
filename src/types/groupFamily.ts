@@ -7,6 +7,13 @@ export type GroupFamily = {
   updatedAt?: Date;
 };
 
+export type GroupFamilyWithOwner = {
+  _id?: string;
+  name: string;
+  ownerName: string;
+  ownerAvatar: string;
+};
+
 export interface SelectedMember {
   userId: string;
 }

@@ -71,6 +71,7 @@ export function CustomizedAccordions({
     <Accordion
       expanded={expanded === "panel1"}
       onChange={handleChange("panel1")}
+      sx={{ borderRadius: 3 }}
     >
       <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
         <Typography component="span">{title}</Typography>

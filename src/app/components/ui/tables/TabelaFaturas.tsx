@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Box from "@mui/material/Box";
+import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
@@ -26,6 +27,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  IconButton,
 } from "@mui/material";
 
 import {
@@ -46,6 +48,7 @@ interface TabelaProps {
   onDeleteInvoice: () => void;
   groupFamilies: GroupFamily[];
   dataUser: User[] | null;
+  onResetData: () => void;
 }
 
 interface Product {
@@ -175,6 +178,7 @@ export default function TabelaFaturas({
   onDeleteInvoice,
   groupFamilies,
   dataUser,
+  onResetData,
 }: TabelaProps) {
   const router = useRouter();
 
@@ -208,6 +212,10 @@ export default function TabelaFaturas({
       severity: "success",
       duration: 3000,
     });
+  };
+
+  const handleResetData = () => {
+    onResetData();
   };
 
   const columns: GridColDef[] = [
@@ -352,6 +360,16 @@ export default function TabelaFaturas({
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Text variant="h5">Faturas Registradas</Text>
+
+        <Tooltip title="Recarregar dados">
+          <IconButton
+            aria-label="add"
+            sx={{ color: "success.main" }}
+            onClick={handleResetData}
+          >
+            <CachedOutlinedIcon fontSize="medium" />
+          </IconButton>
+        </Tooltip>
       </Stack>
 
       {!isLoading && (!data || data.length === 0) && (

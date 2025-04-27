@@ -9,6 +9,10 @@ export const GetAllGroupFamilies = async () => {
   return (await http.get("group-family")).data;
 };
 
+export const GetAllWithOwner = async () => {
+  return (await http.get("group-family/owner")).data;
+};
+
 export const UpdateGroupFamily = async ({
   groupFamily,
   id,
