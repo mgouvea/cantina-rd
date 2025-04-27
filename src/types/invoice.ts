@@ -1,0 +1,61 @@
+export type CreateInvoiceDto = {
+  groupFamilyId: string;
+  startDate: Date | null;
+  endDate: Date | null;
+};
+
+export type InvoiceDto = {
+  _id: string;
+  buyerIds: string[];
+  groupFamilyId: string;
+  startDate: Date;
+  endDate: Date;
+  totalAmount: number;
+  status: "OPEN" | "PARTIALLY_PAID" | "PAID";
+  createdAt: Date;
+};
+
+export interface FullInvoiceResponse {
+  _id: string;
+  groupFamilyId: string;
+  buyerIds: string[];
+  startDate: Date;
+  endDate: Date;
+  totalAmount: number;
+  status: "OPEN" | "PARTIALLY_PAID" | "PAID";
+  createdAt: Date;
+  orders: {
+    _id: string;
+    buyerId: string;
+    groupFamilyId: string;
+    products: {
+      id: string;
+      name: string;
+      price: number;
+      quantity: number;
+    }[];
+    totalPrice: number;
+    createdAt: Date;
+  }[];
+  payments: {
+    _id: string;
+    amountPaid: number;
+    isPartial: boolean;
+    isCredit: boolean;
+    paymentDate: Date;
+    createdAt: Date;
+  }[];
+  consumoPorPessoa: Record<
+    string,
+    {
+      date: Date;
+      products: {
+        id: string;
+        name: string;
+        price: number;
+        quantity: number;
+      }[];
+    }[]
+  >;
+  remaining: number;
+}

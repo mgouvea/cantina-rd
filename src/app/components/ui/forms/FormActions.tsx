@@ -8,6 +8,7 @@ interface FormActionsProps {
   isSubmitting: boolean;
   isEditing?: boolean;
   isGroupFamilyEdit?: boolean;
+  isFatura?: boolean;
 }
 
 export const FormActions = ({
@@ -17,6 +18,7 @@ export const FormActions = ({
   isSubmitting,
   isEditing,
   isGroupFamilyEdit,
+  isFatura,
 }: FormActionsProps) => (
   <Box
     sx={{
@@ -50,6 +52,8 @@ export const FormActions = ({
         ? "Atualizando..."
         : !isSubmitting && isEditing
         ? "Atualizar"
+        : isFatura
+        ? "Gerar"
         : "Cadastrar"}
     </Botao>
   </Box>

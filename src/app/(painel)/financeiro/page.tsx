@@ -3,18 +3,19 @@ import Loading from "@/app/components/loading/Loading";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import { useGroupFamily, useOrders, useUsers } from "@/hooks/queries";
 import { useQueryClient } from "@tanstack/react-query";
-import TabelaFaturas from "@/app/components/ui/tables/TabelaFaturas";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GridRowModel } from "@mui/x-data-grid";
-import { CustomTabPanel, useSnackbar } from "@/app/components";
+import { CustomTabPanel, FormFaturas, useSnackbar } from "@/app/components";
 import { Box, Stack, Tab, Tabs, useTheme } from "@mui/material";
 import Text from "@/app/components/ui/text/Text";
 import PriceCheckIcon from "@mui/icons-material/PriceCheck";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-// import WalletIcon from "@mui/icons-material/Wallet";
 import AssuredWorkloadIcon from "@mui/icons-material/AssuredWorkload";
 import { a11yProps } from "@/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import TabelaCompras from "@/app/components/ui/tables/TabelaCompras";
+import { useInvoices } from "@/hooks/queries/useInvoices.query";
+import { InvoiceDto } from "@/types/invoice";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -33,10 +34,19 @@ export default function Faturas() {
     : 0;
   const [value, setValue] = useState<number>(initialTab);
 
+  const { data: allInvoices, isLoading: isLoadingInvoices } = useInvoices();
   const { data, isLoading } = useOrders();
   const { data: dataUser, isLoading: isLoadingUser } = useUsers();
   const { data: groupFamilies, isLoading: isLoadingGroupFamily } =
     useGroupFamily();
+
+  const [allInvoicesIds, setAllInvoicesIds] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    if (allInvoices && allInvoices.length > 0 && !isLoadingInvoices) {
+      setAllInvoicesIds(allInvoices.map((invoice: InvoiceDto) => invoice._id));
+    }
+  }, [allInvoices, isLoadingInvoices]);
 
   const handleEditClick = (row: GridRowModel) => () => {
     console.log(row);
@@ -70,17 +80,6 @@ export default function Faturas() {
     if (isLoading || isLoadingGroupFamily || isLoadingUser) {
       return <Loading />;
     }
-
-    // return (
-    //   <TabelaFaturas
-    //     data={data}
-    //     dataUser={dataUser}
-    //     isLoading={isLoading}
-    //     groupFamilies={groupFamilies}
-    //     handleEditClick={handleEditClick}
-    //     handleDeleteClick={handleDeleteClick}
-    //   />
-    // );
 
     return (
       <Stack>
@@ -125,7 +124,7 @@ export default function Faturas() {
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0} dir={theme.direction}>
-          <TabelaFaturas
+          <TabelaCompras
             data={data}
             dataUser={dataUser}
             isLoading={isLoading}
@@ -135,7 +134,11 @@ export default function Faturas() {
           />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1} dir={theme.direction}>
-          <Text variant="h5">Subcategorias</Text>
+          <FormFaturas
+            groupFamilies={groupFamilies}
+            dataUser={dataUser}
+            allInvoicesIds={allInvoicesIds}
+          />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={2} dir={theme.direction}>
           <Text variant="h5">Subcategorias</Text>

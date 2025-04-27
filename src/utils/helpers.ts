@@ -1,4 +1,4 @@
-import { Categories, User } from "@/types";
+import { Categories, GroupFamily, User } from "@/types";
 import { format, parseISO, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -192,4 +192,15 @@ export function findUserById(
 ): User | null {
   if (!users) return null;
   return users.find((user) => user._id === userId) || null;
+}
+
+export function getGroupFamilyNameById(
+  groupFamilyId: string,
+  groupFamilies: GroupFamily[]
+): string {
+  if (!groupFamilies || !groupFamilyId) return "N/A";
+  const groupFamily = groupFamilies.find(
+    (groupFamily) => groupFamily._id === groupFamilyId
+  );
+  return groupFamily ? groupFamily.name : "N/A";
 }

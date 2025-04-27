@@ -1,175 +1,335 @@
 "use client";
 
+import * as React from "react";
 import Box from "@mui/material/Box";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
-import { capitalize, findUserById } from "@/utils";
-import { CircularProgress, Stack, Typography } from "@mui/material";
-import { Filtros } from "../..";
-import { GroupFamily, Order, User } from "@/types";
+import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
+import Text from "../text/Text";
+import { Filtros, useSnackbar } from "../..";
+import { format } from "date-fns";
+import { FullInvoiceResponse } from "@/types/invoice";
+import { GroupFamily, User } from "@/types";
+import { ptBR } from "date-fns/locale";
+import { useRouter } from "next/navigation";
+
+import {
+  CircularProgress,
+  Stack,
+  Tooltip,
+  Chip,
+  Collapse,
+  Paper,
+  Typography,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+} from "@mui/material";
 
 import {
   DataGrid,
   GridColDef,
   GridActionsCellItem,
-  GridRowModel,
+  GridRenderCellParams,
 } from "@mui/x-data-grid";
-import Text from "../text/Text";
+import {
+  capitalizeFirstLastName,
+  findUserById,
+  getGroupFamilyNameById,
+} from "@/utils";
 
-// Define the product structure based on the actual data
-interface ProductItem {
-  _id: string;
+interface TabelaProps {
+  data: FullInvoiceResponse[] | undefined;
+  isLoading: boolean;
+  onDeleteInvoice: () => void;
+  groupFamilies: GroupFamily[];
+  dataUser: User[] | null;
+}
+
+interface Product {
+  id: string;
   name: string;
   price: number;
   quantity: number;
 }
 
-interface TabelaProps {
-  data: Order[];
-  dataUser: User[] | null;
-  isLoading: boolean;
-  groupFamilies: GroupFamily[];
-  handleEditClick: (row: GridRowModel) => () => void;
-  handleDeleteClick: (userId: string) => () => void;
+interface ConsumptionEntry {
+  date: string;
+  products: Product[];
 }
+
+interface ConsumptionByPerson {
+  [userId: string]: ConsumptionEntry[];
+}
+
+const ConsumptionDetails = ({
+  consumptionData,
+  dataUser,
+}: {
+  consumptionData: ConsumptionByPerson;
+  dataUser: User[] | null;
+}) => {
+  const [expandedUser, setExpandedUser] = React.useState<string | null>(null);
+
+  if (!consumptionData || Object.keys(consumptionData).length === 0) {
+    return <Typography variant="body2">Nenhum consumo registrado</Typography>;
+  }
+
+  const toggleUserExpand = (userId: string) => {
+    setExpandedUser(expandedUser === userId ? null : userId);
+  };
+
+  const calculateUserTotal = (entries: ConsumptionEntry[]): number => {
+    return entries.reduce((total, entry) => {
+      const entryTotal = entry.products.reduce(
+        (sum, product) => sum + product.price * product.quantity,
+        0
+      );
+      return total + entryTotal;
+    }, 0);
+  };
+
+  return (
+    <Box sx={{ maxHeight: 300, overflow: "auto", width: "100%" }}>
+      {Object.entries(consumptionData).map(([userId, entries]) => {
+        const userTotal = calculateUserTotal(entries);
+
+        return (
+          <Paper key={userId} sx={{ mb: 1, p: 1 }}>
+            <Box
+              onClick={() => toggleUserExpand(userId)}
+              sx={{
+                cursor: "pointer",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="subtitle2">
+                Membro:{" "}
+                {capitalizeFirstLastName(findUserById(userId, dataUser)?.name)}
+              </Typography>
+              <Chip
+                label={`R$ ${userTotal.toFixed(2)}`}
+                color="primary"
+                size="small"
+              />
+            </Box>
+
+            <Collapse in={expandedUser === userId}>
+              <List dense>
+                {entries.map((entry, entryIndex) => (
+                  <React.Fragment key={entryIndex}>
+                    <ListItem>
+                      <ListItemText
+                        primary={
+                          <Typography variant="body2">
+                            {format(new Date(entry.date), "dd/MM/yyyy HH:mm", {
+                              locale: ptBR,
+                            })}
+                          </Typography>
+                        }
+                      />
+                    </ListItem>
+                    <Divider />
+                    {entry.products.map((product, productIndex) => (
+                      <ListItem key={productIndex} sx={{ pl: 4 }}>
+                        <ListItemText
+                          primary={
+                            <Typography variant="body2">
+                              {product.name} - {product.quantity}x R${" "}
+                              {product.price.toFixed(2)}
+                            </Typography>
+                          }
+                          secondary={
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              Total: R${" "}
+                              {(product.price * product.quantity).toFixed(2)}
+                            </Typography>
+                          }
+                        />
+                      </ListItem>
+                    ))}
+                    {entryIndex < entries.length - 1 && (
+                      <Divider sx={{ my: 1 }} />
+                    )}
+                  </React.Fragment>
+                ))}
+              </List>
+            </Collapse>
+          </Paper>
+        );
+      })}
+    </Box>
+  );
+};
 
 export default function TabelaFaturas({
   data,
-  dataUser,
   isLoading,
+  onDeleteInvoice,
   groupFamilies,
-  handleEditClick,
-  handleDeleteClick,
+  dataUser,
 }: TabelaProps) {
+  const router = useRouter();
+
+  const { showSnackbar } = useSnackbar();
+
+  const handleEditClick = (_row: FullInvoiceResponse) => () => {
+    // Navigation logic can be implemented later
+    console.log("Edit invoice", _row._id);
+    router.replace(`/financeiro/editar/${_row._id}`);
+  };
+
+  const handleDeleteClick = (_id: string) => async () => {
+    // Delete logic can be implemented later
+    console.log("Delete invoice", _id);
+    onDeleteInvoice();
+
+    showSnackbar({
+      message: "Fatura deletada com sucesso!",
+      severity: "success",
+      duration: 3000,
+    });
+  };
+
+  const handleSendInvoiceClick = (_id: string) => async () => {
+    // Delete logic can be implemented later
+    console.log("Delete invoice", _id);
+    onDeleteInvoice();
+
+    showSnackbar({
+      message: "Fatura enviada com sucesso!",
+      severity: "success",
+      duration: 3000,
+    });
+  };
+
   const columns: GridColDef[] = [
-    {
-      field: "buyerId",
-      headerName: "Nome",
-      width: 350,
-      editable: true,
-      renderCell: (params) => (
-        <Typography sx={{ py: 0.5 }}>
-          {capitalize(findUserById(params.value, dataUser)?.name)}
-        </Typography>
-      ),
-    },
     {
       field: "groupFamilyId",
       headerName: "Grupo Familiar",
-      width: 250,
-      editable: true,
-      renderCell: (params) => {
-        const group = groupFamilies?.find(
-          (group: GroupFamily) => group._id === params.value
-        );
-        return group ? capitalize(group.name) : "-";
-      },
+      width: 120,
+      editable: false,
+      sortable: true,
+      align: "center",
+      renderCell: (params) =>
+        getGroupFamilyNameById(params.value, groupFamilies),
     },
     {
-      field: "products",
-      headerName: "Produtos",
-      width: 300,
+      field: "startDate",
+      headerName: "Data de início",
+      width: 120,
+      editable: false,
+      align: "center",
+      renderCell: (params) =>
+        format(new Date(params.value), "dd/MM/yyyy", { locale: ptBR }),
+    },
+    {
+      field: "endDate",
+      headerName: "Data de fim",
+      width: 120,
+      editable: false,
+      align: "center",
+      renderCell: (params) =>
+        format(new Date(params.value), "dd/MM/yyyy", { locale: ptBR }),
+    },
+    {
+      field: "consumoPorPessoa",
+      headerName: "Consumo por pessoa",
+      width: 400,
+      editable: false,
+      renderCell: (params: GridRenderCellParams) => (
+        <Tooltip title="Clique para ver detalhes" arrow placement="top">
+          <Box sx={{ width: "100%" }}>
+            <ConsumptionDetails
+              consumptionData={params.value}
+              dataUser={dataUser}
+            />
+          </Box>
+        </Tooltip>
+      ),
+    },
+    {
+      field: "totalAmount",
+      headerName: "Valor total",
+      width: 120,
+      align: "center",
+      editable: false,
+      renderCell: (params) => `R$ ${params.value.toFixed(2)}`,
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 120,
+      editable: false,
       align: "center",
       headerAlign: "center",
-      editable: true,
       renderCell: (params) => {
-        if (
-          !params.value ||
-          !Array.isArray(params.value) ||
-          params.value.length === 0
-        ) {
-          return "-";
-        }
+        const status = params.value as "OPEN" | "PARTIALLY_PAID" | "PAID";
+        let color:
+          | "default"
+          | "primary"
+          | "secondary"
+          | "error"
+          | "info"
+          | "success"
+          | "warning" = "default";
+        if (status === "OPEN") color = "error";
+        if (status === "PARTIALLY_PAID") color = "warning";
+        if (status === "PAID") color = "success";
 
-        // Display each product with its name and quantity
+        const statusLabels: Record<"OPEN" | "PARTIALLY_PAID" | "PAID", string> =
+          {
+            OPEN: "Em aberto",
+            PARTIALLY_PAID: "Parcialmente pago",
+            PAID: "Pago",
+          };
+
         return (
-          <Stack spacing={0.5} sx={{ width: "100%", py: 0.5 }}>
-            {params.value.map((prod: ProductItem, index: number) => {
-              const quantity = prod.quantity || 1;
-              return (
-                <Box
-                  key={prod._id || index}
-                  sx={{
-                    fontSize: "0.875rem",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    borderBottom:
-                      params.value.length > 1 ? "1px dashed #eee" : "",
-                    pb: params.value.length > 1 ? 0.5 : 0,
-                  }}
-                >
-                  <Typography
-                    sx={{ fontWeight: quantity > 1 ? "bold" : "normal" }}
-                  >
-                    {capitalize(prod.name)}
-                  </Typography>
-                  <Typography sx={{ color: "text.secondary" }}>
-                    {quantity > 1 ? `${quantity}x` : "1x"}
-                  </Typography>
-                </Box>
-              );
-            })}
-            {params.value.length > 1 && (
-              <Box
-                sx={{
-                  fontSize: "0.75rem",
-                  color: "text.secondary",
-                  textAlign: "right",
-                  pt: 0.5,
-                }}
-              >
-                Total: {params.value.length} itens
-              </Box>
-            )}
-          </Stack>
+          <Chip
+            label={statusLabels[status] || status}
+            color={color}
+            size="small"
+            sx={{
+              color: "#fff",
+            }}
+          />
         );
       },
-    },
-    {
-      field: "totalPrice",
-      headerName: "Total",
-      width: 100,
-      editable: false,
-      align: "center",
-      headerAlign: "center",
-      renderCell: (params) => (
-        <Typography sx={{ py: 0.5 }}>{`R$ ${params.value}`}</Typography>
-      ),
-    },
-    {
-      field: "createdAt",
-      headerName: "Data",
-      width: 100,
-      editable: false,
-      align: "center",
-      headerAlign: "center",
-      renderCell: (params) => (
-        <Typography sx={{ py: 0.5 }}>
-          {new Date(params.value).toLocaleDateString()}
-        </Typography>
-      ),
     },
     {
       field: "actions",
       type: "actions",
-      headerName: "",
-      width: 100,
+      headerName: "Ações",
+      width: 120,
       cellClassName: "actions",
       getActions: (params) => {
         return [
           <GridActionsCellItem
-            key={params.id}
+            key={`edit-${params.id}`}
             icon={<EditIcon sx={{ color: "#666666", fontSize: 25 }} />}
             label="Edit"
             className="textPrimary"
-            onClick={handleEditClick(params.row)}
+            onClick={handleEditClick(params.row as FullInvoiceResponse)}
           />,
           <GridActionsCellItem
-            key={params.id}
+            key={`delete-${params.id}`}
             icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 25 }} />}
             label="Delete"
             onClick={handleDeleteClick(String(params.id))}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key={`send-${params.id}`}
+            icon={<SendOutlinedIcon sx={{ color: "#4caf50", fontSize: 25 }} />}
+            label="Send"
+            onClick={handleSendInvoiceClick(String(params.id))}
             color="inherit"
           />,
         ];
@@ -191,19 +351,11 @@ export default function TabelaFaturas({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Compras realizadas</Text>
-
-        {/* <IconButton
-          aria-label="add"
-          sx={{ color: "success.main" }}
-          onClick={handleAddClient}
-        >
-          <AddCircleIcon fontSize="large" />
-        </IconButton> */}
+        <Text variant="h5">Faturas Registradas</Text>
       </Stack>
 
       {!isLoading && (!data || data.length === 0) && (
-        <EmptyContent title="Ainda não há clientes para exibir" />
+        <EmptyContent title="Ainda não há faturas registradas" />
       )}
 
       {!isLoading && data && data.length > 0 && (
