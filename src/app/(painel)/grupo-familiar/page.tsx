@@ -3,7 +3,6 @@
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import Loading from "@/app/components/loading/Loading";
 import TabelaGrupoFamiliar from "@/app/components/ui/tables/TabelaGrupoFamiliar";
-import { capitalizeFirstLastName, findUserById } from "@/utils";
 import { useApp } from "@/contexts";
 import { useDeleteGroupFamily } from "@/hooks/mutations";
 import { useEffect, useState } from "react";
@@ -105,15 +104,6 @@ export default function GroupFamily() {
     setRowModesModel(newRowModesModel);
   };
 
-  const getOwnerName = (ownerId: string, row: GroupFamily) => {
-    const ownerMember = row.members.find(
-      (member: SelectedMember) => member.userId === ownerId
-    );
-    return ownerMember
-      ? capitalizeFirstLastName(findUserById(ownerId, dataUser)?.name)
-      : ownerId;
-  };
-
   const handleEditMembers =
     (row: GroupFamily, addOrRemove: "add" | "remove") => () => {
       setAddOrRemove(addOrRemove);
@@ -131,9 +121,7 @@ export default function GroupFamily() {
     return (
       <TabelaGrupoFamiliar
         data={data}
-        dataUser={dataUser}
         isLoading={isLoading}
-        getOwnerName={getOwnerName}
         handleEditClick={handleEditClick}
         handleDeleteClick={handleDeleteClick}
         processRowUpdate={processRowUpdate}

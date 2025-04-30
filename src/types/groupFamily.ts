@@ -3,6 +3,8 @@ export type GroupFamily = {
   name: string;
   members: SelectedMember[];
   owner?: string;
+  ownerName?: string;
+  ownerAvatar?: string;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -16,6 +18,8 @@ export type GroupFamilyWithOwner = {
 
 export interface SelectedMember {
   userId: string;
+  memberName: string;
+  memberAvatar: string;
 }
 
 export interface TransferMember {

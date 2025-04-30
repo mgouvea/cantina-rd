@@ -9,12 +9,14 @@ import EmptyContent from "../emptyContent/EmptyContent";
 import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
 import GroupRemoveOutlinedIcon from "@mui/icons-material/GroupRemoveOutlined";
 import Text from "../text/Text";
-import { capitalize, findUserById } from "@/utils";
-import { CircularProgress, IconButton, Stack } from "@mui/material";
+import { capitalize, capitalizeFirstLastName } from "@/utils";
+import { CircularProgress, IconButton, Stack, Typography } from "@mui/material";
 import { Filtros } from "../..";
 import { GroupFamily, SelectedMember } from "@/types/groupFamily";
-import { User } from "@/types";
 import { useRouter } from "next/navigation";
+import Avatar from "@mui/material/Avatar";
+import Tooltip from "@mui/material/Tooltip";
+import AvatarGroup from "@mui/material/AvatarGroup";
 
 import {
   DataGrid,
@@ -27,12 +29,10 @@ import {
 
 interface TabelaProps {
   data: GroupFamily[];
-  dataUser: User[] | null;
   isLoading: boolean;
   rows?: GroupFamily[];
   rowModesModel: GridRowModesModel;
   handleRowEditStop: GridEventListener<"rowEditStop">;
-  getOwnerName: (ownerId: string, row: GroupFamily) => string;
   handleEditClick: (row: GridRowModel) => () => void;
   handleDeleteClick: (id: string) => () => void;
   processRowUpdate: (newRow: GridRowModel) => GroupFamily;
@@ -46,9 +46,7 @@ interface TabelaProps {
 
 export default function TabelaGrupoFamiliar({
   data,
-  dataUser,
   isLoading,
-  getOwnerName,
   handleEditClick,
   handleDeleteClick,
   processRowUpdate,
@@ -61,28 +59,54 @@ export default function TabelaGrupoFamiliar({
   const router = useRouter();
 
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Nome", width: 300, editable: true },
     {
-      field: "owner",
+      field: "name",
+      headerName: "Nome do grupo",
+      width: 300,
+      editable: true,
+      renderCell: (params) => (
+        <Typography sx={{ py: 1 }}>{capitalize(params.value)}</Typography>
+      ),
+    },
+    {
+      field: "ownerName",
       headerName: "Responsável",
       type: "string",
       width: 300,
       editable: true,
-      renderCell: (params) => getOwnerName(params.value, params.row),
+      renderCell: (params) => (
+        <Box display="flex" alignItems="center" sx={{ py: 1 }}>
+          <Avatar
+            src={params.row.ownerAvatar}
+            alt={params.value}
+            sx={{ width: 40, height: 40, marginRight: 1 }}
+          />
+          {capitalizeFirstLastName(params.value)}
+        </Box>
+      ),
     },
     {
       field: "members",
       headerName: "Membros",
       width: 250,
-      renderCell: (params) => (
-        <Stack spacing={1} sx={{ py: 1, width: "100%" }}>
-          {params.value.map((member: SelectedMember, index: number) => (
-            <div key={index}>
-              {capitalize(findUserById(member.userId, dataUser)?.name)}
-            </div>
-          ))}
-        </Stack>
-      ),
+      headerAlign: "center",
+      renderCell: (params) => {
+        const members = params.value || [];
+        const maxAvatars = 5;
+        return (
+          <AvatarGroup max={maxAvatars} sx={{ py: 1 }}>
+            {members.map((member: SelectedMember, index: number) => (
+              <Tooltip title={capitalize(member.memberName)} key={index}>
+                <Avatar
+                  src={member.memberAvatar}
+                  alt={member.memberName}
+                  sx={{ width: 32, height: 32 }}
+                />
+              </Tooltip>
+            ))}
+          </AvatarGroup>
+        );
+      },
     },
     {
       field: "actions",
