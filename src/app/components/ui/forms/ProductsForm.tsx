@@ -1,6 +1,18 @@
 "use client";
 
+import { capitalize } from "@/utils";
 import { Categories, fotoUploadProps, Products, SubCategories } from "@/types";
+import { EntradaTexto } from "../entradaTexto/EntradaTexto";
+import { FormActions } from "./FormActions";
+import { UploadPicture } from "../uploadFoto/UploadPicture";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCategories, useSubCategories } from "@/hooks/queries";
+import { useForm } from "react-hook-form";
+import { useProductStore } from "@/contexts";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useSnackbar } from "../../snackbar/SnackbarProvider";
+
 import {
   Box,
   Chip,
@@ -11,21 +23,10 @@ import {
   SelectChangeEvent,
   Stack,
 } from "@mui/material";
-import { EntradaTexto } from "../entradaTexto/EntradaTexto";
-import { capitalize } from "@/utils";
-import { FormActions } from "./FormActions";
-import { useForm } from "react-hook-form";
-import { useState, useCallback, useMemo, useEffect } from "react";
-import { useCategories, useSubCategories } from "@/hooks/queries";
 import {
   useAddProduct,
   useUpdateProduct,
 } from "@/hooks/mutations/useProducts.mutation";
-import { useSnackbar } from "../../snackbar/SnackbarProvider";
-import { useRouter } from "next/navigation";
-import { UploadPicture } from "../uploadFoto/UploadPicture";
-import { useQueryClient } from "@tanstack/react-query";
-import { useProductStore } from "@/contexts/store/products.store";
 
 // Define partial type for form initialization
 type ProductFormValues = Omit<Products, "createdAt" | "updatedAt">;

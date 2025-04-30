@@ -8,14 +8,13 @@ import SwitchSelector from "react-switch-selector";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { FormActions } from "@/app/components";
 import { useQueryClient } from "@tanstack/react-query";
-import { useApp } from "@/contexts";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "@/app/components";
 import { useAddAdmin, useAddUser, useUpdateUser } from "@/hooks/mutations";
 import { UploadPicture } from "@/app/components";
-import { useUserStore } from "@/contexts/store/users.store";
 import Text from "@/app/components/ui/text/Text";
 import { removerMascaraTelefone } from "@/utils";
+import { useUserStore } from "@/contexts";
 
 const optionsSwitch = [
   {
@@ -41,10 +40,12 @@ const INITIAL_FORM_VALUES = {
 };
 
 export default function FormClientsPage() {
-  const { userToEdit, isEditing, updateUserToEdit, updateIsEditing } =
+  const { allUsers, userToEdit, isEditing, updateUserToEdit, updateIsEditing } =
     useUserStore();
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  console.log("ALLUSERS", allUsers);
 
   const EDITING_FORM_VALUES = {
     name: userToEdit?.name || "",
@@ -58,8 +59,6 @@ export default function FormClientsPage() {
   });
   const { control, getValues, reset, setValue } = userForm;
   const { showSnackbar } = useSnackbar();
-
-  const { userContext } = useApp();
 
   const { mutateAsync: addUser } = useAddUser();
   const { mutateAsync: updateUser } = useUpdateUser();
@@ -145,13 +144,17 @@ export default function FormClientsPage() {
 
   const handleSaveClient = useCallback(async () => {
     setIsSubmitting(true);
-    const userExists = userContext.some(
-      (user) => user.telephone === watchedTelefone
+
+    const telefoneNormalizado = removerMascaraTelefone(watchedTelefone);
+
+    const userExists = allUsers?.some(
+      (user) => removerMascaraTelefone(user.telephone) === telefoneNormalizado
     );
 
     if (userExists && !isEditing) {
       showSnackbar({
-        message: "Cliente já cadastrado!",
+        message:
+          "Cliente já cadastrado! Este telefone já consta em nossa base de dados.",
         severity: "warning",
       });
       setIsSubmitting(false);
@@ -215,8 +218,8 @@ export default function FormClientsPage() {
     fotoPerfil,
     queryClient,
     router,
-    userContext,
     watchedTelefone,
+    allUsers,
     userToEdit,
     isEditing,
     addAdmin,

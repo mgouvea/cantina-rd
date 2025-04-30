@@ -3,16 +3,13 @@
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import Loading from "@/app/components/loading/Loading";
 import TabelaGrupoFamiliar from "@/app/components/ui/tables/TabelaGrupoFamiliar";
-import { useApp } from "@/contexts";
 import { useDeleteGroupFamily } from "@/hooks/mutations";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
 import { useGroupFamilyStore } from "@/contexts/store/groupFamily.store";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { DeleteModal, MemberModal, useSnackbar } from "@/app/components";
-import { useUsers } from "@/hooks/queries";
-import { useUserStore } from "@/contexts/store/users.store";
 
 import type { GroupFamily, SelectedMember } from "@/types";
 import {
@@ -29,10 +26,6 @@ const breadcrumbItems = [
 
 export default function GroupFamily() {
   const { data, isLoading } = useGroupFamily();
-  const { data: dataUser } = useUsers();
-  const { setUserContext } = useApp();
-
-  const { updateAllUsers, allUsers } = useUserStore();
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -52,13 +45,6 @@ export default function GroupFamily() {
 
   const { mutateAsync: deleteGroupFamily } = useDeleteGroupFamily();
   const { updateGroupFamilyToEdit, updateIsEditing } = useGroupFamilyStore();
-
-  useEffect(() => {
-    if (!isLoading && data) {
-      setUserContext(data);
-      updateAllUsers(dataUser);
-    }
-  }, [data, isLoading, setUserContext, dataUser, updateAllUsers]);
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -152,7 +138,6 @@ export default function GroupFamily() {
     <ContentWrapper breadcrumbItems={breadcrumbItems}>
       {renderContent()}
       <MemberModal
-        allUsers={allUsers}
         openModal={openModal}
         setOpenModal={setOpenModal}
         addOrRemove={addOrRemove}

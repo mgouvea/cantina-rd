@@ -1,20 +1,20 @@
 "use client";
 
+import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
+import ListOutlinedIcon from "@mui/icons-material/ListOutlined";
 import Loading from "@/app/components/loading/Loading";
 import TabelaCategorias from "@/app/components/ui/tables/TabelaCategorias";
-import { useCategories } from "@/hooks/queries";
-import { Box, Stack, Tabs, Tab, useTheme } from "@mui/material";
-import { useEffect, useState } from "react";
-import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
-import ListOutlinedIcon from "@mui/icons-material/ListOutlined";
-import { a11yProps } from "@/utils";
-import { CustomTabPanel } from "@/app/components";
 import TabelaSubcategorias from "@/app/components/ui/tables/TabelaSubcategoria";
-import { useSubCategories } from "@/hooks/queries";
-import { useCategoryStore } from "@/contexts/store/categories.store";
+import { a11yProps } from "@/utils";
+import { Box, Stack, Tab, Tabs, useTheme } from "@mui/material";
+import { CustomTabPanel } from "@/app/components";
+import { useCategories } from "@/hooks/queries";
+import { useCategoryStore } from "@/contexts";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
+import { useSubCategories } from "@/hooks/queries";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },

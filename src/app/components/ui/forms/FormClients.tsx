@@ -7,12 +7,11 @@ import SwitchSelector from "react-switch-selector";
 import { useState, useMemo, useCallback } from "react";
 import { FormActions } from "./FormActions";
 import { useQueryClient } from "@tanstack/react-query";
-import { useApp } from "@/contexts";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "../../snackbar/SnackbarProvider";
 import { useAddAdmin, useAddUser, useUpdateUser } from "@/hooks/mutations";
 import { UploadPicture } from "../uploadFoto/UploadPicture";
-import { useUserStore } from "@/contexts/store/users.store";
+import { useUserStore } from "@/contexts";
 
 const optionsSwitch = [
   {
@@ -37,7 +36,7 @@ const INITIAL_FORM_VALUES = {
 };
 
 export const FormClients = () => {
-  const { userToEdit, isEditing, updateUserToEdit, updateIsEditing } =
+  const { allUsers, userToEdit, isEditing, updateUserToEdit, updateIsEditing } =
     useUserStore();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -53,8 +52,6 @@ export const FormClients = () => {
   });
   const { control, getValues, reset } = userForm;
   const { showSnackbar } = useSnackbar();
-
-  const { userContext } = useApp();
 
   const { mutateAsync: addUser } = useAddUser();
   const { mutateAsync: updateUser } = useUpdateUser();
@@ -108,7 +105,7 @@ export const FormClients = () => {
 
   const handleSaveClient = useCallback(async () => {
     setIsSubmitting(true);
-    const userExists = userContext.some(
+    const userExists = allUsers?.some(
       (user) => user.telephone === watchedTelefone
     );
 
@@ -177,7 +174,7 @@ export const FormClients = () => {
     fotoPerfil,
     queryClient,
     router,
-    userContext,
+    allUsers,
     watchedTelefone,
     userToEdit,
     isEditing,

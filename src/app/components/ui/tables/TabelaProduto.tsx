@@ -12,9 +12,10 @@ import { capitalize } from "@/utils";
 import { Filtros } from "../../filtros/Filtros";
 import { Products } from "@/types";
 import { useDeleteProduct } from "@/hooks/mutations/useProducts.mutation";
-import { useProductStore } from "@/contexts/store/products.store";
+import { useProductStore } from "@/contexts";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "../../snackbar/SnackbarProvider";
+
 import {
   GridRowModesModel,
   DataGrid,

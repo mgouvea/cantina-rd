@@ -3,14 +3,14 @@
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import Loading from "@/app/components/loading/Loading";
 import TabelaCliente from "@/app/components/ui/tables/TabelaCliente";
+import { capitalizeFirstLastName } from "@/utils";
 import { Client, User } from "@/types";
-import { useApp } from "@/contexts";
+import { DeleteModal, useSnackbar } from "@/app/components";
 import { useEffect, useState } from "react";
-import { useGroupFamily, useUsers } from "@/hooks/queries";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { DeleteModal, useSnackbar } from "@/app/components";
-import { useUserStore } from "@/contexts/store/users.store";
+import { useUsers } from "@/hooks/queries";
+import { useUserStore } from "@/contexts";
 
 import {
   GridEventListener,
@@ -24,7 +24,6 @@ import {
   useDeleteUser,
   useUpdateUser,
 } from "@/hooks/mutations";
-import { capitalizeFirstLastName } from "@/utils";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -34,14 +33,8 @@ const breadcrumbItems = [
 export default function Clientes() {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { data, isLoading } = useUsers();
-  const { setUserContext } = useApp();
 
-  useEffect(() => {
-    if (!isLoading && data) {
-      setUserContext(data);
-    }
-  }, [data, isLoading, setUserContext]);
+  const { data, isLoading } = useUsers();
 
   const [rows, setRows] = useState<Client[]>(data);
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
@@ -55,15 +48,19 @@ export default function Clientes() {
   const [userClicked, setUserClicked] = useState<User | null>(null);
   const [email, setEmail] = useState("");
 
-  const { data: groupFamilies } = useGroupFamily();
-
   const { mutateAsync: deleteUser } = useDeleteUser();
   const { mutateAsync: updateUser } = useUpdateUser();
   const { mutateAsync: addAdmin } = useAddAdmin();
   const { mutateAsync: deleteAdmin } = useDeleteAdmin();
 
-  const { updateUserToEdit, updateIsEditing } = useUserStore();
+  const { updateAllUsers, updateUserToEdit, updateIsEditing } = useUserStore();
   const { showSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      updateAllUsers(data);
+    }
+  }, [data, updateAllUsers]);
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -189,7 +186,6 @@ export default function Clientes() {
       <TabelaCliente
         data={data}
         isLoading={isLoading}
-        groupFamilies={groupFamilies}
         enableOrDisableAdmin={enableOrDisableAdmin}
         openModal={openModal}
         userClicked={userClicked}

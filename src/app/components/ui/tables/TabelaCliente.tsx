@@ -26,13 +26,12 @@ import {
   GridEventListener,
   GridRowModesModel,
 } from "@mui/x-data-grid";
-import { GroupFamily, User } from "@/types";
+import { User } from "@/types";
 import GenericModal from "../../modal/GenericModal";
 import { useRouter } from "next/navigation";
 interface TabelaProps {
   data: Client[];
   isLoading: boolean;
-  groupFamilies: GroupFamily[];
   enableOrDisableAdmin: boolean;
   openModal: boolean;
   userClicked: User | null;
@@ -56,7 +55,6 @@ interface TabelaProps {
 export default function TabelaCliente({
   data,
   isLoading,
-  groupFamilies,
   enableOrDisableAdmin,
   openModal,
   email,
@@ -115,16 +113,11 @@ export default function TabelaCliente({
       renderCell: (params) => formatarTelefone(params.value),
     },
     {
-      field: "groupFamily",
+      field: "groupFamilyName",
       headerName: "Grupo Familiar",
       width: 200,
       editable: true,
-      renderCell: (params) => {
-        const group = groupFamilies?.find(
-          (group: GroupFamily) => group._id === params.value
-        );
-        return group ? capitalize(group.name) : "-";
-      },
+      renderCell: (params) => capitalize(params.value),
     },
     {
       field: "isAdmin",

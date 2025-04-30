@@ -6,12 +6,13 @@ import Box from "@mui/material/Box";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
+import Image from "next/image";
 import Text from "../text/Text";
-import { CircularProgress, IconButton, Stack } from "@mui/material";
 import { capitalize } from "@/utils";
 import { Categories } from "@/types";
+import { CircularProgress, IconButton, Stack } from "@mui/material";
 import { Filtros, useSnackbar } from "../..";
-import { useCategoryStore } from "@/contexts/store/categories.store";
+import { useCategoryStore } from "@/contexts";
 import { useDeleteCategory } from "@/hooks/mutations";
 import { useRouter } from "next/navigation";
 
@@ -24,7 +25,6 @@ import {
   GridRowEditStopReasons,
   GridEventListener,
 } from "@mui/x-data-grid";
-import Image from "next/image";
 interface TabelaProps {
   data: Categories[];
   isLoading: boolean;

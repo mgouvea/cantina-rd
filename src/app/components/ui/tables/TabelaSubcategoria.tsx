@@ -8,8 +8,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
 import { capitalize, getCategoryNameById } from "@/utils";
+import { Categories, SubCategories } from "@/types";
 import { CircularProgress, IconButton, Stack } from "@mui/material";
 import { Filtros, useSnackbar } from "../..";
+import { useCategoryStore, useSubCategoryStore } from "@/contexts";
+import { useDeleteSubCategory } from "@/hooks/mutations";
 import { useRouter } from "next/navigation";
 
 import {
@@ -21,10 +24,6 @@ import {
   GridRowEditStopReasons,
   GridEventListener,
 } from "@mui/x-data-grid";
-import { Categories, SubCategories } from "@/types";
-import { useCategoryStore } from "@/contexts/store/categories.store";
-import { useSubCategoryStore } from "@/contexts/store/subcategories.store";
-import { useDeleteSubCategory } from "@/hooks/mutations";
 
 interface TabelaProps {
   data: Categories[];

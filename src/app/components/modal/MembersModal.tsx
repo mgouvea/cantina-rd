@@ -11,20 +11,9 @@ import {
   useUpdateMembersGroupFamily,
   useUpdateUsersGroupFamily,
 } from "@/hooks/mutations";
+import { useUsers } from "@/hooks/queries";
 
-export const MemberModal = ({
-  allUsers,
-  openModal,
-  setOpenModal,
-  addOrRemove,
-  idGroupFamily,
-  members,
-  setMembers,
-  selectedUserIds,
-  setSelectedUserIds,
-  setIdGroupFamily,
-}: {
-  allUsers: User[] | null;
+interface MembersModalProps {
   openModal: boolean;
   setOpenModal: (open: boolean) => void;
   addOrRemove: "add" | "remove";
@@ -34,9 +23,23 @@ export const MemberModal = ({
   selectedUserIds: string[];
   setSelectedUserIds: (ids: string[]) => void;
   setIdGroupFamily: (id: string | null) => void;
-}) => {
+}
+
+export const MemberModal = ({
+  openModal,
+  setOpenModal,
+  addOrRemove,
+  idGroupFamily,
+  members,
+  setMembers,
+  selectedUserIds,
+  setSelectedUserIds,
+  setIdGroupFamily,
+}: MembersModalProps) => {
   const queryClient = useQueryClient();
   const { showSnackbar } = useSnackbar();
+
+  const { data: allUsers } = useUsers(openModal);
 
   const { mutateAsync: updateMembersGroupFamily } =
     useUpdateMembersGroupFamily();

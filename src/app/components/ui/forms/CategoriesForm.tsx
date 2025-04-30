@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Box, Stack } from "@mui/material";
 import { Categories, fotoUploadProps } from "@/types/products";
 import { EntradaTexto } from "../entradaTexto/EntradaTexto";
-import { useAddCategory, useUpdateCategory } from "@/hooks/mutations";
-import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { useSnackbar } from "../../snackbar/SnackbarProvider";
 import { FormActions } from "./FormActions";
 import { UploadPicture } from "../uploadFoto/UploadPicture";
+import { useAddCategory, useUpdateCategory } from "@/hooks/mutations";
+import { useCategoryStore } from "@/contexts";
+import { useForm } from "react-hook-form";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCategoryStore } from "@/contexts/store/categories.store";
+import { useRouter } from "next/navigation";
+import { useSnackbar } from "../../snackbar/SnackbarProvider";
 
 const INITIAL_CATEGORY_FORM_VALUES: Categories = {
   name: "",

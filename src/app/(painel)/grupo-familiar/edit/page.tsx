@@ -8,9 +8,9 @@ import { useSnackbar } from "@/app/components/snackbar/SnackbarProvider";
 import { GroupFamily, TransferMember } from "@/types";
 import { GroupFamilyForm } from "@/app/components";
 import { useGroupFamilyStore } from "@/contexts/store/groupFamily.store";
-import { useUserStore } from "@/contexts/store/users.store";
 import { findUserById, capitalize } from "@/utils";
 import { useUpdateGroupFamily } from "@/hooks/mutations";
+import { useUserStore } from "@/contexts";
 
 export default function EditGroupFamilyPage() {
   const { isEditing, updateIsEditing, groupFamilyToEdit } =

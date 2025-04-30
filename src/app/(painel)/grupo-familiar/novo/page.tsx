@@ -38,8 +38,8 @@ import StepConnector, {
 } from "@mui/material/StepConnector";
 import { capitalize } from "@/utils";
 import { User } from "@/types";
-import { useUserStore } from "@/contexts/store/users.store";
 import { useQueryClient } from "@tanstack/react-query";
+import { useUserStore } from "@/contexts";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
