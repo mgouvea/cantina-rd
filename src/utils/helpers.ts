@@ -28,6 +28,11 @@ export const formatarTelefone = (numero: string) => {
   return formatado;
 };
 
+export const removerMascaraTelefone = (telefone: string) => {
+  if (!telefone) return "";
+  return telefone.replace(/\D/g, "");
+};
+
 export const primeiraMaiuscula = (
   text: string | undefined
 ): string | undefined => {

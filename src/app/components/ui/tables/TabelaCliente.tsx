@@ -6,7 +6,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
-import { capitalize } from "@/utils";
+import { capitalize, formatarTelefone } from "@/utils";
 import {
   Avatar,
   CircularProgress,
@@ -112,6 +112,7 @@ export default function TabelaCliente({
       align: "left",
       headerAlign: "left",
       editable: true,
+      renderCell: (params) => formatarTelefone(params.value),
     },
     {
       field: "groupFamily",

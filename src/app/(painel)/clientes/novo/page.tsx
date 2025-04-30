@@ -15,6 +15,7 @@ import { useAddAdmin, useAddUser, useUpdateUser } from "@/hooks/mutations";
 import { UploadPicture } from "@/app/components";
 import { useUserStore } from "@/contexts/store/users.store";
 import Text from "@/app/components/ui/text/Text";
+import { removerMascaraTelefone } from "@/utils";
 
 const optionsSwitch = [
   {
@@ -164,13 +165,14 @@ export default function FormClientsPage() {
       const userPayload: User = {
         ...userValues,
         name,
+        telephone: removerMascaraTelefone(watchedTelefone),
         isAdmin: checked,
         imageBase64: isEditing ? isEditingFotoPerfil : fotoPerfil?.base64 || "",
       };
 
       if (isEditing && userToEdit) {
         await updateUser({
-          user: userPayload,
+          userPayload: userPayload,
           userId: userToEdit._id!,
         });
       } else {

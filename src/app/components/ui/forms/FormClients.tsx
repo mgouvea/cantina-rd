@@ -134,7 +134,7 @@ export const FormClients = () => {
 
       if (isEditing && userToEdit) {
         await updateUser({
-          user: userPayload,
+          userPayload: userPayload,
           userId: userToEdit._id!,
         });
       } else {
