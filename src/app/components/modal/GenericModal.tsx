@@ -1,5 +1,4 @@
 import * as React from "react";
-import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -10,7 +9,7 @@ import { Botao } from "../ui/botao/Botao";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
-    children: React.ReactElement<any, any>;
+    children: React.ReactElement;
   },
   ref: React.Ref<unknown>
 ) {
@@ -51,7 +50,7 @@ export default function GenericModal({
       >
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>{children}</DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ pb: 2, pr: 2 }}>
           <Botao variant="outlined" color="warning" onClick={handleClose}>
             {cancelButtonText}
           </Botao>

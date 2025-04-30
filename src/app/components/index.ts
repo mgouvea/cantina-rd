@@ -6,6 +6,7 @@ export * from "./filtros/Pesquisa";
 export * from "./loading/Loading";
 export * from "./modal/GenericModal";
 export * from "./modal/MembersModal";
+export * from "./modal/DeleteModal";
 export * from "./snackbar/SnackbarProvider";
 export * from "./ui/header/Header";
 export * from "./ui/icons/CustomIcons";

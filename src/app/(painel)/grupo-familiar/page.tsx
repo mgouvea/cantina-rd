@@ -10,7 +10,7 @@ import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
 import { useGroupFamilyStore } from "@/contexts/store/groupFamily.store";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { MemberModal, useSnackbar } from "@/app/components";
+import { DeleteModal, MemberModal, useSnackbar } from "@/app/components";
 import { useUsers } from "@/hooks/queries";
 import { useUserStore } from "@/contexts/store/users.store";
 
@@ -41,6 +41,10 @@ export default function GroupFamily() {
   const { showSnackbar } = useSnackbar();
 
   const [openModal, setOpenModal] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [idToDelete, setIdToDelete] = useState<string | null>(null);
+  const [nameToDelete, setNameToDelete] = useState<string | null>(null);
+
   const [addOrRemove, setAddOrRemove] = useState<"add" | "remove">("add");
   const [members, setMembers] = useState<SelectedMember[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -71,9 +75,18 @@ export default function GroupFamily() {
     router.replace("/grupo-familiar/edit");
   };
 
-  const handleDeleteClick = (id: string) => async () => {
+  const handleDeleteClick = (id: string, row: GridRowModel) => () => {
+    console.log("row", row);
+    setIdToDelete(id);
+    setNameToDelete(row.name);
+    setOpenDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!idToDelete) return;
+
     try {
-      await deleteGroupFamily(id);
+      await deleteGroupFamily(idToDelete);
       queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
       queryClient.invalidateQueries({ queryKey: ["users"] });
       showSnackbar({
@@ -81,6 +94,7 @@ export default function GroupFamily() {
         severity: "success",
         duration: 3000,
       });
+      setOpenDeleteModal(false);
     } catch (error) {
       showSnackbar({
         message: "Erro ao deletar grupo familiar",
@@ -149,6 +163,13 @@ export default function GroupFamily() {
         selectedUserIds={selectedUserIds}
         setSelectedUserIds={setSelectedUserIds}
         setIdGroupFamily={setIdGroupFamily}
+      />
+      <DeleteModal
+        title="grupo familiar"
+        nameToDelete={nameToDelete!}
+        openModal={openDeleteModal}
+        setOpenModal={setOpenDeleteModal}
+        onConfirmDelete={confirmDelete}
       />
     </ContentWrapper>
   );
