@@ -1,10 +1,20 @@
 "use client";
 
 import * as React from "react";
-import Box from "@mui/material/Box";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import Box from "@mui/material/Box";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import EditIcon from "@mui/icons-material/Edit";
+import EmptyContent from "../emptyContent/EmptyContent";
+import Image from "next/image";
+import Text from "../text/Text";
+import { capitalize } from "@/utils";
+import { Filtros } from "../../filtros/Filtros";
+import { Products } from "@/types";
+import { useDeleteProduct } from "@/hooks/mutations/useProducts.mutation";
+import { useProductStore } from "@/contexts/store/products.store";
+import { useRouter } from "next/navigation";
+import { useSnackbar } from "../../snackbar/SnackbarProvider";
 import {
   GridRowModesModel,
   DataGrid,
@@ -21,30 +31,16 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { capitalize } from "@/utils";
-import { Categories, Products, SubCategories } from "@/types/products";
-import EmptyContent from "../emptyContent/EmptyContent";
-import Image from "next/image";
-import { Filtros } from "../../filtros/Filtros";
-import Text from "../text/Text";
-import { useProductStore } from "@/contexts/store/products.store";
-import { useDeleteProduct } from "@/hooks/mutations/useProducts.mutation";
-import { useSnackbar } from "../../snackbar/SnackbarProvider";
 
 interface TabelaProps {
   data: Products[];
   isLoading: boolean;
-  categories: Categories[];
-  subcategories: SubCategories[];
   onDeleteProduct: () => void;
 }
 
 export default function TabelaProduto({
   data,
   isLoading,
-  categories,
-  subcategories,
   onDeleteProduct,
 }: TabelaProps) {
   const router = useRouter();
@@ -201,12 +197,7 @@ export default function TabelaProduto({
             headerAlign: "center",
             align: "center",
             renderCell: (params) => {
-              const categoryId = params.row.categoryId;
-              const category =
-                typeof categoryId === "string"
-                  ? categories?.find((cat) => cat._id === categoryId)
-                  : categoryId;
-
+              const category = params.row.categoryId;
               return (
                 <div style={{ ...rowStyle, textAlign: "center" }}>
                   {capitalize(category?.name || "")}
@@ -222,14 +213,7 @@ export default function TabelaProduto({
             headerAlign: "center",
             align: "center",
             renderCell: (params) => {
-              const subcategoryId = params.row.subcategoryId;
-              const subcategory =
-                typeof subcategoryId === "string"
-                  ? subcategories?.find(
-                      (subcat) => subcat._id === subcategoryId
-                    )
-                  : subcategoryId;
-
+              const subcategory = params.row.subcategoryId;
               return (
                 <div style={{ ...rowStyle, textAlign: "center" }}>
                   {capitalize(subcategory?.name || "")}
@@ -260,7 +244,7 @@ export default function TabelaProduto({
   const columns = React.useMemo(
     () => getColumnConfig(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isMobile, isTablet, categories, subcategories]
+    [isMobile, isTablet]
   );
 
   const handleAddProduto = () => {
