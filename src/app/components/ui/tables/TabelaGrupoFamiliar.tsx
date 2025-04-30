@@ -34,7 +34,7 @@ interface TabelaProps {
   rowModesModel: GridRowModesModel;
   handleRowEditStop: GridEventListener<"rowEditStop">;
   handleEditClick: (row: GridRowModel) => () => void;
-  handleDeleteClick: (id: string, row: GridRowModel) => () => void;
+  handleDeleteClick: (row: GridRowModel) => () => void;
   processRowUpdate: (newRow: GridRowModel) => GroupFamily;
   handleRowModesModelChange: (newRowModesModel: GridRowModesModel) => void;
   setRows: (rows: GroupFamily[]) => void;
@@ -147,7 +147,7 @@ export default function TabelaGrupoFamiliar({
             key={id}
             icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 25 }} />}
             label="Delete"
-            onClick={handleDeleteClick(String(id), row)}
+            onClick={handleDeleteClick(row)}
             color="inherit"
           />,
         ];

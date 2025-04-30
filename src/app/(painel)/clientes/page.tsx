@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { useGroupFamily, useUsers } from "@/hooks/queries";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useSnackbar } from "@/app/components";
+import { DeleteModal, useSnackbar } from "@/app/components";
 import { useUserStore } from "@/contexts/store/users.store";
 
 import {
@@ -24,6 +24,7 @@ import {
   useDeleteUser,
   useUpdateUser,
 } from "@/hooks/mutations";
+import { capitalizeFirstLastName } from "@/utils";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -46,6 +47,10 @@ export default function Clientes() {
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
   const [openModal, setOpenModal] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [idToDelete, setIdToDelete] = useState<string | null>(null);
+  const [nameToDelete, setNameToDelete] = useState<string | null>(null);
+
   const [enableOrDisableAdmin, setEnableOrDisableAdmin] = useState(false);
   const [userClicked, setUserClicked] = useState<User | null>(null);
   const [email, setEmail] = useState("");
@@ -75,15 +80,24 @@ export default function Clientes() {
     router.replace("/clientes/novo");
   };
 
-  const handleDeleteClick = (userId: string) => async () => {
+  const handleDeleteClick = (row: GridRowModel) => () => {
+    setIdToDelete(row._id);
+    setNameToDelete(row.name);
+    setOpenDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!idToDelete) return;
+
     try {
-      await deleteUser(userId);
+      await deleteUser(idToDelete);
       showSnackbar({
         message: "Cliente deletado com sucesso!",
         severity: "success",
         duration: 3000,
       });
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      setOpenDeleteModal(false);
     } catch (error) {
       showSnackbar({
         message: "Erro ao deletar o cliente",
@@ -131,13 +145,13 @@ export default function Clientes() {
       if (enableOrDisableAdmin) {
         await addAdmin(payloadAdmin);
         await updateUser({
-          user: { isAdmin: true },
+          userPayload: { isAdmin: true },
           userId: userClicked?._id ?? "",
         });
       } else {
         await deleteAdmin(userClicked?._id ?? "");
         await updateUser({
-          user: { isAdmin: false },
+          userPayload: { isAdmin: false },
           userId: userClicked?._id ?? "",
         });
       }
@@ -201,6 +215,13 @@ export default function Clientes() {
   return (
     <ContentWrapper breadcrumbItems={breadcrumbItems}>
       {renderContent()}
+      <DeleteModal
+        title="cliente"
+        nameToDelete={capitalizeFirstLastName(nameToDelete!)}
+        openModal={openDeleteModal}
+        setOpenModal={setOpenDeleteModal}
+        onConfirmDelete={confirmDelete}
+      />
     </ContentWrapper>
   );
 }

@@ -75,9 +75,8 @@ export default function GroupFamily() {
     router.replace("/grupo-familiar/edit");
   };
 
-  const handleDeleteClick = (id: string, row: GridRowModel) => () => {
-    console.log("row", row);
-    setIdToDelete(id);
+  const handleDeleteClick = (row: GridRowModel) => () => {
+    setIdToDelete(row._id);
     setNameToDelete(row.name);
     setOpenDeleteModal(true);
   };

@@ -39,7 +39,7 @@ interface TabelaProps {
   email: string;
   rowModesModel: GridRowModesModel;
   handleEditClick: (row: GridRowModel) => () => void;
-  handleDeleteClick: (userId: string) => () => void;
+  handleDeleteClick: (row: GridRowModel) => () => void;
   handleRowEditStop: GridEventListener<"rowEditStop">;
   handleRowModesModelChange: (newRowModesModel: GridRowModesModel) => void;
   handleOpenModal: (row: User) => void;
@@ -147,20 +147,20 @@ export default function TabelaCliente({
       headerName: "",
       width: 100,
       cellClassName: "actions",
-      getActions: (params) => {
+      getActions: ({ id, row }) => {
         return [
           <GridActionsCellItem
-            key={params.id}
+            key={id}
             icon={<EditIcon sx={{ color: "#666666" }} />}
             label="Edit"
             className="textPrimary"
-            onClick={handleEditClick(params.row)}
+            onClick={handleEditClick(row)}
           />,
           <GridActionsCellItem
-            key={params.id}
+            key={id}
             icon={<DeleteIcon sx={{ color: "#9B0B00" }} />}
             label="Delete"
-            onClick={handleDeleteClick(String(params.id))}
+            onClick={handleDeleteClick(row)}
             color="inherit"
           />,
         ];

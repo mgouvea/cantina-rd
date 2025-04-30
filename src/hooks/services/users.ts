@@ -6,11 +6,11 @@ export const PostAddUser = async (user: User) => {
 };
 
 export const UpdateUser = async ({
-  userId,
   userPayload,
+  userId,
 }: {
-  userId: string;
   userPayload: Partial<User>;
+  userId: string;
 }) => {
   return (await http.patch(`users/${userId}`, userPayload)).data;
 };
