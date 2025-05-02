@@ -151,12 +151,21 @@ export const CategoriesForm = () => {
         >
           <UploadPicture
             fotoUpload={fotoCategory}
-            onRemove={() => setFotoCategory(null)}
+            onRemove={() => {
+              setFotoCategory(null);
+              if (isEditing && categoryToEdit) {
+                // Atualiza o categoryToEdit para refletir a remoção da imagem
+                updateCategoryToEdit({
+                  ...categoryToEdit,
+                  imageBase64: "",
+                });
+              }
+            }}
             onHover={handleHover}
             hovering={hovering}
             avatarTitle="Categoria"
             setFotoUpload={setFotoCategory}
-            fotoUpdate={categoryToEdit?.imageBase64}
+            fotoUpdate={fotoCategory ? undefined : categoryToEdit?.imageBase64}
           />
         </Box>
         <Stack direction={{ xs: "column", sm: "row" }} gap={1}>

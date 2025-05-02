@@ -83,7 +83,7 @@ const UploadPictureComponent = ({
             height: 106,
             cursor: fotoUpload ? "pointer" : "default",
           }}
-          src={fotoUpdate || fotoUpload?.base64}
+          src={fotoUpload?.base64 || fotoUpdate}
         >
           {fotoUpload ? "" : avatarTitle}
         </Avatar>
