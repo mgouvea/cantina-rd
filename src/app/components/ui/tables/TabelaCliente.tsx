@@ -182,7 +182,7 @@ export default function TabelaCliente({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Clientes Cadastrados</Text>
+        <Text variant="h5">Sócios Cadastrados</Text>
 
         <IconButton
           aria-label="add"

@@ -1,16 +1,22 @@
 "use client";
 
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
+import EmojiPeopleOutlinedIcon from "@mui/icons-material/EmojiPeopleOutlined";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import Loading from "@/app/components/loading/Loading";
 import TabelaCliente from "@/app/components/ui/tables/TabelaCliente";
-import { capitalizeFirstLastName } from "@/utils";
+import TabelaVisitantes from "@/app/components/ui/tables/TabelaVisitantes";
+import { a11yProps, capitalizeFirstLastName } from "@/utils";
+import { Box, Stack, Tab, Tabs, useTheme } from "@mui/material";
 import { Client, User } from "@/types";
-import { DeleteModal, useSnackbar } from "@/app/components";
+import { CustomTabPanel, DeleteModal, useSnackbar } from "@/app/components";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useUsers } from "@/hooks/queries";
 import { useUserStore } from "@/contexts";
+import { useVisitors } from "@/hooks/queries/useVisitors.query";
+import { Visitor } from "@/types/visitors";
 
 import {
   GridEventListener,
@@ -24,6 +30,7 @@ import {
   useDeleteUser,
   useUpdateUser,
 } from "@/hooks/mutations";
+import { useDeleteVisitor } from "@/hooks/mutations/useVisitors.mutation";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -33,16 +40,26 @@ const breadcrumbItems = [
 export default function Clientes() {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const theme = useTheme();
 
   const { data, isLoading } = useUsers();
+  const { data: visitorsData, isLoading: visitorsLoading } = useVisitors();
 
   const [rows, setRows] = useState<Client[]>(data);
+  const [rowsVisitors, setRowsVisitors] = useState<Visitor[]>(visitorsData);
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
   const [openModal, setOpenModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [idToDelete, setIdToDelete] = useState<string | null>(null);
   const [nameToDelete, setNameToDelete] = useState<string | null>(null);
+  const [isVisitor, setIsVisitor] = useState(false);
+
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab")
+    ? parseInt(searchParams.get("tab")!)
+    : 0;
+  const [value, setValue] = useState(initialTab);
 
   const [enableOrDisableAdmin, setEnableOrDisableAdmin] = useState(false);
   const [userClicked, setUserClicked] = useState<User | null>(null);
@@ -52,6 +69,8 @@ export default function Clientes() {
   const { mutateAsync: updateUser } = useUpdateUser();
   const { mutateAsync: addAdmin } = useAddAdmin();
   const { mutateAsync: deleteAdmin } = useDeleteAdmin();
+
+  const { mutateAsync: deleteVisitor } = useDeleteVisitor();
 
   const { updateAllUsers, updateUserToEdit, updateIsEditing } = useUserStore();
   const { showSnackbar } = useSnackbar();
@@ -71,15 +90,20 @@ export default function Clientes() {
     }
   };
 
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
   const handleEditClick = (row: GridRowModel) => () => {
     updateUserToEdit(row as User);
     updateIsEditing(true);
     router.replace("/clientes/novo");
   };
 
-  const handleDeleteClick = (row: GridRowModel) => () => {
+  const handleDeleteClick = (row: GridRowModel, isVisitor?: boolean) => () => {
     setIdToDelete(row._id);
     setNameToDelete(row.name);
+    setIsVisitor(isVisitor ?? false);
     setOpenDeleteModal(true);
   };
 
@@ -87,13 +111,18 @@ export default function Clientes() {
     if (!idToDelete) return;
 
     try {
-      await deleteUser(idToDelete);
+      if (isVisitor) {
+        await deleteVisitor(idToDelete);
+        queryClient.invalidateQueries({ queryKey: ["visitors"] });
+      } else {
+        await deleteUser(idToDelete);
+        queryClient.invalidateQueries({ queryKey: ["users"] });
+      }
       showSnackbar({
         message: "Cliente deletado com sucesso!",
         severity: "success",
         duration: 3000,
       });
-      queryClient.invalidateQueries({ queryKey: ["users"] });
       setOpenDeleteModal(false);
     } catch (error) {
       showSnackbar({
@@ -111,6 +140,11 @@ export default function Clientes() {
       rows.map((row: Client) =>
         row._id === newRow._id ? updatedRow : row
       ) as Client[]
+    );
+    setRowsVisitors(
+      rowsVisitors.map((row: Visitor) =>
+        row._id === newRow._id ? updatedRow : row
+      ) as Visitor[]
     );
     return updatedRow;
   };
@@ -183,28 +217,90 @@ export default function Clientes() {
     }
 
     return (
-      <TabelaCliente
-        data={data}
-        isLoading={isLoading}
-        enableOrDisableAdmin={enableOrDisableAdmin}
-        openModal={openModal}
-        userClicked={userClicked}
-        email={email}
-        rowModesModel={rowModesModel}
-        handleEditClick={handleEditClick}
-        handleDeleteClick={handleDeleteClick}
-        handleRowEditStop={handleRowEditStop}
-        handleRowModesModelChange={handleRowModesModelChange}
-        handleOpenModal={handleOpenModal}
-        handleEnableOrDisableAdmin={handleEnableOrDisableAdmin}
-        setEmail={setEmail}
-        updateIsEditing={updateIsEditing}
-        updateUserToEdit={updateUserToEdit}
-        setRowModesModel={setRowModesModel}
-        processRowUpdate={processRowUpdate}
-        setRows={setRows}
-        setOpenModal={setOpenModal}
-      />
+      <Stack>
+        <Box
+          sx={{
+            borderBottom: 1,
+            borderColor: "divider",
+            bgcolor: "background.paper",
+          }}
+        >
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            indicatorColor="secondary"
+            textColor="inherit"
+            variant="fullWidth"
+            aria-label="full width tabs example"
+            sx={{
+              "& .Mui-selected": {
+                backgroundColor: "background.paper",
+                color: "text.primary",
+                fontWeight: "bold",
+              },
+              "& .Mui-selected:hover": {
+                backgroundColor: "background.paper",
+                color: "text.primary",
+                fontWeight: "bold",
+              },
+              "& .MuiTab-root": {
+                backgroundColor: "background.paper",
+                color: "text.primary",
+              },
+            }}
+          >
+            <Tab
+              icon={<GroupOutlinedIcon />}
+              label="Sócios"
+              {...a11yProps(0)}
+            />
+            <Tab
+              icon={<EmojiPeopleOutlinedIcon />}
+              label="Visitantes"
+              {...a11yProps(1)}
+            />
+          </Tabs>
+        </Box>
+        <CustomTabPanel value={value} index={0} dir={theme.direction}>
+          <TabelaCliente
+            data={data}
+            isLoading={isLoading}
+            enableOrDisableAdmin={enableOrDisableAdmin}
+            openModal={openModal}
+            userClicked={userClicked}
+            email={email}
+            rowModesModel={rowModesModel}
+            handleEditClick={handleEditClick}
+            handleDeleteClick={handleDeleteClick}
+            handleRowEditStop={handleRowEditStop}
+            handleRowModesModelChange={handleRowModesModelChange}
+            handleOpenModal={handleOpenModal}
+            handleEnableOrDisableAdmin={handleEnableOrDisableAdmin}
+            setEmail={setEmail}
+            updateIsEditing={updateIsEditing}
+            updateUserToEdit={updateUserToEdit}
+            setRowModesModel={setRowModesModel}
+            processRowUpdate={processRowUpdate}
+            setRows={setRows}
+            setOpenModal={setOpenModal}
+          />
+        </CustomTabPanel>
+        <CustomTabPanel value={value} index={1} dir={theme.direction}>
+          <TabelaVisitantes
+            data={visitorsData}
+            isLoading={visitorsLoading}
+            rowModesModel={rowModesModel}
+            handleDeleteClick={(row: GridRowModel) =>
+              handleDeleteClick(row, true)
+            }
+            handleRowEditStop={handleRowEditStop}
+            handleRowModesModelChange={handleRowModesModelChange}
+            processRowUpdate={processRowUpdate}
+            setRowModesModel={setRowModesModel}
+            setRows={setRowsVisitors}
+          />
+        </CustomTabPanel>
+      </Stack>
     );
   };
 
