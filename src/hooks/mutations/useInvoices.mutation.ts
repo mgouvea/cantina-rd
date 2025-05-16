@@ -6,3 +6,9 @@ export const useFullInvoices = () => {
     mutationFn: GetFullInvoice,
   });
 };
+
+export const useAddInvoice = () => {
+  return useMutation({
+    mutationFn: CreateInvoice,
+  });
+};

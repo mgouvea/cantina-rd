@@ -6,56 +6,38 @@ import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
 import { capitalize } from "@/utils";
-import {
-  CircularProgress,
-  Stack,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import { CircularProgress, Stack, Typography } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 import { Filtros } from "../..";
-import { Order, ProductItem, TabelaProps } from "@/types";
+import { OrderVisitor, ProductItem, TabelaProps } from "@/types";
 
-export default function TabelaCompras({
+export default function TabelaComprasVisitors({
   data,
   isLoading,
   handleEditClick,
   handleDeleteClick,
-}: TabelaProps<Order>) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-
+}: TabelaProps<OrderVisitor>) {
   const columns: GridColDef[] = [
     {
       field: "buyerName",
       headerName: "Nome",
-      width: isMobile ? 150 : isTablet ? 200 : 300,
-      flex: 1,
-      minWidth: 120,
+      width: 350,
       editable: true,
       renderCell: (params) => (
         <Typography sx={{ py: 0.5 }}>{capitalize(params.value)}</Typography>
       ),
     },
     {
-      field: "groupFamilyName",
-      headerName: "Grupo Familiar",
-      width: isMobile ? 150 : isTablet ? 180 : 200,
-      flex: 0.8,
-      minWidth: 120,
+      field: "churchCore",
+      headerName: "Núcleo",
+      width: 250,
       editable: true,
-      renderCell: (params) => (
-        <Typography sx={{ py: 0.5 }}>{capitalize(params.value)}</Typography>
-      ),
+      renderCell: (params) => capitalize(params.value),
     },
     {
       field: "products",
       headerName: "Produtos",
-      width: isMobile ? 180 : isTablet ? 250 : 300,
-      flex: 1.5,
-      minWidth: 150,
+      width: 300,
       align: "center",
       headerAlign: "center",
       editable: true,
@@ -115,9 +97,7 @@ export default function TabelaCompras({
     {
       field: "totalPrice",
       headerName: "Total",
-      width: isMobile ? 80 : 100,
-      flex: 0.5,
-      minWidth: 80,
+      width: 100,
       editable: false,
       align: "center",
       headerAlign: "center",
@@ -128,9 +108,7 @@ export default function TabelaCompras({
     {
       field: "createdAt",
       headerName: "Data",
-      width: isMobile ? 80 : 100,
-      flex: 0.5,
-      minWidth: 80,
+      width: 100,
       editable: false,
       align: "center",
       headerAlign: "center",
@@ -144,9 +122,7 @@ export default function TabelaCompras({
       field: "actions",
       type: "actions",
       headerName: "",
-      width: isMobile ? 80 : 100,
-      flex: 0.3,
-      minWidth: 70,
+      width: 100,
       cellClassName: "actions",
       getActions: (params) => {
         return [
@@ -172,10 +148,8 @@ export default function TabelaCompras({
   return (
     <Box
       sx={{
-        padding: { xs: 1, sm: 2 },
+        padding: 2,
         height: "fit-content",
-        width: "100%",
-        overflowX: "auto",
         "& .actions": {
           color: "text.secondary",
         },
@@ -205,34 +179,7 @@ export default function TabelaCompras({
                 getRowId={(row) => row._id}
                 getRowHeight={() => "auto"}
                 getEstimatedRowHeight={() => 100}
-                autoHeight
-                disableColumnMenu={isMobile}
-                sx={{
-                  borderRadius: "16px",
-                  width: "100%",
-                  "& .MuiDataGrid-cell": {
-                    wordBreak: "break-word",
-                  },
-                  "& .MuiDataGrid-columnHeaders": {
-                    backgroundColor:
-                      theme.palette.mode === "light" ? "#f5f5f5" : "#333",
-                  },
-                  "& .MuiDataGrid-virtualScroller": {
-                    minHeight: "200px",
-                  },
-                }}
-                initialState={{
-                  pagination: {
-                    paginationModel: { pageSize: isMobile ? 5 : 10 },
-                  },
-                  columns: {
-                    columnVisibilityModel: {
-                      groupFamilyName: !isMobile,
-                      createdAt: !(isMobile && !isTablet),
-                    },
-                  },
-                }}
-                pageSizeOptions={[5, 10, 15]}
+                sx={{ borderRadius: "16px" }}
               />
             )
           }

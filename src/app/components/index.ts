@@ -17,6 +17,7 @@ export * from "./ui/tables/TabelaProduto";
 export * from "./ui/tables/TabelaCompras";
 export * from "./ui/tables/TabelaFaturas";
 export * from "./ui/tables/TabelaVisitantes";
+export * from "./ui/tables/TabelaComprasVisitors";
 export * from "./ui/tabs/CustomTabs";
 export * from "./ui/botao/Botao";
 export * from "./ui/emptyContent/EmptyContent";
