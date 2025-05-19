@@ -10,7 +10,7 @@ import { CreateInvoiceDto } from "@/types/invoice";
 import { CustomizedAccordions } from "../../accordion/Accordion";
 import { FormActions } from "./FormActions";
 import { GroupFamily, GroupFamilyWithOwner, User } from "@/types";
-import { useFullInvoices } from "@/hooks/mutations";
+import { useAddInvoice, useFullInvoices } from "@/hooks/mutations";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { DateRange, Range, RangeKeyDict } from "react-date-range";
@@ -26,9 +26,11 @@ import {
   IconButton,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import { useSnackbar } from "../../snackbar/SnackbarProvider";
+import { useQueryClient } from "@tanstack/react-query";
 
 const INITIAL_INVOICE_FORM_VALUES: CreateInvoiceDto = {
-  groupFamilyId: "",
+  groupFamilyIds: [],
   startDate: null,
   endDate: null,
 };
@@ -66,11 +68,14 @@ export const FormFaturas = ({
   allInvoicesIds: string[] | null;
   groupFamiliesWithOwner: GroupFamilyWithOwner[] | null;
 }) => {
+  const { showSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
   const invoiceForm = useForm<CreateInvoiceDto>({
     defaultValues: INITIAL_INVOICE_FORM_VALUES,
     mode: "onChange", // Enable validation on change for immediate feedback
   });
 
+  const { mutateAsync: addInvoice } = useAddInvoice();
   const { mutateAsync: fullInvoices, isPending: isLoadingFullInvoices } =
     useFullInvoices();
   const { control } = invoiceForm;
@@ -151,10 +156,47 @@ export const FormFaturas = ({
 
   const handleSaveInvoice = async () => {
     setIsSubmitting(true);
+
+    const invoicePayload = {
+      ...invoiceForm.getValues(),
+      groupFamilyIds: selectedFamilies.map((item) => item._id!),
+    };
+
+    if (!invoicePayload.groupFamilyIds.length) {
+      showSnackbar({
+        message: "Selecione pelo menos uma família",
+        severity: "error",
+        duration: 3000,
+      });
+      return;
+    }
+
     try {
-      console.log("FATURA", invoiceForm.getValues());
-    } catch (error) {
-      console.error(error);
+      const response = await addInvoice(invoicePayload);
+
+      if (response.status === 201) {
+        showSnackbar({
+          message: "Fatura gerada com sucesso",
+          severity: "success",
+          duration: 3000,
+        });
+        handleClearForm();
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      let errorMessage = "Erro ao gerar fatura";
+
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || errorMessage;
+      }
+
+      showSnackbar({
+        message: errorMessage,
+        severity: "error",
+        duration: 5000,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -183,8 +225,10 @@ export const FormFaturas = ({
   }, [invoiceForm.formState.isSubmitSuccessful]);
 
   const isFormValid = useMemo(() => {
-    return invoiceForm.formState.isValid && invoiceForm.formState.isDirty;
-  }, [invoiceForm.formState]);
+    const hasFamilies = selectedFamilies.length > 0;
+    const hasDateRange = state[0]?.startDate && state[0]?.endDate;
+    return hasFamilies && hasDateRange;
+  }, [selectedFamilies, state]);
 
   return (
     <Box
@@ -213,8 +257,49 @@ export const FormFaturas = ({
               <Text variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
                 Selecione as famílias
               </Text>
+              <Box
+                sx={{
+                  mb: 1,
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 1,
+                }}
+              >
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => {
+                    const allFamilies =
+                      groupFamiliesWithOwner
+                        ?.slice()
+                        .sort((a, b) => a.name.localeCompare(b.name)) || [];
+                    setSelectedFamilies(allFamilies);
+                    // Atualiza o valor no formulário
+                    invoiceForm.setValue(
+                      "groupFamilyIds",
+                      allFamilies
+                        .map((item) => item._id || "")
+                        .filter((id) => id !== "")
+                    );
+                  }}
+                >
+                  Selecionar Todos
+                </Button>
+
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  onClick={() => {
+                    setSelectedFamilies([]);
+                    invoiceForm.setValue("groupFamilyIds", []);
+                  }}
+                >
+                  Desmarcar Todos
+                </Button>
+              </Box>
               <Controller
-                name="groupFamilyId"
+                name="groupFamilyIds"
                 control={control}
                 render={({ field: { onChange, ...restField } }) => (
                   <Autocomplete
@@ -233,10 +318,11 @@ export const FormFaturas = ({
                     value={selectedFamilies}
                     onChange={(_, newValue) => {
                       setSelectedFamilies(newValue);
-                      const selectedIds = newValue
-                        .map((item) => item._id)
-                        .join(",");
-                      onChange(selectedIds);
+                      onChange(
+                        newValue
+                          .map((item) => item._id || "")
+                          .filter((id) => id !== "")
+                      );
                     }}
                     isOptionEqualToValue={(option, value) =>
                       option._id === value._id
@@ -322,6 +408,7 @@ export const FormFaturas = ({
                       moveRangeOnFirstSelection={false}
                       ranges={state}
                       rangeColors={["#3f51b5", "#2196f3", "#00bcd4"]}
+                      maxDate={new Date()} // Limita a seleção até o dia atual
                     />
                     <Box
                       sx={{
@@ -359,7 +446,6 @@ export const FormFaturas = ({
         groupFamilies={groupFamilies}
         dataUser={dataUser}
         isLoading={isLoadingFullInvoices}
-        onDeleteInvoice={() => console.log("Deletar fatura")}
         onResetData={handleResetData}
       />
     </Box>

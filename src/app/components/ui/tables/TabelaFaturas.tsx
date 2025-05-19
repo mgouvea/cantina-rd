@@ -4,7 +4,6 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
@@ -13,7 +12,6 @@ import { format } from "date-fns";
 import { FullInvoiceResponse } from "@/types/invoice";
 import { GroupFamily, User } from "@/types";
 import { ptBR } from "date-fns/locale";
-import { useRouter } from "next/navigation";
 
 import {
   CircularProgress,
@@ -41,11 +39,12 @@ import {
   findUserById,
   getGroupFamilyNameById,
 } from "@/utils";
+import { useDeleteInvoice } from "@/hooks/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TabelaProps {
   data: FullInvoiceResponse[] | undefined;
   isLoading: boolean;
-  onDeleteInvoice: () => void;
   groupFamilies: GroupFamily[];
   dataUser: User[] | null;
   onResetData: () => void;
@@ -175,38 +174,36 @@ const ConsumptionDetails = ({
 export default function TabelaFaturas({
   data,
   isLoading,
-  onDeleteInvoice,
   groupFamilies,
   dataUser,
   onResetData,
 }: TabelaProps) {
-  const router = useRouter();
-
   const { showSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
 
-  const handleEditClick = (_row: FullInvoiceResponse) => () => {
-    // Navigation logic can be implemented later
-    console.log("Edit invoice", _row._id);
-    router.replace(`/financeiro/editar/${_row._id}`);
-  };
+  const { mutateAsync: deleteInvoice } = useDeleteInvoice();
 
   const handleDeleteClick = (_id: string) => async () => {
-    // Delete logic can be implemented later
-    console.log("Delete invoice", _id);
-    onDeleteInvoice();
-
-    showSnackbar({
-      message: "Fatura deletada com sucesso!",
-      severity: "success",
-      duration: 3000,
-    });
+    try {
+      await deleteInvoice(_id);
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      showSnackbar({
+        message: "Fatura deletada com sucesso!",
+        severity: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      showSnackbar({
+        message: "Erro ao deletar fatura",
+        severity: "error",
+        duration: 3000,
+      });
+      console.error(error);
+    }
   };
 
   const handleSendInvoiceClick = (_id: string) => async () => {
-    // Delete logic can be implemented later
-    console.log("Delete invoice", _id);
-    onDeleteInvoice();
-
+    console.log("Send invoice", _id);
     showSnackbar({
       message: "Fatura enviada com sucesso!",
       severity: "success",
@@ -320,22 +317,15 @@ export default function TabelaFaturas({
       getActions: (params) => {
         return [
           <GridActionsCellItem
-            key={`edit-${params.id}`}
-            icon={<EditIcon sx={{ color: "#666666", fontSize: 25 }} />}
-            label="Edit"
-            className="textPrimary"
-            onClick={handleEditClick(params.row as FullInvoiceResponse)}
-          />,
-          <GridActionsCellItem
             key={`delete-${params.id}`}
-            icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 25 }} />}
+            icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 27 }} />}
             label="Delete"
             onClick={handleDeleteClick(String(params.id))}
             color="inherit"
           />,
           <GridActionsCellItem
             key={`send-${params.id}`}
-            icon={<SendOutlinedIcon sx={{ color: "#4caf50", fontSize: 25 }} />}
+            icon={<SendOutlinedIcon sx={{ color: "#4caf50", fontSize: 27 }} />}
             label="Send"
             onClick={handleSendInvoiceClick(String(params.id))}
             color="inherit"

@@ -12,3 +12,7 @@ export const GetInvoice = async () => {
 export const CreateInvoice = async (invoice: CreateInvoiceDto) => {
   return (await http.post("invoices", invoice)).data;
 };
+
+export const DeleteInvoice = async (invoiceId: string) => {
+  return (await http.delete(`invoices/${invoiceId}`)).data;
+};

@@ -1,5 +1,5 @@
 export type CreateInvoiceDto = {
-  groupFamilyId: string;
+  groupFamilyIds: string[];
   startDate: Date | null;
   endDate: Date | null;
 };
