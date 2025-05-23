@@ -6,7 +6,8 @@ import FamilyRestroomOutlinedIcon from "@mui/icons-material/FamilyRestroomOutlin
 import FastfoodRoundedIcon from "@mui/icons-material/FastfoodRounded";
 import Image from "next/image";
 import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
-import React, { useMemo, useCallback } from "react";
+import QrCodeScannerOutlinedIcon from "@mui/icons-material/QrCodeScannerOutlined";
+import React, { useCallback, useMemo } from "react";
 import SupervisorAccountRoundedIcon from "@mui/icons-material/SupervisorAccountRounded";
 import Text from "../text/Text";
 import { Box, Drawer, List, Toolbar } from "@mui/material";
@@ -35,6 +36,7 @@ export function NewSidebar() {
       { title: "Grupo Familiar" as NavigationTitle, route: "/grupo-familiar" },
       { title: "Produtos" as NavigationTitle, route: "/produtos" },
       { title: "Categorias" as NavigationTitle, route: "/categorias" },
+      { title: "WhatsApp" as NavigationTitle, route: "/whatsapp" },
     ],
     []
   );
@@ -49,6 +51,7 @@ export function NewSidebar() {
         "Grupo Familiar": <FamilyRestroomOutlinedIcon />,
         Produtos: <FastfoodRoundedIcon />,
         Categorias: <CategoryIcon />,
+        WhatsApp: <QrCodeScannerOutlinedIcon />,
       } as Record<NavigationTitle, JSX.Element>),
     []
   );

@@ -7,3 +7,4 @@ export * from "./users";
 export * from "./orders";
 export * from "./invoices";
 export * from "./visitors";
+export * from "./whatssApp";
