@@ -1,5 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { CreateInvoice, DeleteInvoice, GetFullInvoice } from "../services";
+import {
+  CreateInvoice,
+  DeleteInvoice,
+  GetFullInvoice,
+  SendInvoiceByWhatsApp,
+} from "../services";
 
 export const useFullInvoices = () => {
   return useMutation({
@@ -16,5 +21,11 @@ export const useAddInvoice = () => {
 export const useDeleteInvoice = () => {
   return useMutation({
     mutationFn: DeleteInvoice,
+  });
+};
+
+export const useSendInvoiceByWhatsApp = () => {
+  return useMutation({
+    mutationFn: SendInvoiceByWhatsApp,
   });
 };

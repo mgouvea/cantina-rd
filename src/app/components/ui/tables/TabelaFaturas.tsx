@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EmptyContent from "../emptyContent/EmptyContent";
+import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
 import { Filtros, useSnackbar } from "../..";
@@ -12,6 +13,8 @@ import { format } from "date-fns";
 import { FullInvoiceResponse } from "@/types/invoice";
 import { GroupFamily, User } from "@/types";
 import { ptBR } from "date-fns/locale";
+import { useDeleteInvoice, useSendInvoiceByWhatsApp } from "@/hooks/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 
 import {
   CircularProgress,
@@ -39,8 +42,6 @@ import {
   findUserById,
   getGroupFamilyNameById,
 } from "@/utils";
-import { useDeleteInvoice } from "@/hooks/mutations";
-import { useQueryClient } from "@tanstack/react-query";
 
 interface TabelaProps {
   data: FullInvoiceResponse[] | undefined;
@@ -182,6 +183,7 @@ export default function TabelaFaturas({
   const queryClient = useQueryClient();
 
   const { mutateAsync: deleteInvoice } = useDeleteInvoice();
+  const { mutateAsync: sendInvoiceByWhatsApp } = useSendInvoiceByWhatsApp();
 
   const handleDeleteClick = (_id: string) => async () => {
     try {
@@ -203,12 +205,26 @@ export default function TabelaFaturas({
   };
 
   const handleSendInvoiceClick = (_id: string) => async () => {
-    console.log("Send invoice", _id);
-    showSnackbar({
-      message: "Fatura enviada com sucesso!",
-      severity: "success",
-      duration: 3000,
-    });
+    try {
+      await sendInvoiceByWhatsApp(_id);
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      showSnackbar({
+        message: "Fatura enviada com sucesso!",
+        severity: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      showSnackbar({
+        message: "Erro ao enviar fatura",
+        severity: "error",
+        duration: 3000,
+      });
+      console.error(error);
+    }
+  };
+
+  const handleConfirmInvoiceClick = (_id: string) => async () => {
+    alert(_id);
   };
 
   const handleResetData = () => {
@@ -315,21 +331,47 @@ export default function TabelaFaturas({
       width: 120,
       cellClassName: "actions",
       getActions: (params) => {
+        const isSentByWhatsApp = Boolean(params.row.sentByWhatsapp);
+        const isOpenStatus = params.row.status === "OPEN";
+        const isDisabledSend = !isOpenStatus || isSentByWhatsApp;
+
         return [
-          <GridActionsCellItem
-            key={`delete-${params.id}`}
-            icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 27 }} />}
-            label="Delete"
-            onClick={handleDeleteClick(String(params.id))}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            key={`send-${params.id}`}
-            icon={<SendOutlinedIcon sx={{ color: "#4caf50", fontSize: 27 }} />}
-            label="Send"
-            onClick={handleSendInvoiceClick(String(params.id))}
-            color="inherit"
-          />,
+          <Tooltip title="Deletar fatura" key={`delete-${params.id}`}>
+            <GridActionsCellItem
+              icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 27 }} />}
+              label="Delete"
+              onClick={handleDeleteClick(String(params.id))}
+              color="inherit"
+            />
+          </Tooltip>,
+          <Tooltip title="Enviar fatura" key={`send-${params.id}`}>
+            <GridActionsCellItem
+              icon={
+                <SendOutlinedIcon
+                  sx={{
+                    color: isDisabledSend ? "#ccc" : "#4caf50",
+                    fontSize: 27,
+                  }}
+                />
+              }
+              label="Enviar"
+              onClick={handleSendInvoiceClick(String(params.id))}
+              color="inherit"
+              disabled={isDisabledSend}
+            />
+          </Tooltip>,
+          <Tooltip title="Confirmar pagamento" key={`confirm-${params.id}`}>
+            <GridActionsCellItem
+              icon={
+                <PriceCheckOutlinedIcon
+                  sx={{ color: "#1565c0", fontSize: 27 }}
+                />
+              }
+              label="Confirmar"
+              onClick={handleConfirmInvoiceClick(String(params.id))}
+              color="inherit"
+            />
+          </Tooltip>,
         ];
       },
     },

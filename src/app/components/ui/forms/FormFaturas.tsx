@@ -199,6 +199,7 @@ export const FormFaturas = ({
       });
     } finally {
       setIsSubmitting(false);
+      handleClearForm();
     }
   };
 
