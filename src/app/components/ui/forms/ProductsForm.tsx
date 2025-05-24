@@ -208,12 +208,22 @@ export const ProductsForm = () => {
 
       queryClient.invalidateQueries({ queryKey: ["products"] });
       router.push("/produtos");
-    } catch (error) {
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      let errorMessage = `Erro ao ${
+        isEditing ? "atualizar" : "cadastrar"
+      } o produto`;
+
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || errorMessage;
+      }
+
       showSnackbar({
-        message: `Erro ao ${isEditing ? "atualizar" : "cadastrar"} o produto`,
+        message: errorMessage,
         severity: "error",
+        duration: 5000,
       });
-      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
