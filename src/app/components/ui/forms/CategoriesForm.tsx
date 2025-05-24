@@ -15,7 +15,7 @@ import { useSnackbar } from "../../snackbar/SnackbarProvider";
 
 const INITIAL_CATEGORY_FORM_VALUES: Categories = {
   name: "",
-  imageBase64: "",
+  urlImage: "",
 };
 
 export const CategoriesForm = () => {
@@ -30,7 +30,7 @@ export const CategoriesForm = () => {
 
   const EDITING_CATEGORY_FORM_VALUES: Categories = {
     name: categoryToEdit?.name || "",
-    imageBase64: categoryToEdit?.imageBase64 || "",
+    urlImage: categoryToEdit?.urlImage || "",
   };
 
   const categoriesForm = useForm<Categories>({
@@ -50,8 +50,8 @@ export const CategoriesForm = () => {
   const categoryName = watch("name");
 
   const [fotoCategory, setFotoCategory] = useState<fotoUploadProps | null>(
-    categoryToEdit?.imageBase64
-      ? { base64: categoryToEdit.imageBase64, name: "", size: 0, type: "" }
+    categoryToEdit?.urlImage
+      ? { base64: categoryToEdit.urlImage, name: "", size: 0, type: "" }
       : null
   );
   const [hovering, setHovering] = useState(false);
@@ -61,21 +61,19 @@ export const CategoriesForm = () => {
     // Quando estiver editando, considere válido se tiver nome e (fotoCategory OU imageBase64 existente)
     return (
       categoryName !== "" &&
-      (fotoCategory !== null || (isEditing && categoryToEdit?.imageBase64))
+      (fotoCategory !== null || (isEditing && categoryToEdit?.urlImage))
     );
-  }, [categoryName, fotoCategory, isEditing, categoryToEdit?.imageBase64]);
+  }, [categoryName, fotoCategory, isEditing, categoryToEdit?.urlImage]);
 
   const handleSaveCategory = useCallback(async () => {
     setIsSubmitting(true);
 
     const categoryId = categoryToEdit?._id || "";
-    const imageBase64ToEditing = fotoCategory?.base64 || "";
+    const urlImageToEditing = fotoCategory?.base64 || "";
 
     const categoryPayload: Categories = {
       ...getCategoriesValues(),
-      imageBase64: isEditing
-        ? imageBase64ToEditing
-        : fotoCategory?.base64 || "",
+      urlImage: isEditing ? urlImageToEditing : fotoCategory?.base64 || "",
     };
 
     try {
@@ -157,7 +155,7 @@ export const CategoriesForm = () => {
                 // Atualiza o categoryToEdit para refletir a remoção da imagem
                 updateCategoryToEdit({
                   ...categoryToEdit,
-                  imageBase64: "",
+                  urlImage: "",
                 });
               }
             }}
@@ -165,7 +163,7 @@ export const CategoriesForm = () => {
             hovering={hovering}
             avatarTitle="Categoria"
             setFotoUpload={setFotoCategory}
-            fotoUpdate={fotoCategory ? undefined : categoryToEdit?.imageBase64}
+            fotoUpdate={fotoCategory ? undefined : categoryToEdit?.urlImage}
           />
         </Box>
         <Stack direction={{ xs: "column", sm: "row" }} gap={1}>

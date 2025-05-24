@@ -10,7 +10,7 @@ export type Products = {
   tag: string;
   categoryId: Categories;
   subcategoryId: SubCategories;
-  imageBase64: string;
+  urlImage: string;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -18,7 +18,7 @@ export type Products = {
 export type Categories = {
   _id?: string;
   name: string;
-  imageBase64: string;
+  urlImage: string;
   createdAt?: Date;
   updatedAt?: Date;
 };

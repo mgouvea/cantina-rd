@@ -120,13 +120,13 @@ export const FormClients = () => {
 
     try {
       const { name, email, ...userValues } = getValues();
-      const isEditingFotoPerfil = userToEdit?.imageBase64 || "";
+      const isEditingFotoPerfil = userToEdit?.urlImage || "";
 
       const userPayload: User = {
         ...userValues,
         name,
         isAdmin: checked,
-        imageBase64: isEditing ? isEditingFotoPerfil : fotoPerfil?.base64 || "",
+        urlImage: isEditing ? isEditingFotoPerfil : fotoPerfil?.base64 || "",
       };
 
       if (isEditing && userToEdit) {
@@ -214,7 +214,7 @@ export const FormClients = () => {
             hovering={hovering}
             avatarTitle="Perfil"
             setFotoUpload={setFotoPerfil}
-            fotoUpdate={userToEdit?.imageBase64}
+            fotoUpdate={userToEdit?.urlImage}
           />
         </Box>
         <Stack direction={{ xs: "column", sm: "row" }} gap={1}>

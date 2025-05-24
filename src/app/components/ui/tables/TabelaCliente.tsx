@@ -77,7 +77,7 @@ export default function TabelaCliente({
 
   const columns: GridColDef[] = [
     {
-      field: "imageBase64",
+      field: "urlImage",
       headerName: "Imagem",
       width: 100,
       editable: false,
@@ -91,7 +91,7 @@ export default function TabelaCliente({
             height: 50,
             cursor: "default",
           }}
-          src={`data:image/${params.row.imageBase64}`}
+          src={params.row.urlImage}
         />
       ),
     },

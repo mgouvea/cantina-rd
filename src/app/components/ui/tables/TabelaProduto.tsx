@@ -112,7 +112,7 @@ export default function TabelaProduto({
   const getColumnConfig = () => {
     const baseColumns: GridColDef<Products>[] = [
       {
-        field: "imageBase64",
+        field: "urlImage",
         headerName: "Imagem",
         width: isMobile ? 60 : 100,
         editable: false,
@@ -120,7 +120,7 @@ export default function TabelaProduto({
         align: "center",
         renderCell: (params) => (
           <Image
-            src={`data:image/${params.row.imageBase64}`}
+            src={params.row.urlImage}
             alt={params.row.name}
             width={isMobile ? 40 : 55}
             height={isMobile ? 40 : 55}

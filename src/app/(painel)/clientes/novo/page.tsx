@@ -45,8 +45,6 @@ export default function FormClientsPage() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  console.log("ALLUSERS", allUsers);
-
   const EDITING_FORM_VALUES = {
     name: userToEdit?.name || "",
     telephone: userToEdit?.telephone || "",
@@ -163,14 +161,14 @@ export default function FormClientsPage() {
 
     try {
       const { name, email, ...userValues } = getValues();
-      const isEditingFotoPerfil = userToEdit?.imageBase64 || "";
+      const isEditingFotoPerfil = userToEdit?.urlImage || "";
 
       const userPayload: User = {
         ...userValues,
         name,
         telephone: removerMascaraTelefone(watchedTelefone),
         isAdmin: checked,
-        imageBase64: isEditing ? isEditingFotoPerfil : fotoPerfil?.base64 || "",
+        urlImage: isEditing ? isEditingFotoPerfil : fotoPerfil?.base64 || "",
       };
 
       if (isEditing && userToEdit) {
@@ -258,7 +256,7 @@ export default function FormClientsPage() {
             hovering={hovering}
             avatarTitle="Perfil"
             setFotoUpload={setFotoPerfil}
-            fotoUpdate={userToEdit?.imageBase64}
+            fotoUpdate={userToEdit?.urlImage}
           />
         </Box>
         <Stack direction={{ xs: "column", sm: "row" }} gap={1}>

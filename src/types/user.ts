@@ -4,7 +4,7 @@ export type User = {
   email?: string;
   isAdmin: boolean;
   telephone: string;
-  imageBase64: string;
+  urlImage: string;
   groupFamily: string | null;
   isChild: boolean;
   createdAt?: Date;

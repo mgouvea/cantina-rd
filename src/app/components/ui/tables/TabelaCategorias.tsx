@@ -89,7 +89,7 @@ export default function TabelaCategorias({
 
   const columns: GridColDef[] = [
     {
-      field: "imageBase64",
+      field: "urlImage",
       headerName: "Imagem",
       width: 100,
       editable: false,
@@ -100,7 +100,7 @@ export default function TabelaCategorias({
           alt="Foto do Perfil"
           width={50}
           height={50}
-          src={`data:image/${params.row.imageBase64}`}
+          src={params.row.urlImage}
         />
       ),
     },

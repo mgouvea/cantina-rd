@@ -38,7 +38,7 @@ const INITIAL_PROD_FORM_VALUES: ProductFormValues = {
   tag: "",
   categoryId: "",
   subcategoryId: "",
-  imageBase64: "",
+  urlImage: "",
 };
 
 export const ProductsForm = () => {
@@ -92,10 +92,10 @@ export const ProductsForm = () => {
       }
 
       // Set image if available
-      if (productToEdit.imageBase64 && !fotoProduto) {
+      if (productToEdit.urlImage && !fotoProduto) {
         // Create a placeholder fotoUpload object for the existing image
         setFotoProduto({
-          base64: productToEdit.imageBase64,
+          base64: productToEdit.urlImage,
           name: "existing-image.jpg",
           size: 0,
           type: "image/jpeg",
@@ -111,7 +111,7 @@ export const ProductsForm = () => {
     tag: productToEdit?.tag || "",
     categoryId: productToEdit?.categoryId || "",
     subcategoryId: productToEdit?.subcategoryId || "",
-    imageBase64: productToEdit?.imageBase64 || "",
+    urlImage: productToEdit?.urlImage || "",
   };
 
   const productsForm = useForm<ProductFormValues>({
@@ -136,7 +136,7 @@ export const ProductsForm = () => {
     // In edit mode, we might already have an image in productToEdit
     const hasImage = isEditing
       ? fotoProduto !== null ||
-        (productToEdit?.imageBase64 && productToEdit.imageBase64 !== "")
+        (productToEdit?.urlImage && productToEdit.urlImage !== "")
       : fotoProduto !== null;
 
     // In edit mode, we might already have category and subcategory from productToEdit
@@ -178,7 +178,7 @@ export const ProductsForm = () => {
       categoryId: selectedCategory!,
       subcategoryId: selectedSubcategory!,
       price: Number(getProductValues().price),
-      imageBase64: fotoProduto?.base64 || "",
+      urlImage: fotoProduto?.base64 || "",
       createdAt:
         isEditing && productToEdit ? productToEdit.createdAt : new Date(),
       updatedAt: isEditing && productToEdit ? new Date() : undefined,
@@ -307,7 +307,7 @@ export const ProductsForm = () => {
             hovering={hovering}
             avatarTitle="Produto"
             setFotoUpload={setFotoProduto}
-            fotoUpdate={productToEdit?.imageBase64 || ""}
+            fotoUpdate={productToEdit?.urlImage || ""}
           />
         </Box>
         <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
