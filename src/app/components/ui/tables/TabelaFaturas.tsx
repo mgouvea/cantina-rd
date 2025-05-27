@@ -181,6 +181,9 @@ export default function TabelaFaturas({
 }: TabelaProps) {
   const { showSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
+  const [sendingInvoiceId, setSendingInvoiceId] = React.useState<string | null>(
+    null
+  );
 
   const { mutateAsync: deleteInvoice } = useDeleteInvoice();
   const { mutateAsync: sendInvoiceByWhatsApp } = useSendInvoiceByWhatsApp();
@@ -206,6 +209,7 @@ export default function TabelaFaturas({
 
   const handleSendInvoiceClick = (_id: string) => async () => {
     try {
+      setSendingInvoiceId(_id);
       await sendInvoiceByWhatsApp(_id);
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       showSnackbar({
@@ -220,6 +224,8 @@ export default function TabelaFaturas({
         duration: 3000,
       });
       console.error(error);
+    } finally {
+      setSendingInvoiceId(null);
     }
   };
 
@@ -347,17 +353,21 @@ export default function TabelaFaturas({
           <Tooltip title="Enviar fatura" key={`send-${params.id}`}>
             <GridActionsCellItem
               icon={
-                <SendOutlinedIcon
-                  sx={{
-                    color: isDisabledSend ? "#ccc" : "#4caf50",
-                    fontSize: 27,
-                  }}
-                />
+                sendingInvoiceId === String(params.id) ? (
+                  <CircularProgress size={24} color="success" />
+                ) : (
+                  <SendOutlinedIcon
+                    sx={{
+                      color: isDisabledSend ? "#ccc" : "#4caf50",
+                      fontSize: 27,
+                    }}
+                  />
+                )
               }
               label="Enviar"
               onClick={handleSendInvoiceClick(String(params.id))}
               color="inherit"
-              disabled={isDisabledSend}
+              disabled={isDisabledSend || sendingInvoiceId !== null}
             />
           </Tooltip>,
           <Tooltip title="Confirmar pagamento" key={`confirm-${params.id}`}>
