@@ -23,7 +23,7 @@ export interface FullInvoiceResponse {
   startDate: Date;
   endDate: Date;
   totalAmount: number;
-  sentByWhatsApp: boolean;
+  sentByWhatsapp: boolean;
   status: "OPEN" | "PARTIALLY_PAID" | "PAID";
   createdAt: Date;
   orders: {
@@ -59,5 +59,7 @@ export interface FullInvoiceResponse {
       }[];
     }[]
   >;
+  consumidoresNomes: Record<string, string>;
+  ownerName: string;
   remaining: number;
 }

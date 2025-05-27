@@ -62,6 +62,44 @@ export function formatDate(date: Date | string | undefined): string {
     : "";
 }
 
+export function formatTime(date: Date | string | undefined): string {
+  if (date instanceof Date) {
+    return date?.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  return date
+    ? new Date(date).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "";
+}
+
+export function formatDateTime(date: Date | string | undefined): string {
+  if (date instanceof Date) {
+    return date?.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  return date
+    ? new Date(date).toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "";
+}
+
 export function a11yProps(index: number) {
   return {
     id: `full-width-tab-${index}`,

@@ -1,12 +1,13 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Snackbar, Alert, AlertColor } from '@mui/material';
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import { Snackbar, Alert, AlertColor } from "@mui/material";
 
 type SnackbarMessage = {
   message: string;
   severity: AlertColor;
   duration?: number;
+  position?: "top" | "bottom";
 };
 
 type SnackbarContextType = {
@@ -38,12 +39,15 @@ export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
         open={open}
         autoHideDuration={snackbarMessage?.duration || 3000}
         onClose={handleClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{
+          vertical: snackbarMessage?.position || "top",
+          horizontal: "center",
+        }}
       >
         <Alert
           onClose={handleClose}
           severity={snackbarMessage?.severity}
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {snackbarMessage?.message}
         </Alert>
@@ -55,7 +59,7 @@ export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
 export const useSnackbar = (): SnackbarContextType => {
   const context = useContext(SnackbarContext);
   if (!context) {
-    throw new Error('useSnackbar must be used within a SnackbarProvider');
+    throw new Error("useSnackbar must be used within a SnackbarProvider");
   }
   return context;
 };
