@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
@@ -8,7 +8,7 @@ import EmptyContent from "../emptyContent/EmptyContent";
 import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
-import { Filtros, useSnackbar } from "../..";
+import { DeleteModal, Filtros, useSnackbar } from "../..";
 import { format } from "date-fns";
 import { FullInvoiceResponse } from "@/types/invoice";
 import { GroupFamily, User } from "@/types";
@@ -36,6 +36,7 @@ import {
   GridColDef,
   GridActionsCellItem,
   GridRenderCellParams,
+  GridRowModel,
 } from "@mui/x-data-grid";
 import {
   capitalizeFirstLastName,
@@ -181,14 +182,27 @@ export default function TabelaFaturas({
 }: TabelaProps) {
   const { showSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
-  const [sendingInvoiceId, setSendingInvoiceId] = React.useState<string | null>(
-    null
-  );
+  const [sendingInvoiceId, setSendingInvoiceId] = useState<string | null>(null);
 
   const { mutateAsync: deleteInvoice } = useDeleteInvoice();
   const { mutateAsync: sendInvoiceByWhatsApp } = useSendInvoiceByWhatsApp();
 
-  const handleDeleteClick = (_id: string) => async () => {
+  const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(
+    null
+  );
+  const [invoiceNameToDelete, setInvoiceNameToDelete] = useState<string | null>(
+    null
+  );
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+
+  const handleDeleteClick = (row: GridRowModel) => async () => {
+    console.log("row", row);
+    setInvoiceIdToDelete(row._id);
+    setInvoiceNameToDelete(row.ownerName);
+    setOpenDeleteModal(true);
+  };
+
+  const handleConfirmDelete = (_id: string) => async () => {
     try {
       await deleteInvoice(_id);
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
@@ -197,9 +211,20 @@ export default function TabelaFaturas({
         severity: "success",
         duration: 3000,
       });
-    } catch (error) {
+      setOpenDeleteModal(false);
+      setInvoiceIdToDelete(null);
+      setInvoiceNameToDelete(null);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      let errorMessage = "Erro ao deletar fatura";
+
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || errorMessage;
+      }
+
       showSnackbar({
-        message: "Erro ao deletar fatura",
+        message: errorMessage,
         severity: "error",
         duration: 3000,
       });
@@ -346,7 +371,7 @@ export default function TabelaFaturas({
             <GridActionsCellItem
               icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 27 }} />}
               label="Delete"
-              onClick={handleDeleteClick(String(params.id))}
+              onClick={handleDeleteClick(params.row)}
               color="inherit"
             />
           </Tooltip>,
@@ -437,6 +462,14 @@ export default function TabelaFaturas({
           }
         </Filtros>
       )}
+
+      <DeleteModal
+        title="fatura"
+        openModal={openDeleteModal}
+        nameToDelete={capitalizeFirstLastName(invoiceNameToDelete!)}
+        setOpenModal={setOpenDeleteModal}
+        onConfirmDelete={handleConfirmDelete(invoiceIdToDelete!)}
+      />
     </Box>
   );
 }

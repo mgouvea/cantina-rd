@@ -7,3 +7,7 @@ export const GetAllOrders = async () => {
 export const GetAllOrdersVisitors = async () => {
   return (await http.get("orders-visitors")).data;
 };
+
+export const DeleteOrder = async (_id: string) => {
+  return (await http.delete(`orders/${_id}`)).data;
+};

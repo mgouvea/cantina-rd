@@ -16,15 +16,18 @@ export const DeleteModal = ({
   onConfirmDelete: () => void;
 }) => {
   const titleGender =
-    title === "categoria" || title === "subcategoria" || title === "compra"
+    title === "categoria" ||
+    title === "subcategoria" ||
+    title === "compra" ||
+    title === "fatura"
       ? "essa"
       : "esse";
 
   return (
     <GenericModal
-      title={`Excluir ${title} ${title === "compra" ? "de" : ""} ${
-        nameToDelete ? nameToDelete : ""
-      }`}
+      title={`Excluir ${title} ${
+        title === "compra" || title === "fatura" ? "de" : ""
+      } ${nameToDelete ? nameToDelete : ""}`}
       open={openModal}
       handleClose={() => {
         setOpenModal(false);

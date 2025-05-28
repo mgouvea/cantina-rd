@@ -39,6 +39,7 @@ import {
   ToggleButtonGroup,
 } from "@mui/material";
 import TabelaComprasVisitors from "@/app/components/ui/tables/TabelaComprasVisitors";
+import { useDeleteOrder } from "@/hooks/mutations";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -73,6 +74,8 @@ export default function Faturas() {
     isLoading: isLoadingGroupFamilyWithOwner,
   } = useGroupFamilyWithOwner();
 
+  const { mutateAsync: deleteOrder } = useDeleteOrder();
+
   const [allInvoicesIds, setAllInvoicesIds] = useState<string[] | null>(null);
   const [orderIdToDelete, setOrderIdToDelete] = useState<string | null>(null);
   const [orderNameToDelete, setOrderNameToDelete] = useState<string | null>(
@@ -97,24 +100,34 @@ export default function Faturas() {
     setOpenDeleteModal(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDeleteOrder = async () => {
     if (!orderIdToDelete) return;
     try {
+      await deleteOrder(orderIdToDelete);
       showSnackbar({
-        message: "Fatura deletada com sucesso!",
+        message: "Compra deletada com sucesso!",
         severity: "success",
         duration: 3000,
       });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      setOpenDeleteModal(false);
-      setOrderIdToDelete(null);
-    } catch (error) {
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      let errorMessage = "Erro ao deletar a compra";
+
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || errorMessage;
+      }
+
       showSnackbar({
-        message: "Erro ao deletar a fatura",
+        message: errorMessage,
         severity: "error",
         duration: 3000,
       });
       console.error(error);
+    } finally {
+      setOpenDeleteModal(false);
+      setOrderIdToDelete(null);
     }
   };
 
@@ -278,7 +291,7 @@ export default function Faturas() {
         openModal={openDeleteModal}
         nameToDelete={capitalizeFirstLastName(orderNameToDelete!)}
         setOpenModal={setOpenDeleteModal}
-        onConfirmDelete={handleConfirmDelete}
+        onConfirmDelete={handleConfirmDeleteOrder}
       />
     </ContentWrapper>
   );
