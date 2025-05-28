@@ -8,7 +8,7 @@ import EmptyContent from "../emptyContent/EmptyContent";
 import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
-import { DeleteModal, Filtros, useSnackbar } from "../..";
+import { DeleteModal, Filtros, PaymentModal, useSnackbar } from "../..";
 import { format } from "date-fns";
 import { FullInvoiceResponse } from "@/types/invoice";
 import { GroupFamily, User } from "@/types";
@@ -194,9 +194,11 @@ export default function TabelaFaturas({
     null
   );
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [openPaymentModal, setOpenPaymentModal] = useState(false);
+
+  const [invoiceValue, setInvoiceValue] = useState<number | null>(null);
 
   const handleDeleteClick = (row: GridRowModel) => async () => {
-    console.log("row", row);
     setInvoiceIdToDelete(row._id);
     setInvoiceNameToDelete(row.ownerName);
     setOpenDeleteModal(true);
@@ -232,6 +234,12 @@ export default function TabelaFaturas({
     }
   };
 
+  const handleConfirmPayment = (row: GridRowModel) => async () => {
+    console.log("row", row);
+    setInvoiceValue(row.totalAmount);
+    setOpenPaymentModal(true);
+  };
+
   const handleSendInvoiceClick = (_id: string) => async () => {
     try {
       setSendingInvoiceId(_id);
@@ -252,10 +260,6 @@ export default function TabelaFaturas({
     } finally {
       setSendingInvoiceId(null);
     }
-  };
-
-  const handleConfirmInvoiceClick = (_id: string) => async () => {
-    alert(_id);
   };
 
   const handleResetData = () => {
@@ -403,7 +407,7 @@ export default function TabelaFaturas({
                 />
               }
               label="Confirmar"
-              onClick={handleConfirmInvoiceClick(String(params.id))}
+              onClick={handleConfirmPayment(params.row)}
               color="inherit"
             />
           </Tooltip>,
@@ -469,6 +473,14 @@ export default function TabelaFaturas({
         nameToDelete={capitalizeFirstLastName(invoiceNameToDelete!)}
         setOpenModal={setOpenDeleteModal}
         onConfirmDelete={handleConfirmDelete(invoiceIdToDelete!)}
+      />
+
+      <PaymentModal
+        openModal={openPaymentModal}
+        ownerName={capitalizeFirstLastName(invoiceNameToDelete!)}
+        invoiceValue={invoiceValue!}
+        setOpenModal={setOpenPaymentModal}
+        onConfirmPayment={handleConfirmPayment}
       />
     </Box>
   );

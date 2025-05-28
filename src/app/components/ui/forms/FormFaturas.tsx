@@ -246,7 +246,7 @@ export const FormFaturas = ({
     >
       <Text variant="h5">Gerar Faturas</Text>
       <Box sx={{ my: 2 }}>
-        <CustomizedAccordions title="Gerar nova fatura" open={true}>
+        <CustomizedAccordions title="Gerar nova fatura" open={false}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3, my: 2 }}>
             {/* Family selection */}
             <Box
