@@ -9,8 +9,13 @@ import PriceCheckIcon from "@mui/icons-material/PriceCheck";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import TabelaCompras from "@/app/components/ui/tables/TabelaCompras";
 import Text from "@/app/components/ui/text/Text";
-import { a11yProps } from "@/utils";
-import { CustomTabPanel, FormFaturas, useSnackbar } from "@/app/components";
+import { a11yProps, capitalizeFirstLastName } from "@/utils";
+import {
+  CustomTabPanel,
+  DeleteModal,
+  FormFaturas,
+  useSnackbar,
+} from "@/app/components";
 import { GridRowModel } from "@mui/x-data-grid";
 import { InvoiceDto } from "@/types/invoice";
 import { useEffect, useState } from "react";
@@ -69,6 +74,11 @@ export default function Faturas() {
   } = useGroupFamilyWithOwner();
 
   const [allInvoicesIds, setAllInvoicesIds] = useState<string[] | null>(null);
+  const [orderIdToDelete, setOrderIdToDelete] = useState<string | null>(null);
+  const [orderNameToDelete, setOrderNameToDelete] = useState<string | null>(
+    null
+  );
+  const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (allInvoices && allInvoices.length > 0 && !isLoadingInvoices) {
@@ -81,15 +91,23 @@ export default function Faturas() {
     router.replace("/financeiro/novo");
   };
 
-  const handleDeleteClick = (orderId: string) => async () => {
+  const handleDeleteClick = (row: GridRowModel) => async () => {
+    setOrderIdToDelete(row._id);
+    setOrderNameToDelete(row.buyerName);
+    setOpenDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!orderIdToDelete) return;
     try {
-      console.log(orderId);
       showSnackbar({
         message: "Fatura deletada com sucesso!",
         severity: "success",
         duration: 3000,
       });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      setOpenDeleteModal(false);
+      setOrderIdToDelete(null);
     } catch (error) {
       showSnackbar({
         message: "Erro ao deletar a fatura",
@@ -255,6 +273,13 @@ export default function Faturas() {
         </ToggleButtonGroup>
       </Box>
       {renderContent()}
+      <DeleteModal
+        title="compra"
+        openModal={openDeleteModal}
+        nameToDelete={capitalizeFirstLastName(orderNameToDelete!)}
+        setOpenModal={setOpenDeleteModal}
+        onConfirmDelete={handleConfirmDelete}
+      />
     </ContentWrapper>
   );
 }

@@ -11,16 +11,20 @@ export const DeleteModal = ({
 }: {
   title: string;
   openModal: boolean;
-  nameToDelete: string;
+  nameToDelete?: string;
   setOpenModal: (open: boolean) => void;
   onConfirmDelete: () => void;
 }) => {
   const titleGender =
-    title === "categoria" || title === "subcategoria" ? "essa" : "esse";
+    title === "categoria" || title === "subcategoria" || title === "compra"
+      ? "essa"
+      : "esse";
 
   return (
     <GenericModal
-      title={`Excluir ${title} ${nameToDelete}`}
+      title={`Excluir ${title} ${title === "compra" ? "de" : ""} ${
+        nameToDelete ? nameToDelete : ""
+      }`}
       open={openModal}
       handleClose={() => {
         setOpenModal(false);

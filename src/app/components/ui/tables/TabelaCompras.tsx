@@ -6,9 +6,12 @@ import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
 import { capitalize } from "@/utils";
+import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import {
   CircularProgress,
+  IconButton,
   Stack,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
@@ -16,6 +19,7 @@ import {
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 import { Filtros } from "../..";
 import { Order, ProductItem, TabelaProps } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function TabelaCompras({
   data,
@@ -26,6 +30,12 @@ export default function TabelaCompras({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
+  const queryClient = useQueryClient();
+
+  const handleResetData = () => {
+    queryClient.invalidateQueries({ queryKey: ["orders"] });
+  };
 
   const columns: GridColDef[] = [
     {
@@ -161,7 +171,7 @@ export default function TabelaCompras({
             key={params.id}
             icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 25 }} />}
             label="Delete"
-            onClick={handleDeleteClick(String(params.id))}
+            onClick={handleDeleteClick(params.row)}
             color="inherit"
           />,
         ];
@@ -186,6 +196,15 @@ export default function TabelaCompras({
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Text variant="h5">Compras realizadas</Text>
+        <Tooltip title="Recarregar dados">
+          <IconButton
+            aria-label="add"
+            sx={{ color: "success.main" }}
+            onClick={handleResetData}
+          >
+            <CachedOutlinedIcon fontSize="medium" />
+          </IconButton>
+        </Tooltip>
       </Stack>
 
       {!isLoading && (!data || data.length === 0) && (
