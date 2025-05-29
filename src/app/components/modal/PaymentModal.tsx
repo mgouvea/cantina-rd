@@ -63,19 +63,25 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     }
   }, [paymentType, setValue]);
 
-  const onSubmit = (data: PaymentFormData) => {
+  const onSubmit = async (data: PaymentFormData) => {
     setIsProcessing(true);
     try {
-      onConfirmPayment({
+      // Chamando a função de pagamento e aguardando sua conclusão
+      await onConfirmPayment({
         paymentType: data.paymentType,
         partialValue:
           data.paymentType === "partial"
             ? parseFloat(data.partialValue)
             : undefined,
       });
+
+      // Só fecha o modal após a conclusão bem-sucedida
+      setOpenModal(false);
+    } catch (error) {
+      // Em caso de erro, mantém o modal aberto para que o usuário possa tentar novamente
+      console.error("Erro ao processar pagamento:", error);
     } finally {
       setIsProcessing(false);
-      setOpenModal(false);
     }
   };
 

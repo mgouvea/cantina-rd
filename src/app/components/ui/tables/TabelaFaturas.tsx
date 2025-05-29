@@ -11,9 +11,13 @@ import Text from "../text/Text";
 import { DeleteModal, Filtros, PaymentModal, useSnackbar } from "../..";
 import { format } from "date-fns";
 import { FullInvoiceResponse } from "@/types/invoice";
-import { GroupFamily, User } from "@/types";
+import { CreatePaymentDto, GroupFamily, User } from "@/types";
 import { ptBR } from "date-fns/locale";
-import { useDeleteInvoice, useSendInvoiceByWhatsApp } from "@/hooks/mutations";
+import {
+  useAddPayment,
+  useDeleteInvoice,
+  useSendInvoiceByWhatsApp,
+} from "@/hooks/mutations";
 import { useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -186,6 +190,7 @@ export default function TabelaFaturas({
 
   const { mutateAsync: deleteInvoice } = useDeleteInvoice();
   const { mutateAsync: sendInvoiceByWhatsApp } = useSendInvoiceByWhatsApp();
+  const { mutateAsync: confirmPayment } = useAddPayment();
 
   const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(
     null
@@ -197,6 +202,7 @@ export default function TabelaFaturas({
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
 
   const [invoiceValue, setInvoiceValue] = useState<number | null>(null);
+  const [paymentId, setPaymentId] = useState<string | null>(null);
 
   const handleDeleteClick = (row: GridRowModel) => async () => {
     setInvoiceIdToDelete(row._id);
@@ -234,10 +240,61 @@ export default function TabelaFaturas({
     }
   };
 
-  const handleConfirmPayment = (row: GridRowModel) => async () => {
-    console.log("row", row);
+  const handlePaymentClick = (row: GridRowModel) => async () => {
     setInvoiceValue(row.totalAmount);
+    setPaymentId(row._id);
     setOpenPaymentModal(true);
+  };
+
+  const handleConfirmPayment = async (modalData: {
+    paymentType: "total" | "partial";
+    partialValue?: number;
+  }) => {
+    // Retornando uma Promise para que o modal possa aguardar sua conclusão
+    return new Promise<void>(async (resolve, reject) => {
+      try {
+        const amountPaid =
+          modalData.paymentType === "total"
+            ? invoiceValue!
+            : modalData.partialValue!;
+
+        const paymentData: CreatePaymentDto = {
+          invoiceId: paymentId!,
+          amountPaid: amountPaid,
+          paymentDate: new Date(),
+          isPartial: modalData.paymentType === "partial",
+          isCredit: false,
+        };
+
+        // Aguardando a conclusão do pagamento
+        await confirmPayment(paymentData);
+
+        // Atualizando os dados
+        queryClient.invalidateQueries({ queryKey: ["invoices"] });
+        queryClient.invalidateQueries({ queryKey: ["payments"] });
+
+        // Exibindo mensagem de sucesso
+        showSnackbar({
+          message: "Pagamento confirmado com sucesso!",
+          severity: "success",
+          duration: 3000,
+        });
+        
+        // Resolvendo a Promise para indicar sucesso
+        resolve();
+      } catch (error) {
+        // Exibindo mensagem de erro
+        showSnackbar({
+          message: "Erro ao confirmar pagamento",
+          severity: "error",
+          duration: 3000,
+        });
+        console.error(error);
+        
+        // Rejeitando a Promise para indicar falha
+        reject(error);
+      }
+    });
   };
 
   const handleSendInvoiceClick = (_id: string) => async () => {
@@ -407,7 +464,7 @@ export default function TabelaFaturas({
                 />
               }
               label="Confirmar"
-              onClick={handleConfirmPayment(params.row)}
+              onClick={handlePaymentClick(params.row)}
               color="inherit"
             />
           </Tooltip>,

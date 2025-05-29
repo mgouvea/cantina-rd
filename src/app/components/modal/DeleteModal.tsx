@@ -51,7 +51,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
-      await onConfirmDelete();
+      onConfirmDelete();
     } finally {
       setIsDeleting(false);
       setOpenModal(false);

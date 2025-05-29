@@ -40,6 +40,8 @@ import {
 } from "@mui/material";
 import TabelaComprasVisitors from "@/app/components/ui/tables/TabelaComprasVisitors";
 import { useDeleteOrder } from "@/hooks/mutations";
+import TabelaPagamentos from "@/app/components/ui/tables/TabelaPagamentos";
+import { usePayments } from "@/hooks/queries/payments.query";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -68,6 +70,7 @@ export default function Faturas() {
   const { data: dataUser, isLoading: isLoadingUser } = useUsers();
   const { data: groupFamilies, isLoading: isLoadingGroupFamily } =
     useGroupFamily();
+  const { data: payments, isLoading: isLoadingPayments } = usePayments();
 
   const {
     data: groupFamiliesWithOwner,
@@ -231,9 +234,16 @@ export default function Faturas() {
         </CustomTabPanel>
         <CustomTabPanel value={value} index={2} dir={theme.direction}>
           {viewType === "socios" ? (
-            <Text variant="h6">
-              Visão de Sócios - Pagamentos (Em implementação)
-            </Text>
+            isLoadingPayments ? (
+              <Loading />
+            ) : (
+              <TabelaPagamentos
+                data={payments || []}
+                isLoading={false}
+                handleEditClick={handleEditClick}
+                handleDeleteClick={handleDeleteClick}
+              />
+            )
           ) : (
             <Text variant="h6">
               Visão de Visitantes - Pagamentos (Em implementação)

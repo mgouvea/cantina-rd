@@ -4,3 +4,4 @@ export * from "./useCategories.mutation";
 export * from "./useInvoices.mutation";
 export * from "./useWhatsApp.mutation";
 export * from "./useOrders.mutation";
+export * from "./usePayments.mutation";

@@ -8,3 +8,4 @@ export * from "./orders";
 export * from "./invoices";
 export * from "./visitors";
 export * from "./whatssApp";
+export * from "./payments";
