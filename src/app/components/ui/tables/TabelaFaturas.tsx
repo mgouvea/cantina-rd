@@ -202,6 +202,7 @@ export default function TabelaFaturas({
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
 
   const [invoiceValue, setInvoiceValue] = useState<number | null>(null);
+  const [paidAmount, setPaidAmount] = useState<number | null>(null);
   const [paymentId, setPaymentId] = useState<string | null>(null);
 
   const handleDeleteClick = (row: GridRowModel) => async () => {
@@ -243,6 +244,14 @@ export default function TabelaFaturas({
   const handlePaymentClick = (row: GridRowModel) => async () => {
     setInvoiceValue(row.totalAmount);
     setPaymentId(row._id);
+    
+    // Calcular o valor total já pago para esta fatura
+    const totalPaid = row.payments?.reduce(
+      (sum: number, payment: { amountPaid: number }) => sum + payment.amountPaid,
+      0
+    ) || 0;
+    
+    setPaidAmount(totalPaid);
     setOpenPaymentModal(true);
   };
 
@@ -253,10 +262,14 @@ export default function TabelaFaturas({
     // Retornando uma Promise para que o modal possa aguardar sua conclusão
     return new Promise<void>(async (resolve, reject) => {
       try {
+        // Se for pagamento total e já tiver pagamentos parciais anteriores,
+        // o valor a ser pago é o restante (total - já pago)
         const amountPaid =
           modalData.paymentType === "total"
-            ? invoiceValue!
-            : modalData.partialValue!;
+            ? paidAmount! > 0 
+              ? invoiceValue! - paidAmount! // Paga apenas o restante
+              : invoiceValue! // Paga o valor total
+            : modalData.partialValue!; // Pagamento parcial conforme informado
 
         const paymentData: CreatePaymentDto = {
           invoiceId: paymentId!,
@@ -279,7 +292,7 @@ export default function TabelaFaturas({
           severity: "success",
           duration: 3000,
         });
-        
+
         // Resolvendo a Promise para indicar sucesso
         resolve();
       } catch (error) {
@@ -290,7 +303,7 @@ export default function TabelaFaturas({
           duration: 3000,
         });
         console.error(error);
-        
+
         // Rejeitando a Promise para indicar falha
         reject(error);
       }
@@ -371,15 +384,50 @@ export default function TabelaFaturas({
     {
       field: "totalAmount",
       headerName: "Valor total",
-      width: 120,
+      width: 150,
       align: "center",
       editable: false,
-      renderCell: (params) => `R$ ${params.value.toFixed(2)}`,
+      renderCell: (params) => {
+        const { row } = params;
+        const totalAmount = params.value;
+        const status = row.status as "OPEN" | "PARTIALLY_PAID" | "PAID";
+        
+        // If status is OPEN or PAID, just show the total amount
+        if (status === "OPEN" || status === "PAID") {
+          return `R$ ${totalAmount.toFixed(2)}`;
+        }
+        
+        // If status is PARTIALLY_PAID, show total, paid and remaining amounts
+        if (status === "PARTIALLY_PAID") {
+          // Calculate total paid amount from all payments
+          const paidAmount = row.payments.reduce(
+            (sum: number, payment: { amountPaid: number }) => sum + payment.amountPaid,
+            0
+          );
+          const remainingAmount = totalAmount - paidAmount;
+          
+          return (
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <Typography variant="caption" sx={{ fontWeight: "bold" }}>
+                Total: R$ {totalAmount.toFixed(2)}
+              </Typography>
+              <Typography variant="caption" sx={{ color: "success.main" }}>
+                Pago: R$ {paidAmount.toFixed(2)}
+              </Typography>
+              <Typography variant="caption" sx={{ color: "error.main" }}>
+                Restante: R$ {remainingAmount.toFixed(2)}
+              </Typography>
+            </Box>
+          );
+        }
+        
+        return `R$ ${totalAmount.toFixed(2)}`;
+      },
     },
     {
       field: "status",
       headerName: "Status",
-      width: 120,
+      width: 150,
       editable: false,
       align: "center",
       headerAlign: "center",
@@ -424,7 +472,9 @@ export default function TabelaFaturas({
       cellClassName: "actions",
       getActions: (params) => {
         const isSentByWhatsApp = Boolean(params.row.sentByWhatsapp);
-        const isOpenStatus = params.row.status === "OPEN";
+        const isOpenStatus =
+          params.row.status === "OPEN" ||
+          params.row.status === "PARTIALLY_PAID";
         const isDisabledSend = !isOpenStatus || isSentByWhatsApp;
 
         return [
@@ -536,6 +586,7 @@ export default function TabelaFaturas({
         openModal={openPaymentModal}
         ownerName={capitalizeFirstLastName(invoiceNameToDelete!)}
         invoiceValue={invoiceValue!}
+        paidAmount={paidAmount!}
         setOpenModal={setOpenPaymentModal}
         onConfirmPayment={handleConfirmPayment}
       />

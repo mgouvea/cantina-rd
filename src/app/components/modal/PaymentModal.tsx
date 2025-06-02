@@ -26,6 +26,7 @@ type PaymentModalProps = {
   openModal: boolean;
   ownerName?: string;
   invoiceValue?: number; // Valor total da fatura
+  paidAmount?: number; // Valor já pago da fatura
   setOpenModal: (open: boolean) => void;
   onConfirmPayment: (paymentData: {
     paymentType: PaymentType;
@@ -37,6 +38,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   ownerName,
   openModal,
   invoiceValue = 0,
+  paidAmount = 0,
   setOpenModal,
   onConfirmPayment,
 }) => {
@@ -72,7 +74,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         partialValue:
           data.paymentType === "partial"
             ? parseFloat(data.partialValue)
-            : undefined,
+            : data.paymentType === "total" && paidAmount > 0
+            ? remainingAmount  // Se for pagamento total e já tiver pago algo, envia o valor restante
+            : undefined,       // Se for pagamento total sem pagamento anterior, envia undefined
       });
 
       // Só fecha o modal após a conclusão bem-sucedida
@@ -85,11 +89,20 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     }
   };
 
-  // Formatar o valor da fatura para exibição
-  const formattedInvoiceValue = new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(invoiceValue);
+  // Calcular o valor restante a ser pago
+  const remainingAmount = invoiceValue - paidAmount;
+  
+  // Formatar os valores para exibição
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value);
+  };
+  
+  const formattedInvoiceValue = formatCurrency(invoiceValue);
+  const formattedPaidAmount = formatCurrency(paidAmount);
+  const formattedRemainingAmount = formatCurrency(remainingAmount);
 
   return (
     <GenericModal
@@ -111,6 +124,17 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         <Text variant="subtitle1" color="textSecondary" sx={{ mb: 2 }}>
           Valor total da fatura: {formattedInvoiceValue}
         </Text>
+        
+        {paidAmount > 0 && (
+          <>
+            <Text variant="subtitle1" color="success.main" sx={{ mb: 1 }}>
+              Valor já pago: {formattedPaidAmount}
+            </Text>
+            <Text variant="subtitle1" color="error.main" sx={{ mb: 2 }}>
+              Valor restante a pagar: {formattedRemainingAmount}
+            </Text>
+          </>
+        )}
 
         <FormControl component="fieldset" sx={{ width: "100%" }}>
           <FormLabel component="legend">Tipo de pagamento</FormLabel>
@@ -122,7 +146,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 <FormControlLabel
                   value="total"
                   control={<Radio />}
-                  label="Pagamento total da fatura"
+                  label={paidAmount > 0 ? `Pagamento do valor restante (${formattedRemainingAmount})` : "Pagamento total da fatura"}
                 />
                 <FormControlLabel
                   value="partial"
@@ -147,7 +171,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               validate: (value) => {
                 const numValue = parseFloat(value);
                 if (numValue <= 0) return "Valor deve ser maior que zero";
-                if (numValue >= invoiceValue)
+                if (numValue >= remainingAmount)
                   return "Para pagamento total, selecione a opção acima";
                 return true;
               },
