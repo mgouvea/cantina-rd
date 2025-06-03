@@ -17,18 +17,12 @@ import { a11yProps, capitalizeFirstLastName } from "@/utils";
 import { GridRowModel } from "@mui/x-data-grid";
 import { InvoiceDto } from "@/types/invoice";
 import { useDeleteOrder } from "@/hooks/mutations";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useInvoices } from "@/hooks/queries/useInvoices.query";
 import { usePayments } from "@/hooks/queries/payments.query";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import {
-  CustomTabPanel,
-  DeleteModal,
-  FormFaturas,
-  useSnackbar,
-} from "@/app/components";
+import { CustomTabPanel, DeleteModal, FormFaturas } from "@/app/components";
 import {
   useCredits,
   useGroupFamily,
@@ -52,10 +46,7 @@ const breadcrumbItems = [
   { label: "Financeiro" },
 ];
 
-export default function Faturas() {
-  const { showSnackbar } = useSnackbar();
-
-  const queryClient = useQueryClient();
+function FaturasContent() {
   const theme = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -110,33 +101,11 @@ export default function Faturas() {
 
   const handleConfirmDeleteOrder = async () => {
     if (!orderIdToDelete) return;
-    try {
-      await deleteOrder(orderIdToDelete);
-      showSnackbar({
-        message: "Compra deletada com sucesso!",
-        severity: "success",
-        duration: 3000,
-      });
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    await deleteOrder(orderIdToDelete);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      let errorMessage = "Erro ao deletar a compra";
-
-      if (error.response && error.response.data) {
-        errorMessage = error.response.data.message || errorMessage;
-      }
-
-      showSnackbar({
-        message: errorMessage,
-        severity: "error",
-        duration: 3000,
-      });
-      console.error(error);
-    } finally {
-      setOpenDeleteModal(false);
-      setOrderIdToDelete(null);
-    }
+    setOpenDeleteModal(false);
+    setOrderIdToDelete(null);
+    setOrderNameToDelete(null);
   };
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -316,5 +285,15 @@ export default function Faturas() {
         onConfirmDelete={handleConfirmDeleteOrder}
       />
     </ContentWrapper>
+  );
+}
+
+export default function Faturas() {
+  return (
+    <Stack>
+      <Suspense fallback={<Loading minHeight={200} />}>
+        <FaturasContent />
+      </Suspense>
+    </Stack>
   );
 }

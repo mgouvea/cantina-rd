@@ -14,7 +14,6 @@ import { Products } from "@/types";
 import { useDeleteProduct } from "@/hooks/mutations/useProducts.mutation";
 import { useProductStore } from "@/contexts";
 import { useRouter } from "next/navigation";
-import { useSnackbar } from "../../snackbar/SnackbarProvider";
 
 import {
   GridRowModesModel,
@@ -36,22 +35,15 @@ import {
 interface TabelaProps {
   data: Products[];
   isLoading: boolean;
-  onDeleteProduct: () => void;
 }
 
-export default function TabelaProduto({
-  data,
-  isLoading,
-  onDeleteProduct,
-}: TabelaProps) {
+export default function TabelaProduto({ data, isLoading }: TabelaProps) {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
   const { mutateAsync: deleteProduct } = useDeleteProduct();
-
-  const { showSnackbar } = useSnackbar();
 
   const [rows, setRows] = React.useState(data);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
@@ -75,22 +67,7 @@ export default function TabelaProduto({
   };
 
   const handleDeleteClick = (id: string) => async () => {
-    try {
-      await deleteProduct({ productId: id });
-      onDeleteProduct();
-      showSnackbar({
-        message: "Produto deletado com sucesso!",
-        severity: "success",
-        duration: 3000,
-      });
-    } catch (error) {
-      showSnackbar({
-        message: "Erro ao deletar o produto",
-        severity: "error",
-        duration: 3000,
-      });
-      console.error(error);
-    }
+    await deleteProduct({ productId: id });
   };
 
   const processRowUpdate = (newRow: GridRowModel<Products>) => {
@@ -200,7 +177,10 @@ export default function TabelaProduto({
             renderCell: (params) => {
               const category = params.row.categoryId;
               // Check if category is an object with a name property
-              const categoryName = typeof category === 'object' && category !== null ? category.name : '';
+              const categoryName =
+                typeof category === "object" && category !== null
+                  ? category.name
+                  : "";
               return (
                 <div style={{ ...rowStyle, textAlign: "center" }}>
                   {capitalize(categoryName)}
@@ -218,7 +198,10 @@ export default function TabelaProduto({
             renderCell: (params) => {
               const subcategory = params.row.subcategoryId;
               // Check if subcategory is an object with a name property
-              const subcategoryName = typeof subcategory === 'object' && subcategory !== null ? subcategory.name : '';
+              const subcategoryName =
+                typeof subcategory === "object" && subcategory !== null
+                  ? subcategory.name
+                  : "";
               return (
                 <div style={{ ...rowStyle, textAlign: "center" }}>
                   {capitalize(subcategoryName)}

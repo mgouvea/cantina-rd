@@ -11,7 +11,7 @@ import Text from "../text/Text";
 import { capitalize } from "@/utils";
 import { Categories } from "@/types";
 import { CircularProgress, IconButton, Stack } from "@mui/material";
-import { Filtros, useSnackbar } from "../..";
+import { Filtros } from "../..";
 import { useCategoryStore } from "@/contexts";
 import { useDeleteCategory } from "@/hooks/mutations";
 import { useRouter } from "next/navigation";
@@ -28,18 +28,12 @@ import {
 interface TabelaProps {
   data: Categories[];
   isLoading: boolean;
-  onDeleteCategory: () => void;
 }
 
-export default function TabelaCategorias({
-  data,
-  isLoading,
-  onDeleteCategory,
-}: TabelaProps) {
+export default function TabelaCategorias({ data, isLoading }: TabelaProps) {
   const router = useRouter();
 
   const { mutateAsync: deleteCategory } = useDeleteCategory();
-  const { showSnackbar } = useSnackbar();
   const { updateCategoryToEdit, updateIsEditing } = useCategoryStore();
 
   const [rows, setRows] = React.useState<Categories[]>(data);
@@ -64,13 +58,6 @@ export default function TabelaCategorias({
 
   const handleDeleteClick = (id: string) => async () => {
     await deleteCategory(id);
-    onDeleteCategory();
-
-    showSnackbar({
-      message: "Categorias e subcategorias deletadas com sucesso!",
-      severity: "success",
-      duration: 3000,
-    });
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {

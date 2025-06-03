@@ -169,35 +169,9 @@ export const FormFaturas = ({
       return;
     }
 
-    try {
-      const response = await addInvoice(invoicePayload);
-
-      if (response.status === 201) {
-        showSnackbar({
-          message: "Fatura gerada com sucesso",
-          severity: "success",
-          duration: 3000,
-        });
-        handleClearForm();
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      let errorMessage = "Erro ao gerar fatura";
-
-      if (error.response && error.response.data) {
-        errorMessage = error.response.data.message || errorMessage;
-      }
-
-      showSnackbar({
-        message: errorMessage,
-        severity: "error",
-        duration: 5000,
-      });
-    } finally {
-      setIsSubmitting(false);
-      handleClearForm();
-    }
+    await addInvoice(invoicePayload);
+    handleClearForm();
+    setIsSubmitting(false);
   };
 
   const handleResetData = () => {

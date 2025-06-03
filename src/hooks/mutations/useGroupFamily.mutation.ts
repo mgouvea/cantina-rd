@@ -1,3 +1,4 @@
+import { useSnackbar } from "@/app/components";
 import {
   AddOrRemoveMember,
   DeleteGroupFamily,
@@ -5,7 +6,7 @@ import {
   RemoveMember,
   UpdateGroupFamily,
 } from "@/hooks/services/groupFamily";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useAddGroupFamily = () => {
   return useMutation({
@@ -32,7 +33,27 @@ export const useRemoveMemberFromGroupFamily = () => {
 };
 
 export const useDeleteGroupFamily = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+
   return useMutation({
     mutationFn: DeleteGroupFamily,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+
+      showSnackbar({
+        message: "Grupo Familiar deletado com sucesso!",
+        severity: "success",
+        duration: 3000,
+      });
+    },
+    onError: () => {
+      showSnackbar({
+        message: "Erro ao deletar grupo familiar",
+        severity: "error",
+        duration: 3000,
+      });
+    },
   });
 };

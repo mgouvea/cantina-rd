@@ -8,7 +8,7 @@ import EmptyContent from "../emptyContent/EmptyContent";
 import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
-import { DeleteModal, Filtros, PaymentModal, useSnackbar } from "../..";
+import { DeleteModal, Filtros, PaymentModal } from "../..";
 import { format } from "date-fns";
 import { FullInvoiceResponse } from "@/types/invoice";
 import { CreatePaymentDto, GroupFamily, User } from "@/types";
@@ -18,7 +18,6 @@ import {
   useDeleteInvoice,
   useSendInvoiceByWhatsApp,
 } from "@/hooks/mutations";
-import { useQueryClient } from "@tanstack/react-query";
 
 import {
   CircularProgress,
@@ -184,8 +183,6 @@ export default function TabelaFaturas({
   dataUser,
   onResetData,
 }: TabelaProps) {
-  const { showSnackbar } = useSnackbar();
-  const queryClient = useQueryClient();
   const [sendingInvoiceId, setSendingInvoiceId] = useState<string | null>(null);
 
   const { mutateAsync: deleteInvoice } = useDeleteInvoice();
@@ -212,33 +209,11 @@ export default function TabelaFaturas({
   };
 
   const handleConfirmDelete = (_id: string) => async () => {
-    try {
-      await deleteInvoice(_id);
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      showSnackbar({
-        message: "Fatura deletada com sucesso!",
-        severity: "success",
-        duration: 3000,
-      });
-      setOpenDeleteModal(false);
-      setInvoiceIdToDelete(null);
-      setInvoiceNameToDelete(null);
+    await deleteInvoice(_id);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      let errorMessage = "Erro ao deletar fatura";
-
-      if (error.response && error.response.data) {
-        errorMessage = error.response.data.message || errorMessage;
-      }
-
-      showSnackbar({
-        message: errorMessage,
-        severity: "error",
-        duration: 3000,
-      });
-      console.error(error);
-    }
+    setOpenDeleteModal(false);
+    setInvoiceIdToDelete(null);
+    setInvoiceNameToDelete(null);
   };
 
   const handlePaymentClick = (row: GridRowModel) => async () => {
@@ -281,68 +256,48 @@ export default function TabelaFaturas({
           isCredit: false,
         };
 
-        // Aguardando a conclusão do pagamento
         await confirmPayment(paymentData);
 
-        // Atualizando os dados
-        queryClient.invalidateQueries({ queryKey: ["invoices"] });
-        queryClient.invalidateQueries({ queryKey: ["payments"] });
-
-        // Exibindo mensagem de sucesso
-        showSnackbar({
-          message: "Pagamento confirmado com sucesso!",
-          severity: "success",
-          duration: 3000,
-        });
-
-        // Resolvendo a Promise para indicar sucesso
         resolve();
       } catch (error) {
-        // Exibindo mensagem de erro
-        showSnackbar({
-          message: "Erro ao confirmar pagamento",
-          severity: "error",
-          duration: 3000,
-        });
-        console.error(error);
-
-        // Rejeitando a Promise para indicar falha
         reject(error);
       }
     });
   };
 
   const handleSendInvoiceClick = (_id: string) => async () => {
-    try {
-      setSendingInvoiceId(_id);
-      await sendInvoiceByWhatsApp(_id);
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      showSnackbar({
-        message: "Fatura enviada com sucesso!",
-        severity: "success",
-        duration: 3000,
-      });
-    } catch (error) {
-      showSnackbar({
-        message: "Erro ao enviar fatura",
-        severity: "error",
-        duration: 3000,
-      });
-      console.error(error);
-    } finally {
-      setSendingInvoiceId(null);
-    }
+    setSendingInvoiceId(_id);
+    await sendInvoiceByWhatsApp(_id);
+    setSendingInvoiceId(null);
   };
 
   const handleResetData = () => {
     onResetData();
   };
 
+  // Create a custom hook for responsive columns
+  const useResponsiveColumns = () => {
+    const [windowWidth, setWindowWidth] = useState(
+      typeof window !== "undefined" ? window.innerWidth : 1200
+    );
+
+    React.useEffect(() => {
+      const handleResize = () => setWindowWidth(window.innerWidth);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    // Return smaller widths for smaller screens
+    return windowWidth < 1200;
+  };
+
+  const isSmallScreen = useResponsiveColumns();
+
   const columns: GridColDef[] = [
     {
       field: "groupFamilyId",
       headerName: "Grupo Familiar",
-      width: 120,
+      width: isSmallScreen ? 100 : 120,
       editable: false,
       sortable: true,
       align: "center",
@@ -352,7 +307,7 @@ export default function TabelaFaturas({
     {
       field: "startDate",
       headerName: "Data de início",
-      width: 120,
+      width: isSmallScreen ? 100 : 120,
       editable: false,
       align: "center",
       renderCell: (params) =>
@@ -361,7 +316,7 @@ export default function TabelaFaturas({
     {
       field: "endDate",
       headerName: "Data de fim",
-      width: 120,
+      width: isSmallScreen ? 100 : 120,
       editable: false,
       align: "center",
       renderCell: (params) =>
@@ -370,7 +325,7 @@ export default function TabelaFaturas({
     {
       field: "consumoPorPessoa",
       headerName: "Consumo por pessoa",
-      width: 400,
+      width: isSmallScreen ? 250 : 350,
       editable: false,
       renderCell: (params: GridRenderCellParams) => (
         <Tooltip title="Clique para ver detalhes" arrow placement="top">
@@ -386,7 +341,7 @@ export default function TabelaFaturas({
     {
       field: "totalAmount",
       headerName: "Valor total",
-      width: 150,
+      width: isSmallScreen ? 120 : 150,
       align: "center",
       editable: false,
       renderCell: (params) => {
@@ -454,7 +409,7 @@ export default function TabelaFaturas({
     {
       field: "status",
       headerName: "Status",
-      width: 150,
+      width: isSmallScreen ? 120 : 150,
       editable: false,
       align: "center",
       headerAlign: "center",
@@ -495,7 +450,7 @@ export default function TabelaFaturas({
       field: "actions",
       type: "actions",
       headerName: "Ações",
-      width: 120,
+      width: isSmallScreen ? 100 : 120,
       cellClassName: "actions",
       getActions: (params) => {
         const isSentByWhatsApp = Boolean(params.row.sentByWhatsapp);
@@ -560,6 +515,8 @@ export default function TabelaFaturas({
       sx={{
         padding: 2,
         height: "fit-content",
+        width: "100%",
+        overflow: "hidden",
         "& .actions": {
           color: "text.secondary",
         },
@@ -592,15 +549,33 @@ export default function TabelaFaturas({
             isLoading ? (
               <CircularProgress />
             ) : (
-              <DataGrid
-                rows={rowsFiltradas}
-                columns={columns}
-                editMode="row"
-                getRowId={(row) => row._id}
-                getRowHeight={() => "auto"}
-                getEstimatedRowHeight={() => 100}
-                sx={{ borderRadius: "16px" }}
-              />
+              <Box sx={{ width: "100%", overflowX: "auto" }}>
+                <DataGrid
+                  rows={rowsFiltradas}
+                  columns={columns}
+                  editMode="row"
+                  getRowId={(row) => row._id}
+                  getRowHeight={() => "auto"}
+                  getEstimatedRowHeight={() => 100}
+                  autoHeight
+                  disableColumnMenu={isSmallScreen}
+                  sx={{
+                    borderRadius: "16px",
+                    width: "100%",
+                    "& .MuiDataGrid-main": {
+                      overflow: "auto",
+                    },
+                    "& .MuiDataGrid-cell": {
+                      whiteSpace: "normal",
+                      wordWrap: "break-word",
+                    },
+                    "& .MuiDataGrid-columnHeaders": {
+                      whiteSpace: "normal",
+                      wordWrap: "break-word",
+                    },
+                  }}
+                />
+              </Box>
             )
           }
         </Filtros>
