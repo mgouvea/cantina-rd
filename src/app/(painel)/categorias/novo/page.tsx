@@ -17,6 +17,7 @@ import {
   SubCategoriesForm,
 } from "@/app/components";
 import { a11yProps } from "@/utils";
+import Loading from "@/app/components/loading/Loading";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -31,7 +32,9 @@ const CategoriasContent = () => {
   const searchParams = useSearchParams();
 
   // Get tab from URL query parameter or default to 0
-  const initialTab = searchParams.get('tab') ? parseInt(searchParams.get('tab')!) : 0;
+  const initialTab = searchParams.get("tab")
+    ? parseInt(searchParams.get("tab")!)
+    : 0;
   const [value, setValue] = useState(initialTab);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -133,7 +136,7 @@ export default function NovoCategoria() {
   return (
     <Stack>
       <GenericBreadcrumbs items={breadcrumbItems} />
-      <Suspense fallback={<Text>Carregando conteúdo...</Text>}>
+      <Suspense fallback={<Loading minHeight={200} />}>
         <CategoriasContent />
       </Suspense>
     </Stack>

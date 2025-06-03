@@ -17,7 +17,7 @@ import { a11yProps, capitalizeFirstLastName } from "@/utils";
 import { GridRowModel } from "@mui/x-data-grid";
 import { InvoiceDto } from "@/types/invoice";
 import { useDeleteOrder } from "@/hooks/mutations";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useInvoices } from "@/hooks/queries/useInvoices.query";
 import { usePayments } from "@/hooks/queries/payments.query";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -46,7 +46,7 @@ const breadcrumbItems = [
   { label: "Financeiro" },
 ];
 
-export default function Faturas() {
+function FaturasContent() {
   const theme = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -285,5 +285,15 @@ export default function Faturas() {
         onConfirmDelete={handleConfirmDeleteOrder}
       />
     </ContentWrapper>
+  );
+}
+
+export default function Faturas() {
+  return (
+    <Stack>
+      <Suspense fallback={<Loading minHeight={200} />}>
+        <FaturasContent />
+      </Suspense>
+    </Stack>
   );
 }

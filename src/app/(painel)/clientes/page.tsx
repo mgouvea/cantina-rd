@@ -10,7 +10,7 @@ import { a11yProps, capitalizeFirstLastName } from "@/utils";
 import { Box, Stack, Tab, Tabs, useTheme } from "@mui/material";
 import { Client, User } from "@/types";
 import { CustomTabPanel, DeleteModal, useSnackbar } from "@/app/components";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUsers } from "@/hooks/queries";
@@ -37,7 +37,7 @@ const breadcrumbItems = [
   { label: "Clientes" },
 ];
 
-export default function Clientes() {
+function ClientesContent() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const theme = useTheme();
@@ -299,5 +299,15 @@ export default function Clientes() {
         onConfirmDelete={confirmDelete}
       />
     </ContentWrapper>
+  );
+}
+
+export default function Clientes() {
+  return (
+    <Stack>
+      <Suspense fallback={<Loading minHeight={200} />}>
+        <ClientesContent />
+      </Suspense>
+    </Stack>
   );
 }

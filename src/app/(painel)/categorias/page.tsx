@@ -14,8 +14,6 @@ import { useCategoryStore } from "@/contexts";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSubCategories } from "@/hooks/queries";
-import GenericBreadcrumbs from "@/app/components/breadcrumb/GenericBreadcrumb";
-import Text from "@/app/components/ui/text/Text";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -117,8 +115,7 @@ function CategoriasContent() {
 export default function Categorias() {
   return (
     <Stack>
-      <GenericBreadcrumbs items={breadcrumbItems} />
-      <Suspense fallback={<Text>Carregando conteúdo...</Text>}>
+      <Suspense fallback={<Loading minHeight={200} />}>
         <CategoriasContent />
       </Suspense>
     </Stack>
