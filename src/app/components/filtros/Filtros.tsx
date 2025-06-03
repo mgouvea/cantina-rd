@@ -1,16 +1,18 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Box } from '@mui/material';
-import { Pesquisa } from './Pesquisa';
+import React, { useState } from "react";
+import { Box } from "@mui/material";
+import { Pesquisa } from "./Pesquisa";
 
 type FiltrosProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children: (filteredRows: any[]) => React.ReactNode;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rows: any[];
 };
 
 export const Filtros: React.FC<FiltrosProps> = ({ children, rows }) => {
-  const [parametrosDeBusca, setParametrosDeBusca] = useState('');
+  const [parametrosDeBusca, setParametrosDeBusca] = useState("");
 
   const filteredRows = rows?.filter((row) =>
     Object.values(row).some((value) =>
@@ -22,10 +24,10 @@ export const Filtros: React.FC<FiltrosProps> = ({ children, rows }) => {
     <>
       <Box
         sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
           gap: 2,
           mb: 2,
         }}

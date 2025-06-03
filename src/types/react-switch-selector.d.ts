@@ -1,5 +1,5 @@
-declare module 'react-switch-selector' {
-  // Add specific types if you know them, or use `any` as a placeholder
+declare module "react-switch-selector" {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const SwitchSelector: any;
   export default SwitchSelector;
 }
