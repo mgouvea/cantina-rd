@@ -110,17 +110,12 @@ export default function Clientes() {
   const confirmDelete = async () => {
     if (!idToDelete) return;
 
-    try {
-      if (isVisitor) {
-        await deleteVisitor(idToDelete);
-      } else {
-        await deleteUser(idToDelete);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setOpenDeleteModal(false);
+    if (isVisitor) {
+      await deleteVisitor(idToDelete);
+    } else {
+      await deleteUser(idToDelete);
     }
+    setOpenDeleteModal(false);
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {

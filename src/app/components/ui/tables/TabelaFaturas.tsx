@@ -8,7 +8,7 @@ import EmptyContent from "../emptyContent/EmptyContent";
 import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
-import { DeleteModal, Filtros, PaymentModal, useSnackbar } from "../..";
+import { DeleteModal, Filtros, PaymentModal } from "../..";
 import { format } from "date-fns";
 import { FullInvoiceResponse } from "@/types/invoice";
 import { CreatePaymentDto, GroupFamily, User } from "@/types";
@@ -18,7 +18,6 @@ import {
   useDeleteInvoice,
   useSendInvoiceByWhatsApp,
 } from "@/hooks/mutations";
-import { useQueryClient } from "@tanstack/react-query";
 
 import {
   CircularProgress,
@@ -184,8 +183,6 @@ export default function TabelaFaturas({
   dataUser,
   onResetData,
 }: TabelaProps) {
-  const { showSnackbar } = useSnackbar();
-  const queryClient = useQueryClient();
   const [sendingInvoiceId, setSendingInvoiceId] = useState<string | null>(null);
 
   const { mutateAsync: deleteInvoice } = useDeleteInvoice();
@@ -212,33 +209,11 @@ export default function TabelaFaturas({
   };
 
   const handleConfirmDelete = (_id: string) => async () => {
-    try {
-      await deleteInvoice(_id);
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      showSnackbar({
-        message: "Fatura deletada com sucesso!",
-        severity: "success",
-        duration: 3000,
-      });
-      setOpenDeleteModal(false);
-      setInvoiceIdToDelete(null);
-      setInvoiceNameToDelete(null);
+    await deleteInvoice(_id);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      let errorMessage = "Erro ao deletar fatura";
-
-      if (error.response && error.response.data) {
-        errorMessage = error.response.data.message || errorMessage;
-      }
-
-      showSnackbar({
-        message: errorMessage,
-        severity: "error",
-        duration: 3000,
-      });
-      console.error(error);
-    }
+    setOpenDeleteModal(false);
+    setInvoiceIdToDelete(null);
+    setInvoiceNameToDelete(null);
   };
 
   const handlePaymentClick = (row: GridRowModel) => async () => {
@@ -291,14 +266,9 @@ export default function TabelaFaturas({
   };
 
   const handleSendInvoiceClick = (_id: string) => async () => {
-    try {
-      setSendingInvoiceId(_id);
-      await sendInvoiceByWhatsApp(_id);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setSendingInvoiceId(null);
-    }
+    setSendingInvoiceId(_id);
+    await sendInvoiceByWhatsApp(_id);
+    setSendingInvoiceId(null);
   };
 
   const handleResetData = () => {
@@ -307,20 +277,22 @@ export default function TabelaFaturas({
 
   // Create a custom hook for responsive columns
   const useResponsiveColumns = () => {
-    const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
-    
+    const [windowWidth, setWindowWidth] = useState(
+      typeof window !== "undefined" ? window.innerWidth : 1200
+    );
+
     React.useEffect(() => {
       const handleResize = () => setWindowWidth(window.innerWidth);
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
     }, []);
-    
+
     // Return smaller widths for smaller screens
     return windowWidth < 1200;
   };
-  
+
   const isSmallScreen = useResponsiveColumns();
-  
+
   const columns: GridColDef[] = [
     {
       field: "groupFamilyId",
@@ -577,7 +549,7 @@ export default function TabelaFaturas({
             isLoading ? (
               <CircularProgress />
             ) : (
-              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+              <Box sx={{ width: "100%", overflowX: "auto" }}>
                 <DataGrid
                   rows={rowsFiltradas}
                   columns={columns}
@@ -587,20 +559,20 @@ export default function TabelaFaturas({
                   getEstimatedRowHeight={() => 100}
                   autoHeight
                   disableColumnMenu={isSmallScreen}
-                  sx={{ 
+                  sx={{
                     borderRadius: "16px",
                     width: "100%",
-                    '& .MuiDataGrid-main': {
-                      overflow: 'auto'
+                    "& .MuiDataGrid-main": {
+                      overflow: "auto",
                     },
-                    '& .MuiDataGrid-cell': {
-                      whiteSpace: 'normal',
-                      wordWrap: 'break-word'
+                    "& .MuiDataGrid-cell": {
+                      whiteSpace: "normal",
+                      wordWrap: "break-word",
                     },
-                    '& .MuiDataGrid-columnHeaders': {
-                      whiteSpace: 'normal',
-                      wordWrap: 'break-word'
-                    }
+                    "& .MuiDataGrid-columnHeaders": {
+                      whiteSpace: "normal",
+                      wordWrap: "break-word",
+                    },
                   }}
                 />
               </Box>

@@ -9,9 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCategories, useSubCategories } from "@/hooks/queries";
 import { useForm } from "react-hook-form";
 import { useProductStore } from "@/contexts";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useSnackbar } from "../../snackbar/SnackbarProvider";
 
 import {
   Box,
@@ -42,15 +40,12 @@ const INITIAL_PROD_FORM_VALUES: ProductFormValues = {
 };
 
 export const ProductsForm = () => {
-  const queryClient = useQueryClient();
-
   const { data: categories } = useCategories();
   const { data: subcategories } = useSubCategories();
 
   const { mutateAsync: addProduct } = useAddProduct();
   const { mutateAsync: updateProduct } = useUpdateProduct();
 
-  const { showSnackbar } = useSnackbar();
   const router = useRouter();
   const { isEditing, updateIsEditing, productToEdit, updateProductToEdit } =
     useProductStore();
@@ -184,63 +179,38 @@ export const ProductsForm = () => {
       updatedAt: isEditing && productToEdit ? new Date() : undefined,
     };
 
-    try {
-      if (isEditing) {
-        await updateProduct({
-          productId: productId,
-          product: productPayload,
-        });
-      } else {
-        await addProduct(productPayload);
-      }
-      showSnackbar({
-        message: `Produto ${isEditing ? "editado" : "cadastrado"} com sucesso!`,
-        severity: "success",
+    if (isEditing) {
+      await updateProduct({
+        productId: productId,
+        product: productPayload,
       });
-
-      resetProducts();
-      setSelectedCategory(null);
-      setSelectedSubcategory(null);
-      setFilteredSubcategories([]);
-      setFotoProduto(null);
-      updateIsEditing(false);
-      updateProductToEdit(null);
-
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-      router.push("/produtos");
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      let errorMessage = `Erro ao ${
-        isEditing ? "atualizar" : "cadastrar"
-      } o produto`;
-
-      if (error.response && error.response.data) {
-        errorMessage = error.response.data.message || errorMessage;
-      }
-
-      showSnackbar({
-        message: errorMessage,
-        severity: "error",
-        duration: 5000,
-      });
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      await addProduct(productPayload);
     }
+
+    resetProducts();
+    setSelectedCategory(null);
+    setSelectedSubcategory(null);
+    setFilteredSubcategories([]);
+    setFotoProduto(null);
+    updateIsEditing(false);
+    updateProductToEdit(null);
+
+    router.push("/produtos");
+
+    setIsSubmitting(false);
   }, [
     isEditing,
     selectedCategory,
     selectedSubcategory,
     fotoProduto,
     router,
-    queryClient,
     productToEdit,
     productId,
     addProduct,
     updateProduct,
     getProductValues,
     resetProducts,
-    showSnackbar,
     updateIsEditing,
     updateProductToEdit,
   ]);

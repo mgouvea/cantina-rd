@@ -7,9 +7,8 @@ import { useDeleteGroupFamily } from "@/hooks/mutations";
 import { useState } from "react";
 import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
 import { useGroupFamilyStore } from "@/contexts/store/groupFamily.store";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { DeleteModal, MemberModal, useSnackbar } from "@/app/components";
+import { DeleteModal, MemberModal } from "@/app/components";
 
 import type { GroupFamily, SelectedMember } from "@/types";
 import {
@@ -27,11 +26,9 @@ const breadcrumbItems = [
 export default function GroupFamily() {
   const { data, isLoading } = useGroupFamily();
 
-  const queryClient = useQueryClient();
   const router = useRouter();
   const [rows, setRows] = useState<GroupFamily[]>(data);
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-  const { showSnackbar } = useSnackbar();
 
   const [openModal, setOpenModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -70,24 +67,8 @@ export default function GroupFamily() {
   const confirmDelete = async () => {
     if (!idToDelete) return;
 
-    try {
-      await deleteGroupFamily(idToDelete);
-      queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      showSnackbar({
-        message: "Grupo Familiar deletado com sucesso!",
-        severity: "success",
-        duration: 3000,
-      });
-      setOpenDeleteModal(false);
-    } catch (error) {
-      showSnackbar({
-        message: "Erro ao deletar grupo familiar",
-        severity: "error",
-        duration: 3000,
-      });
-      console.error(error);
-    }
+    await deleteGroupFamily(idToDelete);
+    setOpenDeleteModal(false);
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {

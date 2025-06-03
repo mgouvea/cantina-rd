@@ -9,9 +9,7 @@ import { UploadPicture } from "../uploadFoto/UploadPicture";
 import { useAddCategory, useUpdateCategory } from "@/hooks/mutations";
 import { useCategoryStore } from "@/contexts";
 import { useForm } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useSnackbar } from "../../snackbar/SnackbarProvider";
 
 const INITIAL_CATEGORY_FORM_VALUES: Categories = {
   name: "",
@@ -21,12 +19,10 @@ const INITIAL_CATEGORY_FORM_VALUES: Categories = {
 export const CategoriesForm = () => {
   const { updateCategoryToEdit, updateIsEditing, isEditing, categoryToEdit } =
     useCategoryStore();
-  const queryClient = useQueryClient();
   const router = useRouter();
 
   const { mutateAsync: addCategory } = useAddCategory();
   const { mutateAsync: updateCategory } = useUpdateCategory();
-  const { showSnackbar } = useSnackbar();
 
   const EDITING_CATEGORY_FORM_VALUES: Categories = {
     name: categoryToEdit?.name || "",
@@ -76,42 +72,25 @@ export const CategoriesForm = () => {
       urlImage: isEditing ? urlImageToEditing : fotoCategory?.base64 || "",
     };
 
-    try {
-      if (isEditing) {
-        await updateCategory({
-          categoriesId: categoryId,
-          categories: categoryPayload,
-        });
-      } else {
-        await addCategory(categoryPayload);
-      }
-      showSnackbar({
-        message: `Categoria ${
-          isEditing ? "editada" : "cadastrada"
-        } com sucesso!`,
-        severity: "success",
+    if (isEditing) {
+      await updateCategory({
+        categoriesId: categoryId,
+        categories: categoryPayload,
       });
-      resetCategories();
-      setFotoCategory(null);
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-      router.push("/categorias");
-    } catch (error) {
-      showSnackbar({
-        message: `Erro ao ${isEditing ? "editar" : "cadastrar"} a categoria`,
-        severity: "error",
-      });
-      console.error(error);
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      await addCategory(categoryPayload);
     }
+
+    resetCategories();
+    setFotoCategory(null);
+    router.push("/categorias");
+    setIsSubmitting(false);
   }, [
     categoryToEdit?._id,
     fotoCategory?.base64,
     isEditing,
-    queryClient,
     router,
     getCategoriesValues,
-    showSnackbar,
     resetCategories,
     updateCategory,
     addCategory,
