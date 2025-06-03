@@ -15,15 +15,7 @@ import { useCategoryStore, useSubCategoryStore } from "@/contexts";
 import { useDeleteSubCategory } from "@/hooks/mutations";
 import { useRouter } from "next/navigation";
 
-import {
-  GridRowModesModel,
-  DataGrid,
-  GridColDef,
-  GridActionsCellItem,
-  GridRowModel,
-  GridRowEditStopReasons,
-  GridEventListener,
-} from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridActionsCellItem } from "@mui/x-data-grid";
 
 interface TabelaProps {
   data: Categories[];
@@ -32,24 +24,11 @@ interface TabelaProps {
 
 export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
   const router = useRouter();
-  const [rows, setRows] = React.useState<Categories[]>(data);
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {}
-  );
 
   const { mutateAsync: deleteSubCategory } = useDeleteSubCategory();
 
   const { category } = useCategoryStore();
   const { updateIsEditing, updateSubCategoryToEdit } = useSubCategoryStore();
-
-  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
 
   const handleEditClick = (row: SubCategories, tab: number) => () => {
     updateIsEditing(true);
@@ -59,20 +38,6 @@ export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
 
   const handleDeleteClick = (id: string) => async () => {
     await deleteSubCategory(id);
-  };
-
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(
-      rows.map((row: Categories) =>
-        row._id === newRow._id ? updatedRow : row
-      ) as Categories[]
-    );
-    return updatedRow;
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
   };
 
   const columns: GridColDef[] = [
@@ -165,15 +130,7 @@ export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
               <DataGrid
                 rows={rowsFiltradas}
                 columns={columns}
-                editMode="row"
                 getRowId={(row) => row._id}
-                rowModesModel={rowModesModel}
-                onRowModesModelChange={handleRowModesModelChange}
-                onRowEditStop={handleRowEditStop}
-                processRowUpdate={processRowUpdate}
-                slotProps={{
-                  toolbar: { setRowModesModel },
-                }}
                 sx={{ borderRadius: "16px" }}
                 rowHeight={60}
               />

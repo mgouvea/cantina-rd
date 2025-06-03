@@ -23,20 +23,13 @@ import {
   GridColDef,
   GridActionsCellItem,
   GridRowModel,
-  GridRowModesModel,
-  GridEventListener,
 } from "@mui/x-data-grid";
 
 interface TabelaProps {
   data: GroupFamily[];
   isLoading: boolean;
-  rows?: GroupFamily[];
-  rowModesModel: GridRowModesModel;
-  handleRowEditStop: GridEventListener<"rowEditStop">;
   handleEditClick: (row: GridRowModel) => () => void;
   handleDeleteClick: (row: GridRowModel) => () => void;
-  processRowUpdate: (newRow: GridRowModel) => GroupFamily;
-  handleRowModesModelChange: (newRowModesModel: GridRowModesModel) => void;
   handleEditMembers: (
     row: GroupFamily,
     addOrRemove: "add" | "remove"
@@ -48,10 +41,6 @@ export default function TabelaGrupoFamiliar({
   isLoading,
   handleEditClick,
   handleDeleteClick,
-  processRowUpdate,
-  handleRowModesModelChange,
-  handleRowEditStop,
-  rowModesModel,
   handleEditMembers,
 }: TabelaProps) {
   const router = useRouter();
@@ -196,17 +185,9 @@ export default function TabelaGrupoFamiliar({
               <DataGrid
                 rows={rowsFiltradas}
                 columns={columns}
-                editMode="row"
                 getRowId={(row) => row._id}
-                rowModesModel={rowModesModel}
-                onRowModesModelChange={handleRowModesModelChange}
-                onRowEditStop={handleRowEditStop}
-                processRowUpdate={processRowUpdate}
                 getRowHeight={() => "auto"}
                 getEstimatedRowHeight={() => 100}
-                slotProps={{
-                  toolbar: { rowModesModel },
-                }}
                 sx={{ borderRadius: "16px" }}
               />
             )
