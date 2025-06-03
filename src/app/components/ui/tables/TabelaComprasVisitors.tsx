@@ -131,13 +131,13 @@ export default function TabelaComprasVisitors({
             icon={<EditIcon sx={{ color: "#666666", fontSize: 25 }} />}
             label="Edit"
             className="textPrimary"
-            onClick={handleEditClick(params.row)}
+            onClick={handleEditClick!(params.row)}
           />,
           <GridActionsCellItem
             key={params.id}
             icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 25 }} />}
             label="Delete"
-            onClick={handleDeleteClick(String(params.id))}
+            onClick={handleDeleteClick!(params.row)}
             color="inherit"
           />,
         ];

@@ -8,8 +8,8 @@ export type Products = {
   description: string;
   price: number | string;
   tag: string;
-  categoryId: Categories;
-  subcategoryId: SubCategories;
+  categoryId: Categories | string;
+  subcategoryId: SubCategories | string;
   urlImage: string;
   createdAt?: Date;
   updatedAt?: Date;
