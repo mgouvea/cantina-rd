@@ -48,7 +48,6 @@ interface TabelaProps {
   updateIsEditing: (isEditing: boolean) => void;
   updateUserToEdit: (user: User | null) => void;
   setRowModesModel: (rowModesModel: GridRowModesModel) => void;
-  setRows: (rows: Client[]) => void;
   setOpenModal: (open: boolean) => void;
 }
 
@@ -70,7 +69,6 @@ export default function TabelaCliente({
   updateUserToEdit,
   setRowModesModel,
   processRowUpdate,
-  setRows,
   setOpenModal,
 }: TabelaProps) {
   const router = useRouter();
@@ -213,7 +211,7 @@ export default function TabelaCliente({
                 onRowEditStop={handleRowEditStop}
                 processRowUpdate={processRowUpdate}
                 slotProps={{
-                  toolbar: { setRows, setRowModesModel },
+                  toolbar: { setRowModesModel },
                 }}
                 sx={{ borderRadius: "16px" }}
                 rowHeight={60}

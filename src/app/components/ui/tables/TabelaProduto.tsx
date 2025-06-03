@@ -292,7 +292,7 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
                 onRowEditStop={handleRowEditStop}
                 processRowUpdate={processRowUpdate}
                 slotProps={{
-                  toolbar: { setRows, setRowModesModel },
+                  toolbar: { setRowModesModel },
                 }}
                 sx={{
                   borderRadius: "16px",

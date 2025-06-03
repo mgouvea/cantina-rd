@@ -172,7 +172,7 @@ export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
                 onRowEditStop={handleRowEditStop}
                 processRowUpdate={processRowUpdate}
                 slotProps={{
-                  toolbar: { setRows, setRowModesModel },
+                  toolbar: { setRowModesModel },
                 }}
                 sx={{ borderRadius: "16px" }}
                 rowHeight={60}

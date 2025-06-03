@@ -37,7 +37,6 @@ interface TabelaProps {
   handleDeleteClick: (row: GridRowModel) => () => void;
   processRowUpdate: (newRow: GridRowModel) => GroupFamily;
   handleRowModesModelChange: (newRowModesModel: GridRowModesModel) => void;
-  setRows: (rows: GroupFamily[]) => void;
   handleEditMembers: (
     row: GroupFamily,
     addOrRemove: "add" | "remove"
@@ -53,7 +52,6 @@ export default function TabelaGrupoFamiliar({
   handleRowModesModelChange,
   handleRowEditStop,
   rowModesModel,
-  setRows,
   handleEditMembers,
 }: TabelaProps) {
   const router = useRouter();
@@ -207,7 +205,7 @@ export default function TabelaGrupoFamiliar({
                 getRowHeight={() => "auto"}
                 getEstimatedRowHeight={() => 100}
                 slotProps={{
-                  toolbar: { setRows, rowModesModel },
+                  toolbar: { rowModesModel },
                 }}
                 sx={{ borderRadius: "16px" }}
               />
