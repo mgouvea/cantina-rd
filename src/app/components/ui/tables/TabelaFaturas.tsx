@@ -244,13 +244,15 @@ export default function TabelaFaturas({
   const handlePaymentClick = (row: GridRowModel) => async () => {
     setInvoiceValue(row.totalAmount);
     setPaymentId(row._id);
-    
+
     // Calcular o valor total já pago para esta fatura
-    const totalPaid = row.payments?.reduce(
-      (sum: number, payment: { amountPaid: number }) => sum + payment.amountPaid,
-      0
-    ) || 0;
-    
+    const totalPaid =
+      row.payments?.reduce(
+        (sum: number, payment: { amountPaid: number }) =>
+          sum + payment.amountPaid,
+        0
+      ) || 0;
+
     setPaidAmount(totalPaid);
     setOpenPaymentModal(true);
   };
@@ -266,7 +268,7 @@ export default function TabelaFaturas({
         // o valor a ser pago é o restante (total - já pago)
         const amountPaid =
           modalData.paymentType === "total"
-            ? paidAmount! > 0 
+            ? paidAmount! > 0
               ? invoiceValue! - paidAmount! // Paga apenas o restante
               : invoiceValue! // Paga o valor total
             : modalData.partialValue!; // Pagamento parcial conforme informado
@@ -391,37 +393,62 @@ export default function TabelaFaturas({
         const { row } = params;
         const totalAmount = params.value;
         const status = row.status as "OPEN" | "PARTIALLY_PAID" | "PAID";
-        
-        // If status is OPEN or PAID, just show the total amount
-        if (status === "OPEN" || status === "PAID") {
+        const hasAppliedCredit = row.appliedCredit && row.appliedCredit > 0;
+        const originalAmount = row.originalAmount || totalAmount;
+        const appliedCredit = row.appliedCredit || 0;
+
+        // For simple cases (OPEN or PAID without credit), just show the total amount
+        if ((status === "OPEN" || status === "PAID") && !hasAppliedCredit) {
           return `R$ ${totalAmount.toFixed(2)}`;
         }
-        
-        // If status is PARTIALLY_PAID, show total, paid and remaining amounts
-        if (status === "PARTIALLY_PAID") {
-          // Calculate total paid amount from all payments
-          const paidAmount = row.payments.reduce(
-            (sum: number, payment: { amountPaid: number }) => sum + payment.amountPaid,
-            0
-          );
-          const remainingAmount = totalAmount - paidAmount;
-          
-          return (
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+
+        // Create a box to show detailed information
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            {/* Show original amount if credit was applied */}
+            {hasAppliedCredit && (
               <Typography variant="caption" sx={{ fontWeight: "bold" }}>
-                Total: R$ {totalAmount.toFixed(2)}
+                Original: R$ {originalAmount.toFixed(2)}
               </Typography>
-              <Typography variant="caption" sx={{ color: "success.main" }}>
-                Pago: R$ {paidAmount.toFixed(2)}
+            )}
+
+            {/* Always show total amount */}
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: hasAppliedCredit ? "normal" : "bold",
+                color: hasAppliedCredit ? "text.primary" : "inherit",
+              }}
+            >
+              Total: R$ {totalAmount.toFixed(2)}
+            </Typography>
+
+            {/* Show credit if applied */}
+            {hasAppliedCredit && (
+              <Typography variant="caption" sx={{ color: "info.main" }}>
+                Crédito: R$ {appliedCredit.toFixed(2)}
               </Typography>
-              <Typography variant="caption" sx={{ color: "error.main" }}>
-                Restante: R$ {remainingAmount.toFixed(2)}
-              </Typography>
-            </Box>
-          );
-        }
-        
-        return `R$ ${totalAmount.toFixed(2)}`;
+            )}
+
+            {/* For PARTIALLY_PAID, show paid and remaining amounts */}
+            {status === "PARTIALLY_PAID" && (
+              <>
+                <Typography variant="caption" sx={{ color: "success.main" }}>
+                  Pago: R$ {row.paidAmount.toFixed(2)}
+                </Typography>
+                <Typography variant="caption" sx={{ color: "error.main" }}>
+                  Restante: R$ {(totalAmount - row.paidAmount).toFixed(2)}
+                </Typography>
+              </>
+            )}
+          </Box>
+        );
       },
     },
     {
@@ -476,6 +503,7 @@ export default function TabelaFaturas({
           params.row.status === "OPEN" ||
           params.row.status === "PARTIALLY_PAID";
         const isDisabledSend = !isOpenStatus || isSentByWhatsApp;
+        const isDisabledPayment = params.row.status === "PAID";
 
         return [
           <Tooltip title="Deletar fatura" key={`delete-${params.id}`}>
@@ -510,12 +538,16 @@ export default function TabelaFaturas({
             <GridActionsCellItem
               icon={
                 <PriceCheckOutlinedIcon
-                  sx={{ color: "#1565c0", fontSize: 27 }}
+                  sx={{
+                    color: isDisabledPayment ? "#ccc" : "#1565c0",
+                    fontSize: 27,
+                  }}
                 />
               }
               label="Confirmar"
               onClick={handlePaymentClick(params.row)}
               color="inherit"
+              disabled={isDisabledPayment}
             />
           </Tooltip>,
         ];

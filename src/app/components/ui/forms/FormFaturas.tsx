@@ -27,7 +27,6 @@ import {
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { useSnackbar } from "../../snackbar/SnackbarProvider";
-import { useQueryClient } from "@tanstack/react-query";
 
 const INITIAL_INVOICE_FORM_VALUES: CreateInvoiceDto = {
   groupFamilyIds: [],
@@ -69,7 +68,6 @@ export const FormFaturas = ({
   groupFamiliesWithOwner: GroupFamilyWithOwner[] | null;
 }) => {
   const { showSnackbar } = useSnackbar();
-  const queryClient = useQueryClient();
   const invoiceForm = useForm<CreateInvoiceDto>({
     defaultValues: INITIAL_INVOICE_FORM_VALUES,
     mode: "onChange", // Enable validation on change for immediate feedback
@@ -183,7 +181,6 @@ export const FormFaturas = ({
         handleClearForm();
       }
 
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       let errorMessage = "Erro ao gerar fatura";

@@ -4,25 +4,33 @@ import AssuredWorkloadIcon from "@mui/icons-material/AssuredWorkload";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import EmojiPeopleOutlinedIcon from "@mui/icons-material/EmojiPeopleOutlined";
 import Loading from "@/app/components/loading/Loading";
+import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
 import PeopleIcon from "@mui/icons-material/People";
 import PriceCheckIcon from "@mui/icons-material/PriceCheck";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import TabelaCompras from "@/app/components/ui/tables/TabelaCompras";
+import TabelaComprasVisitors from "@/app/components/ui/tables/TabelaComprasVisitors";
+import TabelaCredito from "@/app/components/ui/tables/TabelaCredito";
+import TabelaPagamentos from "@/app/components/ui/tables/TabelaPagamentos";
 import Text from "@/app/components/ui/text/Text";
 import { a11yProps, capitalizeFirstLastName } from "@/utils";
+import { GridRowModel } from "@mui/x-data-grid";
+import { InvoiceDto } from "@/types/invoice";
+import { useDeleteOrder } from "@/hooks/mutations";
+import { useEffect, useState } from "react";
+import { useInvoices } from "@/hooks/queries/useInvoices.query";
+import { usePayments } from "@/hooks/queries/payments.query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import {
   CustomTabPanel,
   DeleteModal,
   FormFaturas,
   useSnackbar,
 } from "@/app/components";
-import { GridRowModel } from "@mui/x-data-grid";
-import { InvoiceDto } from "@/types/invoice";
-import { useEffect, useState } from "react";
-import { useInvoices } from "@/hooks/queries/useInvoices.query";
-import { useQueryClient } from "@tanstack/react-query";
-import { useRouter, useSearchParams } from "next/navigation";
 import {
+  useCredits,
   useGroupFamily,
   useGroupFamilyWithOwner,
   useOrders,
@@ -38,10 +46,6 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import TabelaComprasVisitors from "@/app/components/ui/tables/TabelaComprasVisitors";
-import { useDeleteOrder } from "@/hooks/mutations";
-import TabelaPagamentos from "@/app/components/ui/tables/TabelaPagamentos";
-import { usePayments } from "@/hooks/queries/payments.query";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -71,6 +75,7 @@ export default function Faturas() {
   const { data: groupFamilies, isLoading: isLoadingGroupFamily } =
     useGroupFamily();
   const { data: payments, isLoading: isLoadingPayments } = usePayments();
+  const { data: credits, isLoading: isLoadingCredits } = useCredits();
 
   const {
     data: groupFamiliesWithOwner,
@@ -199,6 +204,11 @@ export default function Faturas() {
               label="Pagamentos"
               {...a11yProps(2)}
             />
+            <Tab
+              icon={<PaidOutlinedIcon />}
+              label="Credito"
+              {...a11yProps(3)}
+            />
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0} dir={theme.direction}>
@@ -237,17 +247,19 @@ export default function Faturas() {
             isLoadingPayments ? (
               <Loading />
             ) : (
-              <TabelaPagamentos
-                data={payments || []}
-                isLoading={false}
-                handleEditClick={handleEditClick}
-                handleDeleteClick={handleDeleteClick}
-              />
+              <TabelaPagamentos data={payments || []} isLoading={false} />
             )
           ) : (
             <Text variant="h6">
               Visão de Visitantes - Pagamentos (Em implementação)
             </Text>
+          )}
+        </CustomTabPanel>
+        <CustomTabPanel value={value} index={3} dir={theme.direction}>
+          {isLoadingCredits ? (
+            <Loading />
+          ) : (
+            <TabelaCredito data={credits || []} isLoading={false} />
           )}
         </CustomTabPanel>
       </Stack>

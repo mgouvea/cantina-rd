@@ -25,6 +25,7 @@ interface GenericModalProps {
   open: boolean;
   handleClose: () => void;
   handleConfirm: () => void;
+  disableConfirmButton?: boolean;
 }
 
 export default function GenericModal({
@@ -36,6 +37,7 @@ export default function GenericModal({
   open,
   handleClose,
   handleConfirm,
+  disableConfirmButton = false,
 }: GenericModalProps) {
   return (
     <React.Fragment>
@@ -58,6 +60,7 @@ export default function GenericModal({
             variant="contained"
             color={buttonColor}
             onClick={handleConfirm}
+            disabled={disableConfirmButton}
           >
             {confirmButtonText}
           </Botao>
