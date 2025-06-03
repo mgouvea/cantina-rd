@@ -23,8 +23,6 @@ import {
   GridColDef,
   GridActionsCellItem,
   GridRowModel,
-  GridEventListener,
-  GridRowModesModel,
 } from "@mui/x-data-grid";
 import { User } from "@/types";
 import GenericModal from "../../modal/GenericModal";
@@ -36,18 +34,13 @@ interface TabelaProps {
   openModal: boolean;
   userClicked: User | null;
   email: string;
-  rowModesModel: GridRowModesModel;
   handleEditClick: (row: GridRowModel) => () => void;
   handleDeleteClick: (row: GridRowModel) => () => void;
-  handleRowEditStop: GridEventListener<"rowEditStop">;
-  handleRowModesModelChange: (newRowModesModel: GridRowModesModel) => void;
   handleOpenModal: (row: User) => void;
   handleEnableOrDisableAdmin: () => void;
   setEmail: (email: string) => void;
-  processRowUpdate: (newRow: GridRowModel) => GridRowModel;
   updateIsEditing: (isEditing: boolean) => void;
   updateUserToEdit: (user: User | null) => void;
-  setRowModesModel: (rowModesModel: GridRowModesModel) => void;
   setOpenModal: (open: boolean) => void;
 }
 
@@ -57,18 +50,13 @@ export default function TabelaCliente({
   enableOrDisableAdmin,
   openModal,
   email,
-  rowModesModel,
   handleEditClick,
   handleDeleteClick,
-  handleRowEditStop,
-  handleRowModesModelChange,
   handleOpenModal,
   handleEnableOrDisableAdmin,
   setEmail,
   updateIsEditing,
   updateUserToEdit,
-  setRowModesModel,
-  processRowUpdate,
   setOpenModal,
 }: TabelaProps) {
   const router = useRouter();
@@ -204,15 +192,7 @@ export default function TabelaCliente({
               <DataGrid
                 rows={rowsFiltradas}
                 columns={columns}
-                editMode="row"
                 getRowId={(row) => row._id}
-                rowModesModel={rowModesModel}
-                onRowModesModelChange={handleRowModesModelChange}
-                onRowEditStop={handleRowEditStop}
-                processRowUpdate={processRowUpdate}
-                slotProps={{
-                  toolbar: { setRowModesModel },
-                }}
                 sx={{ borderRadius: "16px" }}
                 rowHeight={60}
               />

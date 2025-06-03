@@ -8,7 +8,7 @@ import TabelaCliente from "@/app/components/ui/tables/TabelaCliente";
 import TabelaVisitantes from "@/app/components/ui/tables/TabelaVisitantes";
 import { a11yProps, capitalizeFirstLastName } from "@/utils";
 import { Box, Stack, Tab, Tabs, useTheme } from "@mui/material";
-import { Client, User } from "@/types";
+import { User } from "@/types";
 import { CustomTabPanel, DeleteModal, useSnackbar } from "@/app/components";
 import { Suspense, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -16,14 +16,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useUsers } from "@/hooks/queries";
 import { useUserStore } from "@/contexts";
 import { useVisitors } from "@/hooks/queries/useVisitors.query";
-import { Visitor } from "@/types/visitors";
 
-import {
-  GridEventListener,
-  GridRowEditStopReasons,
-  GridRowModel,
-  GridRowModesModel,
-} from "@mui/x-data-grid";
+import { GridRowModel } from "@mui/x-data-grid";
 import {
   useAddAdmin,
   useDeleteAdmin,
@@ -44,10 +38,6 @@ function ClientesContent() {
 
   const { data, isLoading } = useUsers();
   const { data: visitorsData, isLoading: visitorsLoading } = useVisitors();
-
-  const [rows, setRows] = useState<Client[]>(data);
-  const [rowsVisitors, setRowsVisitors] = useState<Visitor[]>(visitorsData);
-  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
   const [openModal, setOpenModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -81,15 +71,6 @@ function ClientesContent() {
     }
   }, [data, updateAllUsers]);
 
-  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
-
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -116,25 +97,6 @@ function ClientesContent() {
       await deleteUser(idToDelete);
     }
     setOpenDeleteModal(false);
-  };
-
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(
-      rows.map((row: Client) =>
-        row._id === newRow._id ? updatedRow : row
-      ) as Client[]
-    );
-    setRowsVisitors(
-      rowsVisitors.map((row: Visitor) =>
-        row._id === newRow._id ? updatedRow : row
-      ) as Visitor[]
-    );
-    return updatedRow;
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
   };
 
   const handleOpenModal = (row: User) => {
@@ -253,18 +215,13 @@ function ClientesContent() {
             openModal={openModal}
             userClicked={userClicked}
             email={email}
-            rowModesModel={rowModesModel}
             handleEditClick={handleEditClick}
             handleDeleteClick={handleDeleteClick}
-            handleRowEditStop={handleRowEditStop}
-            handleRowModesModelChange={handleRowModesModelChange}
             handleOpenModal={handleOpenModal}
             handleEnableOrDisableAdmin={handleEnableOrDisableAdmin}
             setEmail={setEmail}
             updateIsEditing={updateIsEditing}
             updateUserToEdit={updateUserToEdit}
-            setRowModesModel={setRowModesModel}
-            processRowUpdate={processRowUpdate}
             setOpenModal={setOpenModal}
           />
         </CustomTabPanel>
@@ -272,14 +229,9 @@ function ClientesContent() {
           <TabelaVisitantes
             data={visitorsData}
             isLoading={visitorsLoading}
-            rowModesModel={rowModesModel}
             handleDeleteClick={(row: GridRowModel) =>
               handleDeleteClick(row, true)
             }
-            handleRowEditStop={handleRowEditStop}
-            handleRowModesModelChange={handleRowModesModelChange}
-            processRowUpdate={processRowUpdate}
-            setRowModesModel={setRowModesModel}
           />
         </CustomTabPanel>
       </Stack>

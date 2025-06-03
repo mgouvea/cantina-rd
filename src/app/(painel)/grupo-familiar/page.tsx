@@ -11,12 +11,7 @@ import { useRouter } from "next/navigation";
 import { DeleteModal, MemberModal } from "@/app/components";
 
 import type { GroupFamily, SelectedMember } from "@/types";
-import {
-  GridEventListener,
-  GridRowEditStopReasons,
-  GridRowModel,
-  GridRowModesModel,
-} from "@mui/x-data-grid";
+import { GridRowModel } from "@mui/x-data-grid";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -27,9 +22,6 @@ export default function GroupFamily() {
   const { data, isLoading } = useGroupFamily();
 
   const router = useRouter();
-  const [rows, setRows] = useState<GroupFamily[]>(data);
-  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-
   const [openModal, setOpenModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [idToDelete, setIdToDelete] = useState<string | null>(null);
@@ -42,15 +34,6 @@ export default function GroupFamily() {
 
   const { mutateAsync: deleteGroupFamily } = useDeleteGroupFamily();
   const { updateGroupFamilyToEdit, updateIsEditing } = useGroupFamilyStore();
-
-  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
 
   const handleEditClick = (row: GridRowModel) => () => {
     updateGroupFamilyToEdit(row as GroupFamily);
@@ -69,19 +52,6 @@ export default function GroupFamily() {
 
     await deleteGroupFamily(idToDelete);
     setOpenDeleteModal(false);
-  };
-
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const typedNewRow = newRow as unknown as GroupFamily;
-    const updatedRow = { ...typedNewRow, isNew: false };
-    setRows(
-      rows.map((row) => (row._id === typedNewRow._id ? updatedRow : row))
-    );
-    return updatedRow;
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
   };
 
   const handleEditMembers =
@@ -104,11 +74,6 @@ export default function GroupFamily() {
         isLoading={isLoading}
         handleEditClick={handleEditClick}
         handleDeleteClick={handleDeleteClick}
-        processRowUpdate={processRowUpdate}
-        handleRowModesModelChange={handleRowModesModelChange}
-        handleRowEditStop={handleRowEditStop}
-        rows={rows}
-        rowModesModel={rowModesModel}
         handleEditMembers={handleEditMembers}
       />
     );

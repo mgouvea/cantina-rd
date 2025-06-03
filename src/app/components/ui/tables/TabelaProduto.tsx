@@ -15,15 +15,7 @@ import { useDeleteProduct } from "@/hooks/mutations/useProducts.mutation";
 import { useProductStore } from "@/contexts";
 import { useRouter } from "next/navigation";
 
-import {
-  GridRowModesModel,
-  DataGrid,
-  GridEventListener,
-  GridActionsCellItem,
-  GridRowModel,
-  GridRowEditStopReasons,
-  GridColDef,
-} from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 import {
   CircularProgress,
   IconButton,
@@ -45,20 +37,7 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
 
   const { mutateAsync: deleteProduct } = useDeleteProduct();
 
-  const [rows, setRows] = React.useState(data);
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {}
-  );
   const { updateProductToEdit, updateIsEditing } = useProductStore();
-
-  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
 
   const handleEditClick = (row: Products) => () => {
     updateProductToEdit(row);
@@ -68,21 +47,6 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
 
   const handleDeleteClick = (id: string) => async () => {
     await deleteProduct({ productId: id });
-  };
-
-  const processRowUpdate = (newRow: GridRowModel<Products>) => {
-    const updatedRow: Products = {
-      ...(newRow as Products),
-      updatedAt: new Date(),
-    };
-    setRows(
-      rows.map((row: Products) => (row._id === newRow._id ? updatedRow : row))
-    );
-    return updatedRow;
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
   };
 
   // Responsive column configuration
@@ -285,15 +249,7 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
               <DataGrid
                 rows={rowsFiltradas}
                 columns={columns}
-                editMode="row"
                 getRowId={(row) => row._id!}
-                rowModesModel={rowModesModel}
-                onRowModesModelChange={handleRowModesModelChange}
-                onRowEditStop={handleRowEditStop}
-                processRowUpdate={processRowUpdate}
-                slotProps={{
-                  toolbar: { setRowModesModel },
-                }}
                 sx={{
                   borderRadius: "16px",
                   "& .MuiDataGrid-cell": {
