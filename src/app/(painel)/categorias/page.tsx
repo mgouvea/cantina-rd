@@ -11,18 +11,18 @@ import { Box, Stack, Tab, Tabs, useTheme } from "@mui/material";
 import { CustomTabPanel } from "@/app/components";
 import { useCategories } from "@/hooks/queries";
 import { useCategoryStore } from "@/contexts";
-import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSubCategories } from "@/hooks/queries";
+import GenericBreadcrumbs from "@/app/components/breadcrumb/GenericBreadcrumb";
+import Text from "@/app/components/ui/text/Text";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
   { label: "Categorias" },
 ];
 
-export default function CategoriasPage() {
-  const queryClient = useQueryClient();
+function CategoriasContent() {
   const theme = useTheme();
   const { data: categories, isLoading } = useCategories();
   const { data: subCategories, isLoading: subCategoriesLoading } =
@@ -42,11 +42,6 @@ export default function CategoriasPage() {
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
-  };
-
-  const handleDeleteCategory = () => {
-    queryClient.invalidateQueries({ queryKey: ["categories"] });
-    queryClient.invalidateQueries({ queryKey: ["subCategories"] });
   };
 
   const renderContent = () => {
@@ -100,17 +95,12 @@ export default function CategoriasPage() {
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0} dir={theme.direction}>
-          <TabelaCategorias
-            data={categories}
-            isLoading={isLoading}
-            onDeleteCategory={handleDeleteCategory}
-          />
+          <TabelaCategorias data={categories} isLoading={isLoading} />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1} dir={theme.direction}>
           <TabelaSubcategorias
             data={subCategories}
             isLoading={subCategoriesLoading}
-            onDeleteSubCategory={handleDeleteCategory}
           />
         </CustomTabPanel>
       </Stack>
@@ -121,5 +111,16 @@ export default function CategoriasPage() {
     <ContentWrapper breadcrumbItems={breadcrumbItems}>
       {renderContent()}
     </ContentWrapper>
+  );
+}
+
+export default function Categorias() {
+  return (
+    <Stack>
+      <GenericBreadcrumbs items={breadcrumbItems} />
+      <Suspense fallback={<Text>Carregando conteúdo...</Text>}>
+        <CategoriasContent />
+      </Suspense>
+    </Stack>
   );
 }

@@ -10,7 +10,7 @@ import Text from "../text/Text";
 import { capitalize, getCategoryNameById } from "@/utils";
 import { Categories, SubCategories } from "@/types";
 import { CircularProgress, IconButton, Stack } from "@mui/material";
-import { Filtros, useSnackbar } from "../..";
+import { Filtros } from "../..";
 import { useCategoryStore, useSubCategoryStore } from "@/contexts";
 import { useDeleteSubCategory } from "@/hooks/mutations";
 import { useRouter } from "next/navigation";
@@ -28,14 +28,9 @@ import {
 interface TabelaProps {
   data: Categories[];
   isLoading: boolean;
-  onDeleteSubCategory: () => void;
 }
 
-export default function TabelaSubcategorias({
-  data,
-  isLoading,
-  onDeleteSubCategory,
-}: TabelaProps) {
+export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
   const router = useRouter();
   const [rows, setRows] = React.useState<Categories[]>(data);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
@@ -46,8 +41,6 @@ export default function TabelaSubcategorias({
 
   const { category } = useCategoryStore();
   const { updateIsEditing, updateSubCategoryToEdit } = useSubCategoryStore();
-
-  const { showSnackbar } = useSnackbar();
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -65,22 +58,7 @@ export default function TabelaSubcategorias({
   };
 
   const handleDeleteClick = (id: string) => async () => {
-    try {
-      await deleteSubCategory(id);
-      onDeleteSubCategory();
-      showSnackbar({
-        message: "Subcategoria deletada com sucesso!",
-        severity: "success",
-        duration: 3000,
-      });
-    } catch (error) {
-      showSnackbar({
-        message: "Erro ao deletar subcategoria",
-        severity: "error",
-        duration: 3000,
-      });
-      console.error(error);
-    }
+    await deleteSubCategory(id);
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {

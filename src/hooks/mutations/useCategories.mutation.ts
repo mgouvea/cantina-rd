@@ -56,13 +56,54 @@ export const useUpdateSubCategory = () => {
 };
 
 export const useDeleteCategory = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+
   return useMutation({
     mutationFn: DeleteCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["categories", "subCategories"],
+      });
+
+      showSnackbar({
+        message: "Categorias e subcategorias deletadas com sucesso!",
+        severity: "success",
+        duration: 3000,
+      });
+    },
+    onError: () => {
+      showSnackbar({
+        message: "Erro ao excluir a categoria",
+        severity: "error",
+      });
+    },
   });
 };
 
 export const useDeleteSubCategory = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+
   return useMutation({
     mutationFn: DeleteSubCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["subCategories"],
+      });
+
+      showSnackbar({
+        message: "Subcategoria deletada com sucesso!",
+        severity: "success",
+        duration: 3000,
+      });
+    },
+    onError: () => {
+      showSnackbar({
+        message: "Erro ao deletar subcategoria",
+        severity: "error",
+        duration: 3000,
+      });
+    },
   });
 };

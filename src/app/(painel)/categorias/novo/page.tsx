@@ -9,7 +9,7 @@ import Tabs from "@mui/material/Tabs";
 import Text from "@/app/components/ui/text/Text";
 import { Box, IconButton, Stack, Tooltip, useTheme } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import {
   CategoriesForm,
@@ -24,11 +24,12 @@ const breadcrumbItems = [
   { label: "Novo" },
 ];
 
-export default function NovoCategoria() {
+// Componente interno para lidar com a lógica dependente de searchParams
+const CategoriasContent = () => {
   const theme = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Get tab from URL query parameter or default to 0
   const initialTab = searchParams.get('tab') ? parseInt(searchParams.get('tab')!) : 0;
   const [value, setValue] = useState(initialTab);
@@ -38,9 +39,7 @@ export default function NovoCategoria() {
   };
 
   return (
-    <Stack>
-      <GenericBreadcrumbs items={breadcrumbItems} />
-
+    <>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Text variant="h5" fontWeight="bold">
           Cadastrar {value === 0 ? "nova categoria" : "nova subcategoria"}
@@ -52,10 +51,8 @@ export default function NovoCategoria() {
           }}
           onClick={() => {
             if (value === 1) {
-              // Se estiver na tab de subcategorias, voltar para a página de categorias com a tab de subcategorias selecionada
               router.replace("/categorias?tab=1");
             } else {
-              // Se estiver na tab de categorias, voltar para a página de categorias com a tab de categorias selecionada
               router.replace("/categorias");
             }
           }}
@@ -128,6 +125,17 @@ export default function NovoCategoria() {
           <SubCategoriesForm />
         </CustomTabPanel>
       </Stack>
+    </>
+  );
+};
+
+export default function NovoCategoria() {
+  return (
+    <Stack>
+      <GenericBreadcrumbs items={breadcrumbItems} />
+      <Suspense fallback={<Text>Carregando conteúdo...</Text>}>
+        <CategoriasContent />
+      </Suspense>
     </Stack>
   );
 }
