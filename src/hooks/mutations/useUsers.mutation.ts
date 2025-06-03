@@ -1,3 +1,4 @@
+import { useSnackbar } from "@/app/components";
 import {
   DeleteAdminByUserId,
   DeleteUser,
@@ -6,7 +7,7 @@ import {
   UpdateUser,
   UpdateUserFromGroupFamily,
 } from "@/hooks/services";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useAddUser = () => {
   return useMutation({
@@ -21,8 +22,27 @@ export const useUpdateUser = () => {
 };
 
 export const useDeleteUser = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+
   return useMutation({
     mutationFn: DeleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+
+      showSnackbar({
+        message: "Sócio deletado com sucesso!",
+        severity: "success",
+        duration: 3000,
+      });
+    },
+    onError: () => {
+      showSnackbar({
+        message: "Erro ao deletar o sócio",
+        severity: "error",
+        duration: 3000,
+      });
+    },
   });
 };
 

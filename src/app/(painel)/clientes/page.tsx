@@ -113,24 +113,13 @@ export default function Clientes() {
     try {
       if (isVisitor) {
         await deleteVisitor(idToDelete);
-        queryClient.invalidateQueries({ queryKey: ["visitors"] });
       } else {
         await deleteUser(idToDelete);
-        queryClient.invalidateQueries({ queryKey: ["users"] });
       }
-      showSnackbar({
-        message: "Cliente deletado com sucesso!",
-        severity: "success",
-        duration: 3000,
-      });
-      setOpenDeleteModal(false);
     } catch (error) {
-      showSnackbar({
-        message: "Erro ao deletar o cliente",
-        severity: "error",
-        duration: 3000,
-      });
       console.error(error);
+    } finally {
+      setOpenDeleteModal(false);
     }
   };
 
