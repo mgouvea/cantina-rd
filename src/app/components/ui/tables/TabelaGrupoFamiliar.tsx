@@ -1,114 +1,153 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import * as React from "react";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import Box from "@mui/material/Box";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import EditIcon from "@mui/icons-material/Edit";
+import EmptyContent from "../emptyContent/EmptyContent";
+import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
+import GroupRemoveOutlinedIcon from "@mui/icons-material/GroupRemoveOutlined";
+import Text from "../text/Text";
+import { capitalize, capitalizeFirstLastName } from "@/utils";
+import { CircularProgress, IconButton, Stack, Typography } from "@mui/material";
+import { Filtros } from "../..";
+import { GroupFamily, SelectedMember } from "@/types/groupFamily";
+import { useRouter } from "next/navigation";
+import Avatar from "@mui/material/Avatar";
+import Tooltip from "@mui/material/Tooltip";
+import AvatarGroup from "@mui/material/AvatarGroup";
+
 import {
-  GridRowModesModel,
   DataGrid,
   GridColDef,
   GridActionsCellItem,
-  GridEventListener,
-  GridRowId,
   GridRowModel,
-  GridRowEditStopReasons,
-} from '@mui/x-data-grid';
-import { CircularProgress, IconButton, Stack } from '@mui/material';
-import { Filtros } from '../..';
-import { useRouter } from 'next/navigation';
-import Text from '../text/Text';
-import EmptyContent from '../emptyContent/EmptyContent';
+  GridRowModesModel,
+  GridEventListener,
+} from "@mui/x-data-grid";
 
 interface TabelaProps {
-  data: any;
+  data: GroupFamily[];
   isLoading: boolean;
+  rows?: GroupFamily[];
+  rowModesModel: GridRowModesModel;
+  handleRowEditStop: GridEventListener<"rowEditStop">;
+  handleEditClick: (row: GridRowModel) => () => void;
+  handleDeleteClick: (row: GridRowModel) => () => void;
+  processRowUpdate: (newRow: GridRowModel) => GroupFamily;
+  handleRowModesModelChange: (newRowModesModel: GridRowModesModel) => void;
+  setRows: (rows: GroupFamily[]) => void;
+  handleEditMembers: (
+    row: GroupFamily,
+    addOrRemove: "add" | "remove"
+  ) => () => void;
 }
 
-export default function TabelaGrupoFamiliar({ data, isLoading }: TabelaProps) {
+export default function TabelaGrupoFamiliar({
+  data,
+  isLoading,
+  handleEditClick,
+  handleDeleteClick,
+  processRowUpdate,
+  handleRowModesModelChange,
+  handleRowEditStop,
+  rowModesModel,
+  setRows,
+  handleEditMembers,
+}: TabelaProps) {
   const router = useRouter();
-  const [rows, setRows] = React.useState(data);
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {}
-  );
-
-
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
-
-  const handleEditClick = (id: GridRowId) => () => {
-    router.replace(`/painel/clientes/editar/${id}`);
-  };
-
-  const handleDeleteClick = (id: GridRowId) => () => {
-    console.log('Delete row with id: ', id);
-  };
-
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row: any) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
-  };
-
-
-  const getOwnerName = (ownerId: string, row: any) => {
-    const ownerMember = row.members.find(
-      (member: any) => member.userId === ownerId
-    );
-    return ownerMember ? ownerMember.name : ownerId;
-  };
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Nome', width: 300, editable: true },
     {
-      field: 'owner',
-      headerName: 'Responsável',
-      type: 'string',
+      field: "name",
+      headerName: "Nome do grupo",
       width: 300,
       editable: true,
-      renderCell: (params) => getOwnerName(params.value, params.row),
-    },
-    {
-      field: 'members',
-      headerName: 'Membros',
-      width: 250,
       renderCell: (params) => (
-        <Stack spacing={1} sx={{ py: 1, width: '100%' }}>
-          {params.value.map((member: any, index: number) => (
-            <div key={index}>{member.name}</div>
-          ))}
-        </Stack>
+        <Typography sx={{ py: 1 }}>{capitalize(params.value)}</Typography>
       ),
     },
     {
-      field: 'actions',
-      type: 'actions',
-      headerName: '',
-      width: 100,
-      cellClassName: 'actions',
-      getActions: ({ id }) => {
+      field: "ownerName",
+      headerName: "Responsável",
+      type: "string",
+      width: 300,
+      editable: true,
+      renderCell: (params) => (
+        <Box display="flex" alignItems="center" sx={{ py: 1 }}>
+          <Avatar
+            src={params.row.ownerAvatar}
+            alt={params.value}
+            sx={{ width: 40, height: 40, marginRight: 1 }}
+          />
+          {capitalizeFirstLastName(params.value)}
+        </Box>
+      ),
+    },
+    {
+      field: "members",
+      headerName: "Membros",
+      width: 250,
+      headerAlign: "center",
+      renderCell: (params) => {
+        const members = params.value || [];
+        const maxAvatars = 5;
+        return (
+          <AvatarGroup max={maxAvatars} sx={{ py: 1 }}>
+            {members.map((member: SelectedMember, index: number) => (
+              <Tooltip title={capitalize(member.memberName)} key={index}>
+                <Avatar
+                  src={member.memberAvatar}
+                  alt={member.memberName}
+                  sx={{ width: 32, height: 32 }}
+                />
+              </Tooltip>
+            ))}
+          </AvatarGroup>
+        );
+      },
+    },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "",
+      width: 250,
+      cellClassName: "actions",
+      getActions: ({ id, row }) => {
         return [
           <GridActionsCellItem
-            icon={<EditIcon sx={{ color: '#666666' }} />}
+            key={id}
+            icon={<EditIcon sx={{ color: "#666666", fontSize: 25 }} />}
             label="Edit"
             className="textPrimary"
-            onClick={handleEditClick(id)}
+            onClick={handleEditClick(row)}
           />,
           <GridActionsCellItem
-            icon={<DeleteIcon sx={{ color: '#9B0B00' }} />}
+            key={id}
+            icon={
+              <GroupAddOutlinedIcon sx={{ color: "#1ab86d", fontSize: 25 }} />
+            }
+            label="Add Member"
+            onClick={handleEditMembers(row, "add")}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key={id}
+            icon={
+              <GroupRemoveOutlinedIcon
+                sx={{ color: "#9B0B00", fontSize: 25 }}
+              />
+            }
+            label="Remove Member"
+            onClick={handleEditMembers(row, "remove")}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key={id}
+            icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 25 }} />}
             label="Delete"
-            onClick={handleDeleteClick(id)}
+            onClick={handleDeleteClick(row)}
             color="inherit"
           />,
         ];
@@ -117,20 +156,20 @@ export default function TabelaGrupoFamiliar({ data, isLoading }: TabelaProps) {
   ];
 
   const handleAddClient = () => {
-    router.replace('/painel/grupo-familiar/novo');
+    router.replace("/grupo-familiar/novo");
   };
 
   return (
     <Box
       sx={{
         padding: 2,
-        height: 'fit-content',
-        width: '100%',
-        '& .actions': {
-          color: 'text.secondary',
+        height: "fit-content",
+        width: "100%",
+        "& .actions": {
+          color: "text.secondary",
         },
-        '& .textPrimary': {
-          color: 'text.primary',
+        "& .textPrimary": {
+          color: "text.primary",
         },
       }}
     >
@@ -139,7 +178,7 @@ export default function TabelaGrupoFamiliar({ data, isLoading }: TabelaProps) {
 
         <IconButton
           aria-label="add"
-          sx={{ color: 'success.main' }}
+          sx={{ color: "success.main" }}
           onClick={handleAddClient}
         >
           <AddCircleIcon fontSize="large" />
@@ -165,12 +204,12 @@ export default function TabelaGrupoFamiliar({ data, isLoading }: TabelaProps) {
                 onRowModesModelChange={handleRowModesModelChange}
                 onRowEditStop={handleRowEditStop}
                 processRowUpdate={processRowUpdate}
-                getRowHeight={() => 'auto'}
+                getRowHeight={() => "auto"}
                 getEstimatedRowHeight={() => 100}
                 slotProps={{
-                  toolbar: { setRows, setRowModesModel },
+                  toolbar: { setRows, rowModesModel },
                 }}
-                sx={{ borderRadius: '16px' }}
+                sx={{ borderRadius: "16px" }}
               />
             )
           }

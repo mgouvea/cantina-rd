@@ -4,7 +4,9 @@ export type User = {
   email?: string;
   isAdmin: boolean;
   telephone: string;
-  groupFamily: string;
+  urlImage: string;
+  groupFamily: string | null;
+  isChild: boolean;
   createdAt?: Date;
   updatedAt?: Date | null;
 };
@@ -19,8 +21,7 @@ export type UserAdmin = {
   updatedAt?: Date | null;
 };
 
-
 export type GroupFamilyUser = {
-  name: string;
+  name?: string;
   userId: string;
-}
+};

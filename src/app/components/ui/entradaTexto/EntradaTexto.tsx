@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Control, Controller, FieldValues, Path } from 'react-hook-form';
-import { styled } from '@mui/material/styles';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import InputMask from 'react-input-mask';
+import React, { useState } from "react";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
+import { styled } from "@mui/material/styles";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import InputMask from "react-input-mask";
 
 import {
   TextField,
@@ -13,7 +13,7 @@ import {
   Theme,
   SxProps,
   TextFieldProps,
-} from '@mui/material';
+} from "@mui/material";
 
 type EntradaTextoProps<T extends FieldValues> = {
   name: Path<T>;
@@ -29,19 +29,19 @@ type EntradaTextoProps<T extends FieldValues> = {
 };
 
 const UnioTextFieldBase = styled(TextField)({
-  '& .MuiInputLabel-root': { paddingLeft: '8px' },
-  '& .MuiInputLabel-shrink': {
-    paddingLeft: '4px',
+  "& .MuiInputLabel-root": { paddingLeft: "8px" },
+  "& .MuiInputLabel-shrink": {
+    paddingLeft: "4px",
   },
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
-      borderRadius: '8px',
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderRadius: "8px",
     },
-    '& .MuiIconButton-root': {
-      marginRight: '0px',
+    "& .MuiIconButton-root": {
+      marginRight: "0px",
     },
-    '& .MuiOutlinedInput-input': {
-      paddingLeft: '22px',
+    "& .MuiOutlinedInput-input": {
+      paddingLeft: "22px",
     },
   },
 });
@@ -50,7 +50,7 @@ export function EntradaTexto<T extends FieldValues>({
   name,
   control,
   label,
-  type = 'text',
+  type = "text",
   autoComplete,
   helperText,
   showPasswordToggle = false,
@@ -69,7 +69,7 @@ export function EntradaTexto<T extends FieldValues>({
       name={name}
       control={control}
       rules={{ required: true }}
-      render={({ field, fieldState: { invalid, error } }) => (
+      render={({ field, fieldState: { error } }) => (
         <>
           {mask ? (
             <InputMask
@@ -78,12 +78,13 @@ export function EntradaTexto<T extends FieldValues>({
               onChange={field.onChange}
               onBlur={field.onBlur}
             >
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {(inputProps: any) => (
                 <UnioTextFieldBase
                   {...inputProps}
                   {...props}
                   label={label}
-                  type={showPassword ? 'text' : type}
+                  type={showPassword ? "text" : type}
                   error={!!error}
                   helperText={error ? error.message : helperText}
                   sx={sx}
@@ -92,7 +93,10 @@ export function EntradaTexto<T extends FieldValues>({
                     ...inputProps.InputProps,
                     endAdornment: showPasswordToggle && (
                       <InputAdornment position="end">
-                        <IconButton onClick={handleClickShowPassword} edge="end">
+                        <IconButton
+                          onClick={handleClickShowPassword}
+                          edge="end"
+                        >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
@@ -106,7 +110,7 @@ export function EntradaTexto<T extends FieldValues>({
               {...field}
               {...props}
               label={label}
-              type={showPassword ? 'text' : type}
+              type={showPassword ? "text" : type}
               error={!!error}
               helperText={error ? error.message : helperText}
               sx={sx}

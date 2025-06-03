@@ -1,31 +1,30 @@
-import {
-  GetAdmins,
-  GetAllAdmins,
-  GetAllUsers,
-  GetGroupFamily,
-  GetUserById,
-} from '@/services';
-import { useQuery } from '@tanstack/react-query';
+import { GetAllAdmins, GetAllUsers, GetUserById } from "@/hooks/services";
+import { useQuery } from "@tanstack/react-query";
 
-export const useUsers = () => {
+export const useUsers = (enabled: boolean = true) => {
   return useQuery({
-    queryKey: ['users'],
+    queryKey: ["users"],
     queryFn: () => GetAllUsers(),
     retry: 1,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 60 * 12, // 12 hours in milliseconds
+    gcTime: 1000 * 60 * 60 * 24, // 24 hours garbage collection time (formerly cacheTime)
+    enabled,
   });
 };
 
 export const useUserById = (id: string) => {
   return useQuery({
-    queryKey: ['users', id],
+    queryKey: ["usersId", id],
     queryFn: () => GetUserById(id),
   });
 };
 
 export const useAdmins = () => {
   return useQuery({
-    queryKey: ['admins'],
+    queryKey: ["admins"],
     queryFn: () => GetAllAdmins(),
+    retry: 1,
+    staleTime: 1000 * 60 * 60 * 12, // 12 hours in milliseconds
+    gcTime: 1000 * 60 * 60 * 24, // 24 hours garbage collection time (formerly cacheTime)
   });
 };

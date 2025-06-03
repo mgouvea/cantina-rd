@@ -1,5 +1,12 @@
-import { PostAddAdmin, PostAddUser, UpdateUser, UpdateUserGroupFamily,  } from '@/services';
-import { useMutation } from '@tanstack/react-query';
+import {
+  DeleteAdminByUserId,
+  DeleteUser,
+  PostAddAdmin,
+  PostAddUser,
+  UpdateUser,
+  UpdateUserFromGroupFamily,
+} from "@/hooks/services";
+import { useMutation } from "@tanstack/react-query";
 
 export const useAddUser = () => {
   return useMutation({
@@ -13,14 +20,26 @@ export const useUpdateUser = () => {
   });
 };
 
+export const useDeleteUser = () => {
+  return useMutation({
+    mutationFn: DeleteUser,
+  });
+};
+
 export const useUpdateUsersGroupFamily = () => {
   return useMutation({
-    mutationFn: UpdateUserGroupFamily,
+    mutationFn: UpdateUserFromGroupFamily,
   });
 };
 
 export const useAddAdmin = () => {
   return useMutation({
     mutationFn: PostAddAdmin,
+  });
+};
+
+export const useDeleteAdmin = () => {
+  return useMutation({
+    mutationFn: DeleteAdminByUserId,
   });
 };

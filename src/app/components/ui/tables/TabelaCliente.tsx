@@ -1,112 +1,160 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import Box from "@mui/material/Box";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import EditIcon from "@mui/icons-material/Edit";
+import EmptyContent from "../emptyContent/EmptyContent";
+import Text from "../text/Text";
+import { capitalize, formatarTelefone } from "@/utils";
 import {
-  GridRowModesModel,
+  Avatar,
+  CircularProgress,
+  IconButton,
+  Stack,
+  Switch,
+  TextField,
+} from "@mui/material";
+import { Client } from "@/types/client";
+import { Filtros } from "../..";
+
+import {
   DataGrid,
   GridColDef,
   GridActionsCellItem,
-  GridEventListener,
-  GridRowId,
   GridRowModel,
-  GridRowEditStopReasons,
-} from '@mui/x-data-grid';
-import { CircularProgress, IconButton, Stack } from '@mui/material';
-import { Filtros } from '../..';
-import { useRouter } from 'next/navigation';
-import Text from '../text/Text';
-import EmptyContent from '../emptyContent/EmptyContent';
-import { capitalize } from '@/utils';
-import { useGroupFamily } from '@/hooks/queries/useGroupFamily.query';
-import { groupFamily } from '@/types/groupFamily';
-
+  GridEventListener,
+  GridRowModesModel,
+} from "@mui/x-data-grid";
+import { User } from "@/types";
+import GenericModal from "../../modal/GenericModal";
+import { useRouter } from "next/navigation";
 interface TabelaProps {
-  data: any;
+  data: Client[];
   isLoading: boolean;
+  enableOrDisableAdmin: boolean;
+  openModal: boolean;
+  userClicked: User | null;
+  email: string;
+  rowModesModel: GridRowModesModel;
+  handleEditClick: (row: GridRowModel) => () => void;
+  handleDeleteClick: (row: GridRowModel) => () => void;
+  handleRowEditStop: GridEventListener<"rowEditStop">;
+  handleRowModesModelChange: (newRowModesModel: GridRowModesModel) => void;
+  handleOpenModal: (row: User) => void;
+  handleEnableOrDisableAdmin: () => void;
+  setEmail: (email: string) => void;
+  processRowUpdate: (newRow: GridRowModel) => GridRowModel;
+  updateIsEditing: (isEditing: boolean) => void;
+  updateUserToEdit: (user: User | null) => void;
+  setRowModesModel: (rowModesModel: GridRowModesModel) => void;
+  setRows: (rows: Client[]) => void;
+  setOpenModal: (open: boolean) => void;
 }
 
-export default function TabelaCliente({ data, isLoading }: TabelaProps) {
+export default function TabelaCliente({
+  data,
+  isLoading,
+  enableOrDisableAdmin,
+  openModal,
+  email,
+  rowModesModel,
+  handleEditClick,
+  handleDeleteClick,
+  handleRowEditStop,
+  handleRowModesModelChange,
+  handleOpenModal,
+  handleEnableOrDisableAdmin,
+  setEmail,
+  updateIsEditing,
+  updateUserToEdit,
+  setRowModesModel,
+  processRowUpdate,
+  setRows,
+  setOpenModal,
+}: TabelaProps) {
   const router = useRouter();
-  const [rows, setRows] = React.useState(data);
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {}
-  );
-
-  const { data: groupFamilies } = useGroupFamily();
-
-
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
-
-  const handleEditClick = (id: GridRowId) => () => {
-    router.replace(`/painel/clientes/editar/${id}`);
-  };
-
-  const handleDeleteClick = (id: GridRowId) => () => {
-    console.log('Delete row with id: ', id);
-  };
-
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row: any) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
-  };
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Nome', width: 500, editable: true, renderCell: (params) => (
-      capitalize(params.value)
-    )},
     {
-      field: 'telephone',
-      headerName: 'Telefone',
-      type: 'number',
-      width: 300,
-      align: 'left',
-      headerAlign: 'left',
-      editable: true,
-    },
-    {
-      field: 'groupFamily',
-      headerName: 'Grupo Familiar',
-      width: 300,
-      editable: true,
-      renderCell: (params) => {
-        const group = groupFamilies?.find((group: groupFamily) => group._id === params.value);
-        return group ? capitalize(group.name) : '-';
-      }
-    },
-    {
-      field: 'actions',
-      type: 'actions',
-      headerName: '',
+      field: "urlImage",
+      headerName: "Imagem",
       width: 100,
-      cellClassName: 'actions',
-      getActions: ({ id }) => {
+      editable: false,
+      sortable: false,
+      align: "center",
+      renderCell: (params) => (
+        <Avatar
+          alt="Foto do Perfil"
+          sx={{
+            width: 50,
+            height: 50,
+            cursor: "default",
+          }}
+          src={params.row.urlImage}
+        />
+      ),
+    },
+    {
+      field: "name",
+      headerName: "Nome",
+      width: 350,
+      editable: true,
+      renderCell: (params) => capitalize(params.value),
+    },
+    {
+      field: "telephone",
+      headerName: "Telefone",
+      type: "number",
+      width: 200,
+      align: "left",
+      headerAlign: "left",
+      editable: true,
+      renderCell: (params) => formatarTelefone(params.value),
+    },
+    {
+      field: "groupFamilyName",
+      headerName: "Grupo Familiar",
+      width: 200,
+      editable: true,
+      renderCell: (params) => capitalize(params.value),
+    },
+    {
+      field: "isAdmin",
+      headerName: "Administrador",
+      type: "boolean",
+      width: 150,
+      align: "center",
+      headerAlign: "center",
+      editable: true,
+      renderCell: (params) => (
+        <Switch
+          checked={params.value}
+          onChange={() => handleOpenModal(params.row)}
+          inputProps={{ "aria-label": "controlled" }}
+        />
+      ),
+    },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "",
+      width: 100,
+      cellClassName: "actions",
+      getActions: ({ id, row }) => {
         return [
           <GridActionsCellItem
-            icon={<EditIcon sx={{ color: '#666666' }} />}
+            key={id}
+            icon={<EditIcon sx={{ color: "#666666" }} />}
             label="Edit"
             className="textPrimary"
-            onClick={handleEditClick(id)}
+            onClick={handleEditClick(row)}
           />,
           <GridActionsCellItem
-            icon={<DeleteIcon sx={{ color: '#9B0B00' }} />}
+            key={id}
+            icon={<DeleteIcon sx={{ color: "#9B0B00" }} />}
             label="Delete"
-            onClick={handleDeleteClick(id)}
+            onClick={handleDeleteClick(row)}
             color="inherit"
           />,
         ];
@@ -115,28 +163,30 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
   ];
 
   const handleAddClient = () => {
-    router.replace('/painel/clientes/novo');
+    updateIsEditing(false);
+    updateUserToEdit(null);
+    router.replace("/clientes/novo");
   };
 
   return (
     <Box
       sx={{
         padding: 2,
-        height: 'fit-content',
-        '& .actions': {
-          color: 'text.secondary',
+        height: "fit-content",
+        "& .actions": {
+          color: "text.secondary",
         },
-        '& .textPrimary': {
-          color: 'text.primary',
+        "& .textPrimary": {
+          color: "text.primary",
         },
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Clientes Cadastrados</Text>
+        <Text variant="h5">Sócios Cadastrados</Text>
 
         <IconButton
           aria-label="add"
-          sx={{ color: 'success.main' }}
+          sx={{ color: "success.main" }}
           onClick={handleAddClient}
         >
           <AddCircleIcon fontSize="large" />
@@ -165,12 +215,54 @@ export default function TabelaCliente({ data, isLoading }: TabelaProps) {
                 slotProps={{
                   toolbar: { setRows, setRowModesModel },
                 }}
-                sx={{ borderRadius: '16px' }}
+                sx={{ borderRadius: "16px" }}
+                rowHeight={60}
               />
             )
           }
         </Filtros>
       )}
+
+      <GenericModal
+        title={
+          enableOrDisableAdmin
+            ? "Habilitar administrador"
+            : "Desabilitar administrador"
+        }
+        open={openModal}
+        handleClose={() => {
+          setOpenModal(false);
+          setEmail("");
+        }}
+        cancelButtonText="Cancelar"
+        confirmButtonText={enableOrDisableAdmin ? "Habilitar" : "Desabilitar"}
+        buttonColor={enableOrDisableAdmin ? "success" : "error"}
+        handleConfirm={handleEnableOrDisableAdmin}
+      >
+        <Stack sx={{ flexDirection: "column", gap: 3 }}>
+          <Text>
+            Você realmete deseja{" "}
+            {enableOrDisableAdmin ? "habilitar" : "desabilitar"} esse
+            administrador?
+          </Text>
+
+          {enableOrDisableAdmin && (
+            <TextField
+              autoFocus
+              required
+              margin="dense"
+              id="name"
+              name="email"
+              label="Email"
+              type="email"
+              fullWidth
+              variant="outlined"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          )}
+        </Stack>
+      </GenericModal>
     </Box>
   );
 }
