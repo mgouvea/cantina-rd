@@ -5,7 +5,6 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import CssBaseline from "@mui/material/CssBaseline";
-import Divider from "@mui/material/Divider";
 import ForgotPassword from "./forgotPassword";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -14,10 +13,14 @@ import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import { Card, Theme, Toolbar } from "@mui/material";
-import { GoogleIcon, useSnackbar } from "./components";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useSnackbar } from "./components";
 import Image from "next/image";
 import { isValidEmail } from "@/utils";
 import { useRouter } from "next/navigation";
+import { useAdmins, useUsers } from "@/hooks/queries";
+import { User, UserAdmin } from "@/types";
+import { useUserStore } from "@/contexts";
 
 const muiCardStyles = (theme: Theme) => ({
   display: "flex",
@@ -57,8 +60,12 @@ const signInContainerStyles = (theme: Theme) => ({
   },
 });
 
-export default function Home(props: { disableCustomTheme?: boolean }) {
+export default function Home() {
   const { showSnackbar } = useSnackbar();
+
+  const { data: admins } = useAdmins();
+  const { data: users } = useUsers();
+  const { updateUserLogged } = useUserStore();
 
   const router = useRouter();
 
@@ -69,8 +76,10 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleClickOpen = () => {
+    alert("Liga pro Clésio");
     setOpen(true);
   };
 
@@ -91,15 +100,70 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
   };
 
   const validateInputs = () => {
-    const validateEmail: boolean = isValidEmail(email);
-    if (!validateEmail || !password) {
+    // Reset previous errors
+    setEmailError(false);
+    setEmailErrorMessage("");
+    setPasswordError(false);
+    setPasswordErrorMessage("");
+
+    // Validate email
+    const validateEmail: boolean | undefined = isValidEmail(email);
+    if (!validateEmail) {
+      setEmailError(true);
+      setEmailErrorMessage("Digite um e-mail válido");
       showSnackbar({
         severity: "error",
-        message: "Digite um e-mail ou senha válidos!",
+        message: "Digite um e-mail válido!",
       });
       return;
     }
 
+    // Validate password
+    if (!password) {
+      setPasswordError(true);
+      setPasswordErrorMessage("Digite sua senha");
+      showSnackbar({
+        severity: "error",
+        message: "Digite sua senha!",
+      });
+      return;
+    }
+
+    // Find the admin with matching email
+    const adminFound: UserAdmin | undefined = admins
+      ? admins.find((admin: UserAdmin) => admin.email === email)
+      : null;
+
+    // Check if email exists in admin records
+    if (!adminFound) {
+      showSnackbar({
+        severity: "error",
+        message: "Acesso não autorizado. Apenas administradores podem entrar.",
+      });
+      return;
+    }
+
+    // Check if password matches
+    if (adminFound.password !== password) {
+      setPasswordError(true);
+      setPasswordErrorMessage("Senha incorreta");
+      showSnackbar({
+        severity: "error",
+        message: "Senha incorreta!",
+      });
+      return;
+    }
+
+    // Show loading state
+    setIsLoading(true);
+
+    // Find the corresponding user
+    const userFound = users?.find(
+      (user: User) => user._id === adminFound.idUser
+    );
+
+    // Update user in store and redirect
+    updateUserLogged(userFound);
     router.replace("/dashboard");
   };
 
@@ -180,8 +244,16 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
               fullWidth
               variant="contained"
               onClick={validateInputs}
+              disabled={isLoading}
             >
-              Entrar
+              {isLoading ? (
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <CircularProgress size={24} color="inherit" sx={{ mr: 1 }} />
+                  Entrando...
+                </Box>
+              ) : (
+                "Entrar"
+              )}
             </Button>
             <Link
               component="button"
@@ -192,17 +264,6 @@ export default function Home(props: { disableCustomTheme?: boolean }) {
             >
               Esqueceu a senha?
             </Link>
-          </Box>
-          <Divider>ou</Divider>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => alert("Sign in with Google")}
-              startIcon={<GoogleIcon />}
-            >
-              Entrar com o Google
-            </Button>
           </Box>
         </Card>
       </Stack>

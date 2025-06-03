@@ -233,7 +233,11 @@ export default function NovoGrupoFamiliar() {
     const formValues = getValues();
     const finalData = {
       ...formValues,
-      members: selectedMembers.map(({ userId }) => ({ userId })),
+      members: selectedMembers.map((member) => ({
+        userId: member.userId,
+        memberName: member.name, // Map name to memberName
+        memberAvatar: "", // Provide a default value for memberAvatar
+      })),
       owner: owner,
     };
 

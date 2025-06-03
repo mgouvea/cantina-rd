@@ -48,8 +48,12 @@ export default function ListMembers({
 
     if (addOrRemove === "add") {
       if (!members.some((member) => member.userId === userId)) {
-        // Create new arrays for state updates
-        const newMembers = [...members, { userId }];
+        // Create new arrays for state updates with proper SelectedMember object
+        const newMembers = [...members, { 
+          userId, 
+          memberName: user.name,
+          memberAvatar: user.urlImage || ""
+        }];
         const newSelectedUsers = [...clickedUsersFromListMembers, user];
 
         setMembers(newMembers);
@@ -100,7 +104,11 @@ export default function ListMembers({
       // For remove mode, removing from selection means we want to keep the member
       const userToAdd = users.find((user) => user._id === userId);
       if (userToAdd) {
-        const newMembers = [...members, { userId }];
+        const newMembers = [...members, { 
+          userId, 
+          memberName: userToAdd.name,
+          memberAvatar: userToAdd.urlImage || ""
+        }];
         setMembers(newMembers);
       }
     }
@@ -138,7 +146,7 @@ export default function ListMembers({
                 <ListItemAvatar>
                   <Avatar
                     alt={capitalizeFirstLastName(user.name)}
-                    src={user.imageBase64 || undefined}
+                    src={user.urlImage || undefined}
                   >
                     {user.name.charAt(0).toUpperCase()}
                   </Avatar>
@@ -180,7 +188,7 @@ export default function ListMembers({
                     avatar={
                       <Avatar
                         alt={capitalizeFirstLastName(user.name)}
-                        src={user.imageBase64 || undefined}
+                        src={user.urlImage || undefined}
                       >
                         {user.name.charAt(0).toUpperCase()}
                       </Avatar>

@@ -9,7 +9,7 @@ import {
 import React from "react";
 import { EntradaTexto } from "../entradaTexto/EntradaTexto";
 import { FormActions } from "./FormActions";
-import { Controller, Control } from "react-hook-form";
+import { Control, Controller } from "react-hook-form";
 import { capitalize, findUserById } from "@/utils";
 import { User, TransferMember, GroupFamily } from "@/types";
 

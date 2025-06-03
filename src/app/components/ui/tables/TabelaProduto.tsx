@@ -199,9 +199,11 @@ export default function TabelaProduto({
             align: "center",
             renderCell: (params) => {
               const category = params.row.categoryId;
+              // Check if category is an object with a name property
+              const categoryName = typeof category === 'object' && category !== null ? category.name : '';
               return (
                 <div style={{ ...rowStyle, textAlign: "center" }}>
-                  {capitalize(category?.name || "")}
+                  {capitalize(categoryName)}
                 </div>
               );
             },
@@ -215,9 +217,11 @@ export default function TabelaProduto({
             align: "center",
             renderCell: (params) => {
               const subcategory = params.row.subcategoryId;
+              // Check if subcategory is an object with a name property
+              const subcategoryName = typeof subcategory === 'object' && subcategory !== null ? subcategory.name : '';
               return (
                 <div style={{ ...rowStyle, textAlign: "center" }}>
-                  {capitalize(subcategory?.name || "")}
+                  {capitalize(subcategoryName)}
                 </div>
               );
             },
