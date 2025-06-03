@@ -110,7 +110,6 @@ export default function GroupFamily() {
         rows={rows}
         rowModesModel={rowModesModel}
         handleEditMembers={handleEditMembers}
-        setRows={setRows}
       />
     );
   };

@@ -63,7 +63,10 @@ export const useDeleteCategory = () => {
     mutationFn: DeleteCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["categories", "subCategories"],
+        queryKey: ["categories"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["subCategories"],
       });
 
       showSnackbar({

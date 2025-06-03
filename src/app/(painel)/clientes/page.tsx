@@ -265,7 +265,6 @@ function ClientesContent() {
             updateUserToEdit={updateUserToEdit}
             setRowModesModel={setRowModesModel}
             processRowUpdate={processRowUpdate}
-            setRows={setRows}
             setOpenModal={setOpenModal}
           />
         </CustomTabPanel>
@@ -281,7 +280,6 @@ function ClientesContent() {
             handleRowModesModelChange={handleRowModesModelChange}
             processRowUpdate={processRowUpdate}
             setRowModesModel={setRowModesModel}
-            setRows={setRowsVisitors}
           />
         </CustomTabPanel>
       </Stack>

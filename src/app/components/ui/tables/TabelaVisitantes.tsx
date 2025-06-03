@@ -26,7 +26,6 @@ interface TabelaProps {
   handleRowModesModelChange: (newRowModesModel: GridRowModesModel) => void;
   processRowUpdate: (newRow: GridRowModel) => GridRowModel;
   setRowModesModel: (rowModesModel: GridRowModesModel) => void;
-  setRows: (rows: Visitor[]) => void;
 }
 
 export default function TabelaVisitantes({
@@ -38,7 +37,6 @@ export default function TabelaVisitantes({
   handleRowModesModelChange,
   setRowModesModel,
   processRowUpdate,
-  setRows,
 }: TabelaProps) {
   const columns: GridColDef[] = [
     {
@@ -124,7 +122,7 @@ export default function TabelaVisitantes({
                 onRowEditStop={handleRowEditStop}
                 processRowUpdate={processRowUpdate}
                 slotProps={{
-                  toolbar: { setRows, setRowModesModel },
+                  toolbar: { setRowModesModel },
                 }}
                 sx={{ borderRadius: "16px" }}
                 rowHeight={60}
