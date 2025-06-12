@@ -26,7 +26,6 @@ import { CustomTabPanel, DeleteModal, FormFaturas } from "@/app/components";
 import {
   useCredits,
   useGroupFamily,
-  useGroupFamilyWithOwner,
   useOrders,
   useOrdersVisitors,
   useUsers,
@@ -40,6 +39,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
+import { useGroupFamilyStore } from "@/contexts";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -68,11 +68,6 @@ function FaturasContent() {
   const { data: payments, isLoading: isLoadingPayments } = usePayments();
   const { data: credits, isLoading: isLoadingCredits } = useCredits();
 
-  const {
-    data: groupFamiliesWithOwner,
-    isLoading: isLoadingGroupFamilyWithOwner,
-  } = useGroupFamilyWithOwner();
-
   const { mutateAsync: deleteOrder } = useDeleteOrder();
 
   const [allInvoicesIds, setAllInvoicesIds] = useState<string[] | null>(null);
@@ -82,11 +77,17 @@ function FaturasContent() {
   );
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
 
+  const { updateAllGroupFamilies } = useGroupFamilyStore();
+
   useEffect(() => {
     if (allInvoices && allInvoices.length > 0 && !isLoadingInvoices) {
       setAllInvoicesIds(allInvoices.map((invoice: InvoiceDto) => invoice._id));
     }
   }, [allInvoices, isLoadingInvoices]);
+
+  useEffect(() => {
+    updateAllGroupFamilies(groupFamilies);
+  }, [groupFamilies, updateAllGroupFamilies]);
 
   const handleEditClick = (row: GridRowModel) => () => {
     console.log(row);
@@ -127,7 +128,6 @@ function FaturasContent() {
       isLoading ||
       isLoadingGroupFamily ||
       isLoadingUser ||
-      isLoadingGroupFamilyWithOwner ||
       isLoadingVisitors
     ) {
       return <Loading />;
@@ -203,7 +203,6 @@ function FaturasContent() {
               groupFamilies={groupFamilies}
               dataUser={dataUser}
               allInvoicesIds={allInvoicesIds}
-              groupFamiliesWithOwner={groupFamiliesWithOwner}
             />
           ) : (
             <Text variant="h6">

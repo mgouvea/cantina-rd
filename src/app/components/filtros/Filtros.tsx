@@ -3,15 +3,17 @@
 import React, { useState } from "react";
 import { Box } from "@mui/material";
 import { Pesquisa } from "./Pesquisa";
+import { InvoiceFilter } from "./InvoiceFilter";
 
 type FiltrosProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children: (filteredRows: any[]) => React.ReactNode;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rows: any[];
+  type?: string;
 };
 
-export const Filtros: React.FC<FiltrosProps> = ({ children, rows }) => {
+export const Filtros: React.FC<FiltrosProps> = ({ children, rows, type }) => {
   const [parametrosDeBusca, setParametrosDeBusca] = useState("");
 
   const filteredRows = rows?.filter((row) =>
@@ -38,10 +40,18 @@ export const Filtros: React.FC<FiltrosProps> = ({ children, rows }) => {
             minWidth: { xs: 250, sm: 300 },
           }}
         >
-          <Pesquisa
-            parametrosDeBusca={parametrosDeBusca}
-            setParametrosDeBusca={setParametrosDeBusca}
-          />
+          {type !== "invoice" && (
+            <Pesquisa
+              parametrosDeBusca={parametrosDeBusca}
+              setParametrosDeBusca={setParametrosDeBusca}
+            />
+          )}
+          {type === "invoice" && (
+            <InvoiceFilter
+              parametrosDeBusca={parametrosDeBusca}
+              setParametrosDeBusca={setParametrosDeBusca}
+            />
+          )}
         </Box>
       </Box>
       {children(filteredRows)}

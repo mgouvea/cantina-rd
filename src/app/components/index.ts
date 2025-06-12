@@ -1,6 +1,8 @@
 export * from "./breadcrumb/GenericBreadcrumb";
 export * from "./accordion/Accordion";
+export * from "./autoComplete/SelectFamilies";
 export * from "./filtros/Filtros";
+export * from "./filtros/InvoiceFilter";
 export * from "./svg/IlustracaoEmpty";
 export * from "./filtros/Pesquisa";
 export * from "./loading/Loading";
@@ -9,6 +11,7 @@ export * from "./modal/MembersModal";
 export * from "./modal/DeleteModal";
 export * from "./modal/PaymentModal";
 export * from "./modal/CreditModal";
+export * from "./modal/NewInvoiceModal";
 export * from "./snackbar/SnackbarProvider";
 export * from "./ui/header/Header";
 export * from "./ui/icons/CustomIcons";
