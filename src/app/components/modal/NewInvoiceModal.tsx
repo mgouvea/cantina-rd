@@ -1,33 +1,21 @@
 "use client";
 
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import GenericModal from "./GenericModal";
 import React, { useState } from "react";
+import SelectFamilies from "../autoComplete/SelectFamilies";
 import Text from "../ui/text/Text";
-import { Controller, useForm } from "react-hook-form";
+import { Box, Button, IconButton, Popover, TextField } from "@mui/material";
 import { CreateInvoiceDto } from "@/types/invoice";
 import { GroupFamilyWithOwner } from "@/types";
 import { useAddInvoice } from "@/hooks/mutations";
-import { useGroupFamilyWithOwner } from "@/hooks/queries";
-import { useSnackbar } from "@/app/components";
+import { useForm } from "react-hook-form";
 
 import {
   DateRange,
   Range as DateRangePickerRange,
   RangeKeyDict,
 } from "react-date-range";
-import {
-  Box,
-  TextField,
-  Button,
-  Autocomplete,
-  Checkbox,
-  Avatar,
-  Popover,
-  IconButton,
-} from "@mui/material";
 
 type NewInvoiceModalProps = {
   openModal: boolean;
@@ -40,28 +28,6 @@ const INITIAL_INVOICE_FORM_VALUES: CreateInvoiceDto = {
   endDate: null,
 };
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
-
-const OptionLabel = ({ option }: { option: GroupFamilyWithOwner }) => (
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      gap: 1,
-    }}
-  >
-    {option.ownerAvatar && (
-      <Avatar
-        src={option.ownerAvatar}
-        alt={option.ownerName}
-        sx={{ width: 40, height: 40 }}
-      />
-    )}
-    <span>{option.name}</span>
-  </Box>
-);
-
 export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
   openModal,
   setOpenModal,
@@ -70,12 +36,8 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
     defaultValues: INITIAL_INVOICE_FORM_VALUES,
     mode: "onChange", // Enable validation on change for immediate feedback
   });
-  const { showSnackbar } = useSnackbar();
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedFamilies, setSelectedFamilies] = useState<
-    GroupFamilyWithOwner[]
-  >([]);
 
   const [state, setState] = useState<DateRangePickerRange[]>([
     {
@@ -86,7 +48,10 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
   ]);
 
   const { mutateAsync: addInvoice } = useAddInvoice();
-  const { data: groupFamiliesWithOwner } = useGroupFamilyWithOwner();
+
+  const [selectedFamilies, setSelectedFamilies] = useState<
+    GroupFamilyWithOwner[]
+  >([]);
 
   const {
     control,
@@ -106,23 +71,9 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
       startDate: data.startDate,
       endDate: data.endDate,
     };
-    try {
-      await addInvoice(invoicePayload);
-      showSnackbar({
-        message: "Fatura gerada com sucesso!",
-        severity: "success",
-      });
-      handleClearForm(); // Use the consolidated clear function
-      setOpenModal(false);
-    } catch (error) {
-      console.error("Error adding invoice:", error);
-      showSnackbar({
-        message: "Erro ao gerar fatura.",
-        severity: "error",
-      });
-    } finally {
+    await addInvoice(invoicePayload).then(() => {
       setIsProcessing(false);
-    }
+    });
   };
 
   // Date picker popover state
@@ -152,6 +103,10 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
 
   const handleCalendarClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleSelectFamilies = (families: GroupFamilyWithOwner[]) => {
+    setSelectedFamilies(families);
   };
 
   const handleDateRangeSelect = (rangesByKey: RangeKeyDict) => {
@@ -206,119 +161,13 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
       <Box sx={{ my: 2 }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3, my: 2 }}>
           {/* Family selection */}
-          <Box
-            sx={{
-              width: "100%",
-              px: 2,
-            }}
-          >
-            <Text variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
-              Selecione as famílias
-            </Text>
-            <Box
-              sx={{
-                mb: 1,
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: 1,
-              }}
-            >
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={() => {
-                  const allFamilies =
-                    groupFamiliesWithOwner
-                      ?.slice()
-                      .sort(
-                        (a: GroupFamilyWithOwner, b: GroupFamilyWithOwner) =>
-                          a.name.localeCompare(b.name)
-                      ) || [];
-                  setSelectedFamilies(allFamilies);
-                  // Atualiza o valor no formulário
-                  invoiceForm.setValue(
-                    "groupFamilyIds",
-                    allFamilies
-                      .map((item: GroupFamilyWithOwner) => item._id || "")
-                      .filter((id: string) => id !== "")
-                  );
-                }}
-              >
-                Selecionar Todos
-              </Button>
-
-              <Button
-                size="small"
-                variant="outlined"
-                color="error"
-                onClick={() => {
-                  setSelectedFamilies([]);
-                  invoiceForm.setValue("groupFamilyIds", []);
-                }}
-              >
-                Desmarcar Todos
-              </Button>
-            </Box>
-            <Controller
-              name="groupFamilyIds"
-              control={control}
-              render={({ field: { onChange, ...restField } }) => (
-                <Autocomplete
-                  {...restField}
-                  multiple
-                  id="checkboxes-tags-demo"
-                  options={
-                    groupFamiliesWithOwner
-                      ?.slice()
-                      .sort(
-                        (a: GroupFamilyWithOwner, b: GroupFamilyWithOwner) =>
-                          a.name.localeCompare(b.name)
-                      ) || []
-                  }
-                  disableCloseOnSelect
-                  getOptionLabel={(option) =>
-                    (<OptionLabel option={option} />) as unknown as string
-                  }
-                  value={selectedFamilies}
-                  onChange={(_, newValue) => {
-                    setSelectedFamilies(newValue);
-                    onChange(
-                      newValue
-                        .map((item: GroupFamilyWithOwner) => item._id || "")
-                        .filter((id: string) => id !== "")
-                    );
-                  }}
-                  isOptionEqualToValue={(option, value) =>
-                    option._id === value._id
-                  }
-                  renderOption={(props, option, { selected }) => {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const { key, ...optionProps } = props;
-                    return (
-                      <li key={option._id} {...optionProps}>
-                        <Checkbox
-                          icon={icon}
-                          checkedIcon={checkedIcon}
-                          style={{ marginRight: 8 }}
-                          checked={selected}
-                        />
-
-                        <OptionLabel option={option} />
-                      </li>
-                    );
-                  }}
-                  sx={{ width: "100%" }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Famílias"
-                      placeholder="Famílias"
-                    />
-                  )}
-                />
-              )}
-            />
-          </Box>
+          <SelectFamilies
+            invoiceForm={invoiceForm}
+            control={control}
+            selectedFamilies={selectedFamilies}
+            onSelectFamilies={handleSelectFamilies}
+            hasPadding
+          />
 
           {/* Date selection */}
           <Box

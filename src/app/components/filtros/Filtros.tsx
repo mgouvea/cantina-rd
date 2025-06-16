@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import { Pesquisa } from "./Pesquisa";
 import { InvoiceFilter } from "./InvoiceFilter";
+import { GroupFamilyWithOwner } from "@/types";
 
 type FiltrosProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,12 +16,38 @@ type FiltrosProps = {
 
 export const Filtros: React.FC<FiltrosProps> = ({ children, rows, type }) => {
   const [parametrosDeBusca, setParametrosDeBusca] = useState("");
+  const [selectedFamilies, setSelectedFamilies] = useState<
+    GroupFamilyWithOwner[]
+  >([]);
+  const [finalFilteredRows, setFinalFilteredRows] = useState(rows || []);
+  const [status, setStatus] = useState<string>("");
 
-  const filteredRows = rows?.filter((row) =>
-    Object.values(row).some((value) =>
-      String(value).toLowerCase().includes(parametrosDeBusca.toLowerCase())
-    )
-  );
+  useEffect(() => {
+    let result = rows || [];
+
+    if (parametrosDeBusca) {
+      result = result.filter((row) =>
+        Object.values(row).some((value) =>
+          String(value).toLowerCase().includes(parametrosDeBusca.toLowerCase())
+        )
+      );
+    }
+
+    if (type === "invoice" && selectedFamilies.length > 0) {
+      const familyIds = selectedFamilies.map((f) => f._id);
+      result = result.filter((row) => familyIds.includes(row.groupFamilyId));
+    }
+
+    if (type === "invoice" && status) {
+      result = result.filter((row) => row.status === status);
+    }
+
+    setFinalFilteredRows(result);
+  }, [rows, parametrosDeBusca, selectedFamilies, type, status]);
+
+  const handleGroupFamilyFilter = (families: GroupFamilyWithOwner[]) => {
+    setSelectedFamilies(families);
+  };
 
   return (
     <>
@@ -50,11 +77,14 @@ export const Filtros: React.FC<FiltrosProps> = ({ children, rows, type }) => {
             <InvoiceFilter
               parametrosDeBusca={parametrosDeBusca}
               setParametrosDeBusca={setParametrosDeBusca}
+              status={status}
+              setStatus={setStatus}
+              onGroupFamilyFilter={handleGroupFamilyFilter}
             />
           )}
         </Box>
       </Box>
-      {children(filteredRows)}
+      {children(finalFilteredRows)}
     </>
   );
 };

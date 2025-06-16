@@ -275,7 +275,9 @@ function FaturasContent() {
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
+
       {renderContent()}
+
       <DeleteModal
         title="compra"
         openModal={openDeleteModal}

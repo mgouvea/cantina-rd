@@ -10,6 +10,8 @@ import "react-date-range/dist/theme/default.css";
 import { Box } from "@mui/material";
 
 import { NewInvoiceModal } from "../../modal/NewInvoiceModal";
+import { useGroupFamilyWithOwner } from "@/hooks/queries";
+import { useGroupFamilyStore } from "@/contexts";
 
 export const FormFaturas = ({
   groupFamilies,
@@ -20,8 +22,11 @@ export const FormFaturas = ({
   dataUser: User[] | null;
   allInvoicesIds: string[] | null;
 }) => {
+  const { data: groupFamiliesWithOwner } = useGroupFamilyWithOwner();
   const { mutateAsync: fullInvoices, isPending: isLoadingFullInvoices } =
     useFullInvoices();
+
+  const { updateGroupFamiliesWithOwner } = useGroupFamilyStore();
 
   const [fullInvoicesData, setFullInvoicesData] = useState([]);
   const [resetFullInvoices, setResetFullInvoices] = useState(false);
@@ -37,6 +42,12 @@ export const FormFaturas = ({
       console.error(error);
     }
   }, [allInvoicesIds, fullInvoices]);
+
+  useEffect(() => {
+    if (!!groupFamiliesWithOwner) {
+      updateGroupFamiliesWithOwner(groupFamiliesWithOwner);
+    }
+  }, [groupFamiliesWithOwner, updateGroupFamiliesWithOwner]);
 
   useEffect(() => {
     if (!allInvoicesIds) return;
