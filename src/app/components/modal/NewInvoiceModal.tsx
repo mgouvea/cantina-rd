@@ -1,21 +1,16 @@
 "use client";
 
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import GenericModal from "./GenericModal";
 import React, { useState } from "react";
 import SelectFamilies from "../autoComplete/SelectFamilies";
-import Text from "../ui/text/Text";
-import { Box, Button, IconButton, Popover, TextField } from "@mui/material";
+import { Box } from "@mui/material";
 import { CreateInvoiceDto } from "@/types/invoice";
 import { GroupFamilyWithOwner } from "@/types";
 import { useAddInvoice } from "@/hooks/mutations";
 import { useForm } from "react-hook-form";
 
-import {
-  DateRange,
-  Range as DateRangePickerRange,
-  RangeKeyDict,
-} from "react-date-range";
+import { Range as DateRangePickerRange, RangeKeyDict } from "react-date-range";
+import { SelectData } from "../filtros/SelectData";
 
 type NewInvoiceModalProps = {
   openModal: boolean;
@@ -170,76 +165,16 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
           />
 
           {/* Date selection */}
-          <Box
-            sx={{
-              width: "100%",
-              px: 2,
-            }}
-          >
-            <Text variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
-              Selecione o período
-            </Text>
-            <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-              <TextField
-                fullWidth
-                value={getDateRangeText()}
-                InputProps={{
-                  readOnly: true,
-                  endAdornment: (
-                    <IconButton onClick={handleCalendarOpen} edge="end">
-                      <CalendarTodayIcon />
-                    </IconButton>
-                  ),
-                }}
-                label="Período"
-                variant="outlined"
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "8px",
-                  },
-                }}
-              />
-              <Popover
-                open={open}
-                anchorEl={anchorEl}
-                onClose={handleCalendarClose}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "left",
-                }}
-              >
-                <Box sx={{ p: 1 }}>
-                  <DateRange
-                    editableDateInputs={true}
-                    onChange={handleDateRangeSelect}
-                    moveRangeOnFirstSelection={false}
-                    ranges={state}
-                    rangeColors={["#3f51b5", "#2196f3", "#00bcd4"]}
-                    maxDate={new Date()} // Limita a seleção até o dia atual
-                  />
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      mt: 1,
-                    }}
-                  >
-                    <Button
-                      variant="contained"
-                      onClick={handleDateRangeConfirm}
-                      sx={{ borderRadius: "8px" }}
-                    >
-                      OK
-                    </Button>
-                  </Box>
-                </Box>
-              </Popover>
-            </Box>
-          </Box>
+          <SelectData
+            getDateRangeText={getDateRangeText}
+            handleCalendarOpen={handleCalendarOpen}
+            handleCalendarClose={handleCalendarClose}
+            handleDateRangeSelect={handleDateRangeSelect}
+            handleDateRangeConfirm={handleDateRangeConfirm}
+            open={open}
+            anchorEl={anchorEl}
+            state={state}
+          />
         </Box>
       </Box>
     </GenericModal>
