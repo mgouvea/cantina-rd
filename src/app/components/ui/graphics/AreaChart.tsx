@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Box } from "@mui/material";
 
 export const AreaChart = () => {
-  const [series, setSeries] = useState([
+  const [series] = useState([
     {
       name: "Vendas",
       data: [31, 40, 28, 51, 42, 109, 100],
@@ -17,7 +17,7 @@ export const AreaChart = () => {
     },
   ]);
 
-  const [options, setOptions] = useState<ApexOptions>({
+  const [options] = useState<ApexOptions>({
     chart: {
       height: "100%",
       width: "100%",
