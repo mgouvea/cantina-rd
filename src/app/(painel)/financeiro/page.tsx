@@ -12,7 +12,6 @@ import TabelaCompras from "@/app/components/ui/tables/TabelaCompras";
 import TabelaComprasVisitors from "@/app/components/ui/tables/TabelaComprasVisitors";
 import TabelaCredito from "@/app/components/ui/tables/TabelaCredito";
 import TabelaPagamentos from "@/app/components/ui/tables/TabelaPagamentos";
-import Text from "@/app/components/ui/text/Text";
 import { a11yProps, capitalizeFirstLastName } from "@/utils";
 import { GridRowModel } from "@mui/x-data-grid";
 import { InvoiceDto } from "@/types/invoice";
@@ -26,7 +25,6 @@ import { CustomTabPanel, DeleteModal, FormFaturas } from "@/app/components";
 import {
   useCredits,
   useGroupFamily,
-  useGroupFamilyWithOwner,
   useOrders,
   useOrdersVisitors,
   useUsers,
@@ -40,6 +38,8 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
+import { useGroupFamilyStore } from "@/contexts";
+import EmptyContent from "@/app/components/ui/emptyContent/EmptyContent";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -68,11 +68,6 @@ function FaturasContent() {
   const { data: payments, isLoading: isLoadingPayments } = usePayments();
   const { data: credits, isLoading: isLoadingCredits } = useCredits();
 
-  const {
-    data: groupFamiliesWithOwner,
-    isLoading: isLoadingGroupFamilyWithOwner,
-  } = useGroupFamilyWithOwner();
-
   const { mutateAsync: deleteOrder } = useDeleteOrder();
 
   const [allInvoicesIds, setAllInvoicesIds] = useState<string[] | null>(null);
@@ -82,11 +77,17 @@ function FaturasContent() {
   );
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
 
+  const { updateAllGroupFamilies } = useGroupFamilyStore();
+
   useEffect(() => {
     if (allInvoices && allInvoices.length > 0 && !isLoadingInvoices) {
       setAllInvoicesIds(allInvoices.map((invoice: InvoiceDto) => invoice._id));
     }
   }, [allInvoices, isLoadingInvoices]);
+
+  useEffect(() => {
+    updateAllGroupFamilies(groupFamilies);
+  }, [groupFamilies, updateAllGroupFamilies]);
 
   const handleEditClick = (row: GridRowModel) => () => {
     console.log(row);
@@ -127,7 +128,6 @@ function FaturasContent() {
       isLoading ||
       isLoadingGroupFamily ||
       isLoadingUser ||
-      isLoadingGroupFamilyWithOwner ||
       isLoadingVisitors
     ) {
       return <Loading />;
@@ -203,12 +203,9 @@ function FaturasContent() {
               groupFamilies={groupFamilies}
               dataUser={dataUser}
               allInvoicesIds={allInvoicesIds}
-              groupFamiliesWithOwner={groupFamiliesWithOwner}
             />
           ) : (
-            <Text variant="h6">
-              Visão de Visitantes - Faturas (Em implementação)
-            </Text>
+            <EmptyContent title="Visão de Visitantes - Faturas (Em implementação)" />
           )}
         </CustomTabPanel>
         <CustomTabPanel value={value} index={2} dir={theme.direction}>
@@ -219,16 +216,18 @@ function FaturasContent() {
               <TabelaPagamentos data={payments || []} isLoading={false} />
             )
           ) : (
-            <Text variant="h6">
-              Visão de Visitantes - Pagamentos (Em implementação)
-            </Text>
+            <EmptyContent title="Visão de Visitantes - Pagamentos (Em implementação)" />
           )}
         </CustomTabPanel>
         <CustomTabPanel value={value} index={3} dir={theme.direction}>
-          {isLoadingCredits ? (
-            <Loading />
+          {viewType === "socios" ? (
+            isLoadingCredits ? (
+              <Loading />
+            ) : (
+              <TabelaCredito data={credits || []} isLoading={false} />
+            )
           ) : (
-            <TabelaCredito data={credits || []} isLoading={false} />
+            <EmptyContent title="Não há opção de crédito para visitantes" />
           )}
         </CustomTabPanel>
       </Stack>
@@ -276,7 +275,9 @@ function FaturasContent() {
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
+
       {renderContent()}
+
       <DeleteModal
         title="compra"
         openModal={openDeleteModal}

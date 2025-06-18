@@ -18,6 +18,7 @@ import {
   useDeleteInvoice,
   useSendInvoiceByWhatsApp,
 } from "@/hooks/mutations";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 import {
   CircularProgress,
@@ -53,6 +54,7 @@ interface TabelaProps {
   groupFamilies: GroupFamily[];
   dataUser: User[] | null;
   onResetData: () => void;
+  setOpenModal: (open: boolean) => void;
 }
 
 interface Product {
@@ -182,6 +184,7 @@ export default function TabelaFaturas({
   groupFamilies,
   dataUser,
   onResetData,
+  setOpenModal,
 }: TabelaProps) {
   const [sendingInvoiceId, setSendingInvoiceId] = useState<string | null>(null);
 
@@ -528,15 +531,27 @@ export default function TabelaFaturas({
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Text variant="h5">Faturas Registradas</Text>
 
-        <Tooltip title="Recarregar dados">
-          <IconButton
-            aria-label="add"
-            sx={{ color: "success.main" }}
-            onClick={handleResetData}
-          >
-            <CachedOutlinedIcon fontSize="medium" />
-          </IconButton>
-        </Tooltip>
+        <Stack direction="row" alignItems="center">
+          <Tooltip title="Adicionar nova fatura">
+            <IconButton
+              color="success"
+              aria-label="Adicionar nova fatura"
+              onClick={() => setOpenModal(true)}
+              sx={{ ml: 1 }}
+            >
+              <AddCircleIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Recarregar dados">
+            <IconButton
+              aria-label="add"
+              sx={{ color: "success.main" }}
+              onClick={handleResetData}
+            >
+              <CachedOutlinedIcon fontSize="medium" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
       </Stack>
 
       {!isLoading && (!data || data.length === 0) && (
@@ -544,7 +559,7 @@ export default function TabelaFaturas({
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data}>
+        <Filtros rows={data} type="invoice">
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />

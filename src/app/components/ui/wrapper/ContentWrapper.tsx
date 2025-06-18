@@ -1,6 +1,6 @@
-import { Stack } from '@mui/material';
-import React from 'react';
-import GenericBreadcrumbs from '../../breadcrumb/GenericBreadcrumb';
+import { Stack } from "@mui/material";
+import React from "react";
+import GenericBreadcrumbs from "../../breadcrumb/GenericBreadcrumb";
 
 type BreadcrumbItem = {
   label: string;
@@ -13,6 +13,7 @@ interface WrapperProps {
   maxWidth?: number;
   minHeight?: number;
   breadcrumbItems: BreadcrumbItem[];
+  isDashboard?: boolean;
 }
 
 const ContentWrapper = ({
@@ -21,6 +22,7 @@ const ContentWrapper = ({
   maxWidth = 1400,
   minHeight = 500,
   breadcrumbItems,
+  isDashboard = false,
 }: WrapperProps) => {
   return (
     <Stack>
@@ -31,9 +33,9 @@ const ContentWrapper = ({
           minWidth: minWidth,
           maxWidth: maxWidth,
           minHeight: minHeight,
-          backgroundColor: '#fff',
-          borderRadius: '16px',
-          mt: '0.3rem',
+          backgroundColor: isDashboard ? "#eef2f6" : "#fff",
+          borderRadius: "16px",
+          mt: "0.3rem",
         }}
       >
         {children}
