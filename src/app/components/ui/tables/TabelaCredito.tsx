@@ -38,16 +38,16 @@ export default function TabelaCredito({
   const queryClient = useQueryClient();
 
   const [openCreditModal, setOpenCreditModal] = useState(false);
-  
+
   const handleConfirmCredit = async (data: CreateCreditDto) => {
     try {
       await addCredit(data);
-      
+
       showSnackbar({
         severity: "success",
         message: "Crédito inserido com sucesso!",
       });
-      
+
       setOpenCreditModal(false);
     } catch (error) {
       console.error("Error inserting credit:", error);
@@ -57,7 +57,7 @@ export default function TabelaCredito({
       });
     }
   };
-  
+
   const handleResetData = () => {
     queryClient.invalidateQueries({ queryKey: ["credits"] });
   };
@@ -196,8 +196,11 @@ export default function TabelaCredito({
                       createdAt: !(isMobile && !isTablet),
                     },
                   },
+                  sorting: {
+                    sortModel: [{ field: "createdAt", sort: "desc" }],
+                  },
                 }}
-                pageSizeOptions={[5, 10, 15]}
+                pageSizeOptions={[5, 15, 25]}
               />
             )
           }

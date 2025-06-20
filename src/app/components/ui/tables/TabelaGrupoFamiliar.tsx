@@ -189,6 +189,11 @@ export default function TabelaGrupoFamiliar({
                 getRowHeight={() => "auto"}
                 getEstimatedRowHeight={() => 100}
                 sx={{ borderRadius: "16px" }}
+                initialState={{
+                  sorting: {
+                    sortModel: [{ field: "name", sort: "asc" }],
+                  },
+                }}
               />
             )
           }

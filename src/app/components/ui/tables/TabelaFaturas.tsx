@@ -589,6 +589,11 @@ export default function TabelaFaturas({
                   getEstimatedRowHeight={() => 100}
                   autoHeight
                   disableColumnMenu={isSmallScreen}
+                  initialState={{
+                    sorting: {
+                      sortModel: [{ field: "createdAt", sort: "desc" }],
+                    },
+                  }}
                   sx={{
                     borderRadius: "16px",
                     width: "100%",

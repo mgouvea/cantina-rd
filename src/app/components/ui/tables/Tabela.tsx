@@ -1,3 +1,5 @@
+"use client";
+
 import { DataGrid, DataGridProps } from "@mui/x-data-grid";
 import React from "react";
 import { Box, useMediaQuery, useTheme } from "@mui/material";

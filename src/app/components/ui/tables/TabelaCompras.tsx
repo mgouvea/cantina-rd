@@ -242,7 +242,7 @@ export default function TabelaCompras({
                 }}
                 initialState={{
                   pagination: {
-                    paginationModel: { pageSize: isMobile ? 5 : 10 },
+                    paginationModel: { pageSize: isMobile ? 5 : 15 },
                   },
                   columns: {
                     columnVisibilityModel: {
@@ -250,8 +250,11 @@ export default function TabelaCompras({
                       createdAt: !(isMobile && !isTablet),
                     },
                   },
+                  sorting: {
+                    sortModel: [{ field: "createdAt", sort: "desc" }],
+                  },
                 }}
-                pageSizeOptions={[5, 10, 15]}
+                pageSizeOptions={[5, 15, 25]}
               />
             )
           }
