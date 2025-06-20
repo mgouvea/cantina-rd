@@ -254,10 +254,8 @@ function ClientesContent() {
 
 export default function Clientes() {
   return (
-    <Stack>
-      <Suspense fallback={<Loading minHeight={200} />}>
-        <ClientesContent />
-      </Suspense>
-    </Stack>
+    <Suspense fallback={<Loading minHeight={200} />}>
+      <ClientesContent />
+    </Suspense>
   );
 }
