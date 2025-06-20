@@ -195,6 +195,11 @@ export default function TabelaCliente({
                 getRowId={(row) => row._id}
                 sx={{ borderRadius: "16px" }}
                 rowHeight={60}
+                initialState={{
+                  sorting: {
+                    sortModel: [{ field: 'name', sort: 'asc' }],
+                  },
+                }}
               />
             )
           }

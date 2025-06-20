@@ -250,6 +250,11 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
                 rows={rowsFiltradas}
                 columns={columns}
                 getRowId={(row) => row._id!}
+                initialState={{
+                  sorting: {
+                    sortModel: [{ field: "name", sort: "asc" }],
+                  },
+                }}
                 sx={{
                   borderRadius: "16px",
                   "& .MuiDataGrid-cell": {

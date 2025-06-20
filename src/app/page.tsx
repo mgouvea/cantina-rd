@@ -176,7 +176,7 @@ export default function Home() {
         <Card variant="outlined" sx={muiCardStyles}>
           <Toolbar sx={{ justifyContent: "center", padding: "0.5rem 0 0 0" }}>
             <Image
-              src="/cantinaRd.png"
+              src="/cantinaRD.svg"
               width={110}
               height={110}
               alt="logo da cantina realeza divina"

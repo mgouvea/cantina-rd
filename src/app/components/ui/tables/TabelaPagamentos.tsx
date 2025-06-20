@@ -186,8 +186,11 @@ export default function TabelaPagamentos({
                       createdAt: !(isMobile && !isTablet),
                     },
                   },
+                  sorting: {
+                    sortModel: [{ field: "createdAt", sort: "desc" }],
+                  },
                 }}
-                pageSizeOptions={[5, 10, 15]}
+                pageSizeOptions={[5, 15, 25]}
               />
             )
           }
