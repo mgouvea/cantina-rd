@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
@@ -279,19 +279,34 @@ export default function TabelaFaturas({
   };
 
   // Create a custom hook for responsive columns
-  const useResponsiveColumns = () => {
-    const [windowWidth, setWindowWidth] = useState(
-      typeof window !== "undefined" ? window.innerWidth : 1200
-    );
+  // const useResponsiveColumns = () => {
+  //   const [windowWidth, setWindowWidth] = useState(
+  //     typeof window !== "undefined" ? window.innerWidth : 1200
+  //   );
 
-    React.useEffect(() => {
+  //   React.useEffect(() => {
+  //     const handleResize = () => setWindowWidth(window.innerWidth);
+  //     window.addEventListener("resize", handleResize);
+  //     return () => window.removeEventListener("resize", handleResize);
+  //   }, []);
+
+  //   // Return smaller widths for smaller screens
+  //   return windowWidth < 1200;
+  // };
+
+  const useResponsiveColumns = () => {
+    const [windowWidth, setWindowWidth] = useState<number | null>(null);
+
+    useEffect(() => {
+      // Só roda no client!
       const handleResize = () => setWindowWidth(window.innerWidth);
+      handleResize();
       window.addEventListener("resize", handleResize);
       return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // Return smaller widths for smaller screens
-    return windowWidth < 1200;
+    // Trate o valor durante SSR:
+    return windowWidth ? windowWidth < 1200 : false;
   };
 
   const isSmallScreen = useResponsiveColumns();

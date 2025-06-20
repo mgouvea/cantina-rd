@@ -1,3 +1,5 @@
+"use client";
+
 import { fotoUploadProps } from "@/types";
 import { Avatar, Box, IconButton } from "@mui/material";
 import { Botao } from "../botao/Botao";
