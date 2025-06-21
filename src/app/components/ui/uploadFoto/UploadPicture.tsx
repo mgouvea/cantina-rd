@@ -21,7 +21,7 @@ const UploadPictureComponent = ({
   onHover: (hover: boolean) => void;
   hovering: boolean;
   avatarTitle: string;
-  setFotoUpload: React.Dispatch<React.SetStateAction<fotoUploadProps | null>>;
+  setFotoUpload: (value: fotoUploadProps | null) => void;
   fotoUpdate?: string;
 }) => {
   const handleUploadFile = useCallback(

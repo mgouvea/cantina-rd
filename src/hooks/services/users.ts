@@ -1,7 +1,7 @@
 import { GroupFamilyUser, User } from "@/types";
 import { http } from ".";
 
-export const PostAddUser = async (user: User) => {
+export const PostAddUser = async (user: Partial<User>) => {
   return (await http.post("users", user)).data;
 };
 

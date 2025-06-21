@@ -66,7 +66,16 @@ export default function FormClientsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [fotoPerfil, setFotoPerfil] = useState<fotoUploadProps | null>(null);
+  const [isEditingFotoPerfil, setIsEditingFotoPerfil] =
+    useState<boolean>(false);
   const [hovering, setHovering] = useState(false);
+
+  const handleSetFotoPerfil = (foto: fotoUploadProps | null) => {
+    setFotoPerfil(foto);
+    if (isEditing) {
+      setIsEditingFotoPerfil(true);
+    }
+  };
 
   const watchedNome = useWatch<User>({ control, name: "name" }) as string;
   const watchedEmail = useWatch<User>({ control, name: "email" }) as
@@ -139,36 +148,47 @@ export default function FormClientsPage() {
   const handleRemoveFoto = useCallback(() => {
     setFotoPerfil(null);
   }, []);
-
   const handleSaveClient = useCallback(async () => {
     setIsSubmitting(true);
 
     const telefoneNormalizado = removerMascaraTelefone(watchedTelefone);
 
-    const userExists = allUsers?.some(
-      (user) => removerMascaraTelefone(user.telephone) === telefoneNormalizado
+    const userExists = allUsers?.find(
+      (user) =>
+        removerMascaraTelefone(user.telephone) === telefoneNormalizado &&
+        user._id !== userToEdit?._id
     );
 
     if (userExists && !isEditing) {
+      setIsSubmitting(false);
       showSnackbar({
         message:
           "Cliente já cadastrado! Este telefone já consta em nossa base de dados.",
         severity: "warning",
       });
-      setIsSubmitting(false);
       return;
     }
 
     try {
       const { name, email, ...userValues } = getValues();
-      const isEditingFotoPerfil = userToEdit?.urlImage || "";
 
-      const userPayload: User = {
+      let imageUrl: string;
+      if (isEditing) {
+        if (isEditingFotoPerfil) {
+          imageUrl = fotoPerfil?.base64 || "";
+        } else {
+          imageUrl = userToEdit?.urlImage || "";
+        }
+      } else {
+        imageUrl = fotoPerfil?.base64 || "";
+      }
+
+      const userPayload: Partial<User> = {
         ...userValues,
         name,
         telephone: removerMascaraTelefone(watchedTelefone),
-        isAdmin: checked,
-        urlImage: isEditing ? isEditingFotoPerfil : fotoPerfil?.base64 || "",
+        isAdmin: isEditing ? userToEdit?.isAdmin : checked,
+        urlImage: imageUrl,
       };
 
       if (isEditing && userToEdit) {
@@ -212,22 +232,23 @@ export default function FormClientsPage() {
       setIsSubmitting(false);
     }
   }, [
-    checked,
-    fotoPerfil,
-    queryClient,
-    router,
-    watchedTelefone,
     allUsers,
+    watchedTelefone,
     userToEdit,
     isEditing,
-    addAdmin,
-    addUser,
-    getValues,
-    reset,
     showSnackbar,
+    getValues,
+    isEditingFotoPerfil,
+    fotoPerfil,
+    checked,
+    updateUser,
+    addUser,
+    addAdmin,
+    router,
+    queryClient,
     updateIsEditing,
     updateUserToEdit,
-    updateUser,
+    reset,
   ]);
 
   return (
@@ -255,7 +276,7 @@ export default function FormClientsPage() {
             onHover={handleHover}
             hovering={hovering}
             avatarTitle="Perfil"
-            setFotoUpload={setFotoPerfil}
+            setFotoUpload={handleSetFotoPerfil}
             fotoUpdate={userToEdit?.urlImage}
           />
         </Box>
