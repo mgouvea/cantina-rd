@@ -37,6 +37,7 @@ const INITIAL_PROD_FORM_VALUES: ProductFormValues = {
   categoryId: "",
   subcategoryId: "",
   urlImage: "",
+  isActive: true,
 };
 
 export const ProductsForm = () => {
@@ -106,6 +107,7 @@ export const ProductsForm = () => {
     tag: productToEdit?.tag || "",
     categoryId: productToEdit?.categoryId || "",
     subcategoryId: productToEdit?.subcategoryId || "",
+    isActive: productToEdit?.isActive || true,
     urlImage: productToEdit?.urlImage || "",
   };
 
