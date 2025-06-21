@@ -11,7 +11,10 @@ import Text from "../text/Text";
 import { capitalize } from "@/utils";
 import { Filtros } from "../../filtros/Filtros";
 import { Products } from "@/types";
-import { useDeleteProduct } from "@/hooks/mutations/useProducts.mutation";
+import {
+  useDeleteProduct,
+  useUpdateProduct,
+} from "@/hooks/mutations/useProducts.mutation";
 import { useProductStore } from "@/contexts";
 import { useRouter } from "next/navigation";
 
@@ -20,6 +23,7 @@ import {
   CircularProgress,
   IconButton,
   Stack,
+  Switch,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -36,6 +40,7 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
   const { mutateAsync: deleteProduct } = useDeleteProduct();
+  const { mutateAsync: updateProduct } = useUpdateProduct();
 
   const { updateProductToEdit, updateIsEditing } = useProductStore();
 
@@ -47,6 +52,15 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
 
   const handleDeleteClick = (id: string) => async () => {
     await deleteProduct({ productId: id });
+  };
+
+  const handleUpdateActiveProduct = (row: Products) => async () => {
+    await updateProduct({
+      productId: row._id!,
+      product: {
+        isActive: !row.isActive,
+      },
+    });
   };
 
   // Responsive column configuration
@@ -88,6 +102,21 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
         ),
       },
       {
+        field: "isActive",
+        headerName: "Disponível",
+        type: "boolean",
+        width: 150,
+        align: "center",
+        headerAlign: "center",
+        editable: true,
+        renderCell: (params) => (
+          <Switch
+            checked={params.value}
+            onChange={handleUpdateActiveProduct(params.row)}
+          />
+        ),
+      },
+      {
         field: "actions",
         type: "actions",
         headerName: "",
@@ -116,16 +145,6 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
 
     // Add columns for non-mobile views
     if (!isMobile) {
-      baseColumns.splice(2, 0, {
-        field: "tag",
-        headerName: "Tag",
-        width: isTablet ? 70 : 100,
-        editable: true,
-        renderCell: (params) => (
-          <div style={rowStyle}>{capitalize(params.value)}</div>
-        ),
-      });
-
       // Add category and subcategory for tablet and desktop
       if (!isTablet || theme.breakpoints.up("md")) {
         baseColumns.splice(

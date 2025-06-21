@@ -86,15 +86,8 @@ export default function Home() {
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
-      return;
-    }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    event.preventDefault();
+    validateInputs();
   };
 
   const validateInputs = () => {
@@ -234,10 +227,9 @@ export default function Home() {
             </FormControl>
             <ForgotPassword open={open} handleClose={handleClose} />
             <Button
-              type="button"
+              type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
               disabled={isLoading}
             >
               {isLoading ? (
