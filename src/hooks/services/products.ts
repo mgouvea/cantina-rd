@@ -14,7 +14,7 @@ export const UpdateProduct = async ({
   product,
 }: {
   productId: string;
-  product: Products;
+  product: Partial<Products>;
 }) => {
   return (await http.patch<Products>(`products/${productId}`, product)).data;
 };

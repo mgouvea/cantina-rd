@@ -10,6 +10,7 @@ export type Products = {
   tag: string;
   categoryId: Categories | string;
   subcategoryId: SubCategories | string;
+  isActive: boolean;
   urlImage: string;
   createdAt?: Date;
   updatedAt?: Date;
