@@ -153,13 +153,16 @@ export default function FormClientsPage() {
 
     const telefoneNormalizado = removerMascaraTelefone(watchedTelefone);
 
-    const userExists = allUsers?.find(
-      (user) =>
-        removerMascaraTelefone(user.telephone) === telefoneNormalizado &&
-        user._id !== userToEdit?._id
-    );
+    // Não verificamos telefone duplicado para crianças
+    const userExists = !watchedIsChild
+      ? allUsers?.find(
+          (user) =>
+            removerMascaraTelefone(user.telephone) === telefoneNormalizado &&
+            user._id !== userToEdit?._id
+        )
+      : null;
 
-    if (userExists && !isEditing) {
+    if (userExists) {
       setIsSubmitting(false);
       showSnackbar({
         message:
