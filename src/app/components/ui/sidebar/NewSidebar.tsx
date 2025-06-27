@@ -36,7 +36,7 @@ export function NewSidebar() {
       { title: "Grupo Familiar" as NavigationTitle, route: "/grupo-familiar" },
       { title: "Produtos" as NavigationTitle, route: "/produtos" },
       { title: "Categorias" as NavigationTitle, route: "/categorias" },
-      { title: "WhatsApp" as NavigationTitle, route: "/whatsapp" },
+      // { title: "WhatsApp" as NavigationTitle, route: "/whatsapp" },
     ],
     []
   );

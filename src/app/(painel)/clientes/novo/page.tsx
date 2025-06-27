@@ -237,6 +237,7 @@ export default function FormClientsPage() {
   }, [
     allUsers,
     watchedTelefone,
+    watchedIsChild,
     userToEdit,
     isEditing,
     showSnackbar,
