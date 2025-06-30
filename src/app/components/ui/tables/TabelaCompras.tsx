@@ -7,7 +7,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
-import { capitalize } from "@/utils";
+import { capitalize, capitalizeFirstLastName } from "@/utils";
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 import { Filtros } from "../..";
 import { Order, ProductItem, TabelaProps } from "@/types";
@@ -51,7 +51,9 @@ export default function TabelaCompras({
       minWidth: 120,
       editable: true,
       renderCell: (params) => (
-        <Typography sx={{ py: 0.5 }}>{capitalize(params.value)}</Typography>
+        <Typography sx={{ py: 0.5 }}>
+          {capitalizeFirstLastName(params.value)}
+        </Typography>
       ),
     },
     {
