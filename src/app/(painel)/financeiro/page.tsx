@@ -8,20 +8,21 @@ import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
 import PeopleIcon from "@mui/icons-material/People";
 import PriceCheckIcon from "@mui/icons-material/PriceCheck";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import TabelaCompras from "@/app/components/ui/tables/TabelaCompras";
-import TabelaComprasVisitors from "@/app/components/ui/tables/TabelaComprasVisitors";
 import TabelaCredito from "@/app/components/ui/tables/TabelaCredito";
 import TabelaPagamentos from "@/app/components/ui/tables/TabelaPagamentos";
-import { a11yProps, capitalizeFirstLastName } from "@/utils";
-import { GridRowModel } from "@mui/x-data-grid";
+import { a11yProps } from "@/utils";
 import { InvoiceDto } from "@/types/invoice";
-import { useDeleteOrder } from "@/hooks/mutations";
 import { Suspense, useEffect, useState } from "react";
 import { useInvoices } from "@/hooks/queries/useInvoices.query";
 import { usePayments } from "@/hooks/queries/payments.query";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
-import { CustomTabPanel, DeleteModal, FormFaturas } from "@/app/components";
+import {
+  ComprasVisitorsWrapper,
+  ComprasWrapper,
+  CustomTabPanel,
+  FaturaWrapper,
+} from "@/app/components";
 import {
   useCredits,
   useGroupFamily,
@@ -38,7 +39,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import { useGroupFamilyStore } from "@/contexts";
+import { useGroupFamilyStore, useUserStore } from "@/contexts";
 import EmptyContent from "@/app/components/ui/emptyContent/EmptyContent";
 
 const breadcrumbItems = [
@@ -48,7 +49,6 @@ const breadcrumbItems = [
 
 function FaturasContent() {
   const theme = useTheme();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const initialTab = searchParams.get("tab")
@@ -58,7 +58,7 @@ function FaturasContent() {
   const [value, setValue] = useState<number>(initialTab);
   const [viewType, setViewType] = useState<"socios" | "visitantes">("socios");
 
-  const { data, isLoading } = useOrders();
+  const { data: dataOrders, isLoading: isLoadingOrders } = useOrders();
   const { data: dataVisitors, isLoading: isLoadingVisitors } =
     useOrdersVisitors();
   const { data: allInvoices, isLoading: isLoadingInvoices } = useInvoices();
@@ -68,16 +68,10 @@ function FaturasContent() {
   const { data: payments, isLoading: isLoadingPayments } = usePayments();
   const { data: credits, isLoading: isLoadingCredits } = useCredits();
 
-  const { mutateAsync: deleteOrder } = useDeleteOrder();
-
   const [allInvoicesIds, setAllInvoicesIds] = useState<string[] | null>(null);
-  const [orderIdToDelete, setOrderIdToDelete] = useState<string | null>(null);
-  const [orderNameToDelete, setOrderNameToDelete] = useState<string | null>(
-    null
-  );
-  const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
 
   const { updateAllGroupFamilies } = useGroupFamilyStore();
+  const { updateAllUsers } = useUserStore();
 
   useEffect(() => {
     if (allInvoices && allInvoices.length > 0 && !isLoadingInvoices) {
@@ -87,27 +81,8 @@ function FaturasContent() {
 
   useEffect(() => {
     updateAllGroupFamilies(groupFamilies);
-  }, [groupFamilies, updateAllGroupFamilies]);
-
-  const handleEditClick = (row: GridRowModel) => () => {
-    console.log(row);
-    router.replace("/financeiro/novo");
-  };
-
-  const handleDeleteClick = (row: GridRowModel) => async () => {
-    setOrderIdToDelete(row._id);
-    setOrderNameToDelete(row.buyerName);
-    setOpenDeleteModal(true);
-  };
-
-  const handleConfirmDeleteOrder = async () => {
-    if (!orderIdToDelete) return;
-    await deleteOrder(orderIdToDelete);
-
-    setOpenDeleteModal(false);
-    setOrderIdToDelete(null);
-    setOrderNameToDelete(null);
-  };
+    updateAllUsers(dataUser);
+  }, [groupFamilies, updateAllGroupFamilies, dataUser, updateAllUsers]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -125,7 +100,7 @@ function FaturasContent() {
 
   const renderContent = () => {
     if (
-      isLoading ||
+      isLoadingOrders ||
       isLoadingGroupFamily ||
       isLoadingUser ||
       isLoadingVisitors
@@ -182,24 +157,17 @@ function FaturasContent() {
         </Box>
         <CustomTabPanel value={value} index={0} dir={theme.direction}>
           {viewType === "socios" ? (
-            <TabelaCompras
-              data={data}
-              isLoading={isLoading}
-              handleEditClick={handleEditClick}
-              handleDeleteClick={handleDeleteClick}
-            />
+            <ComprasWrapper data={dataOrders} isLoading={isLoadingOrders} />
           ) : (
-            <TabelaComprasVisitors
+            <ComprasVisitorsWrapper
               data={dataVisitors}
               isLoading={isLoadingVisitors}
-              handleEditClick={handleEditClick}
-              handleDeleteClick={handleDeleteClick}
             />
           )}
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1} dir={theme.direction}>
           {viewType === "socios" ? (
-            <FormFaturas
+            <FaturaWrapper
               groupFamilies={groupFamilies}
               dataUser={dataUser}
               allInvoicesIds={allInvoicesIds}
@@ -277,14 +245,6 @@ function FaturasContent() {
       </Box>
 
       {renderContent()}
-
-      <DeleteModal
-        title="compra"
-        openModal={openDeleteModal}
-        nameToDelete={capitalizeFirstLastName(orderNameToDelete!)}
-        setOpenModal={setOpenDeleteModal}
-        onConfirmDelete={handleConfirmDeleteOrder}
-      />
     </ContentWrapper>
   );
 }

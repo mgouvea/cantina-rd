@@ -24,3 +24,12 @@ export interface OrderVisitor {
   createdAt: Date;
   updatedAt?: Date;
 }
+
+export interface CreateOrderDto {
+  buyerId: string;
+  invoiceId?: string;
+  groupFamilyId: string;
+  products: ProductItem[];
+  totalPrice: number;
+  createdAt: string;
+}

@@ -6,3 +6,4 @@ export * from "./useWhatsApp.mutation";
 export * from "./useOrders.mutation";
 export * from "./usePayments.mutation";
 export * from "./credit.mutation";
+export * from "./orders.mutation";
