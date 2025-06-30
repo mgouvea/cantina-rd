@@ -31,6 +31,21 @@ export default function RootLayout({
             borderTopRightRadius: "24px",
             backgroundColor: "#eef2f6",
             flexGrow: 1,
+            "&::-webkit-scrollbar": {
+              height: "6px",
+              width: "7px",
+            },
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: "rgba(0, 0, 0, 0.05)",
+              borderRadius: "8px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "success.main",
+              borderRadius: "8px",
+              "&:hover": {
+                backgroundColor: "success.dark",
+              },
+            },
           }}
         >
           {children}

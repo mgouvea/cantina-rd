@@ -2,26 +2,27 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import TabelaFaturas from "../tables/TabelaFaturas";
+import { Box } from "@mui/material";
+import { BoxStyle } from "./BoxStyle";
 import { GroupFamily, User } from "@/types";
+import { NewInvoiceModal } from "../../modal/NewInvoiceModal";
 import { useFullInvoices } from "@/hooks/mutations";
+import { useGroupFamilyStore } from "@/contexts";
+import { useGroupFamilyWithOwner } from "@/hooks/queries";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-import { Box } from "@mui/material";
-
-import { NewInvoiceModal } from "../../modal/NewInvoiceModal";
-import { useGroupFamilyWithOwner } from "@/hooks/queries";
-import { useGroupFamilyStore } from "@/contexts";
-
-export const FormFaturas = ({
-  groupFamilies,
-  dataUser,
-  allInvoicesIds,
-}: {
+interface FaturaWrapperProps {
   groupFamilies: GroupFamily[];
   dataUser: User[] | null;
   allInvoicesIds: string[] | null;
-}) => {
+}
+
+export const FaturaWrapper = ({
+  groupFamilies,
+  dataUser,
+  allInvoicesIds,
+}: FaturaWrapperProps) => {
   const { data: groupFamiliesWithOwner } = useGroupFamilyWithOwner();
   const { mutateAsync: fullInvoices, isPending: isLoadingFullInvoices } =
     useFullInvoices();
@@ -59,18 +60,7 @@ export const FormFaturas = ({
   };
 
   return (
-    <Box
-      sx={{
-        padding: 2,
-        height: "fit-content",
-        "& .actions": {
-          color: "text.secondary",
-        },
-        "& .textPrimary": {
-          color: "text.primary",
-        },
-      }}
-    >
+    <Box sx={BoxStyle}>
       <TabelaFaturas
         data={fullInvoicesData}
         groupFamilies={groupFamilies}

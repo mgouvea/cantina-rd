@@ -1,12 +1,18 @@
 "use client";
 
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Box from "@mui/material/Box";
+import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
 import { capitalize } from "@/utils";
-import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
+import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
+import { Filtros } from "../..";
+import { Order, ProductItem, TabelaProps } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
+
 import {
   CircularProgress,
   IconButton,
@@ -16,17 +22,16 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
-import { Filtros } from "../..";
-import { Order, ProductItem, TabelaProps } from "@/types";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function TabelaCompras({
   data,
   isLoading,
   handleEditClick,
   handleDeleteClick,
-}: TabelaProps<Order>) {
+  onClickNewOrder,
+}: TabelaProps<Order> & {
+  onClickNewOrder: () => void;
+}) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -196,15 +201,28 @@ export default function TabelaCompras({
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Text variant="h5">Compras realizadas</Text>
-        <Tooltip title="Recarregar dados">
-          <IconButton
-            aria-label="add"
-            sx={{ color: "success.main" }}
-            onClick={handleResetData}
-          >
-            <CachedOutlinedIcon fontSize="medium" />
-          </IconButton>
-        </Tooltip>
+
+        <Stack direction="row" alignItems="center">
+          <Tooltip title="Adicionar nova fatura">
+            <IconButton
+              color="success"
+              aria-label="Adicionar nova fatura"
+              onClick={onClickNewOrder}
+              sx={{ ml: 1 }}
+            >
+              <AddCircleIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Recarregar dados">
+            <IconButton
+              aria-label="add"
+              sx={{ color: "success.main" }}
+              onClick={handleResetData}
+            >
+              <CachedOutlinedIcon fontSize="medium" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
       </Stack>
 
       {!isLoading && (!data || data.length === 0) && (
