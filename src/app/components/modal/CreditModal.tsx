@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import GenericModal from "./GenericModal";
 import Text from "../ui/text/Text";
@@ -10,10 +10,13 @@ import {
   FormControl,
   FormLabel,
   InputAdornment,
-  MenuItem,
-  Select,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Autocomplete,
+  Avatar,
 } from "@mui/material";
-import { useAddCredit } from "@/hooks/mutations";
+import { useAddCredit, useAddDebit } from "@/hooks/mutations";
 import { CreateCreditDto } from "@/types/credit";
 import { useGroupFamilyWithOwner } from "@/hooks/queries";
 import { GroupFamilyWithOwner } from "@/types/groupFamily";
@@ -21,18 +24,34 @@ import { GroupFamilyWithOwner } from "@/types/groupFamily";
 type CreditModalProps = {
   openModal: boolean;
   setOpenModal: (open: boolean) => void;
-  onConfirmCredit?: (data: CreateCreditDto) => Promise<void>;
 };
 
 export const CreditModal: React.FC<CreditModalProps> = ({
   openModal,
   setOpenModal,
-  onConfirmCredit,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const { data: groupFamilies } = useGroupFamilyWithOwner();
+
   const { mutateAsync: addCredit } = useAddCredit();
-  const { data: groupFamilies, isLoading: isLoadingGroupFamilies } =
-    useGroupFamilyWithOwner();
+  const { mutateAsync: addDebit } = useAddDebit();
+
+  const [typeOperation, setTypeOperation] = useState<"credit" | "debit">(
+    "credit"
+  );
+
+  const [selectedFamily, setSelectedFamily] =
+    useState<GroupFamilyWithOwner | null>(null);
+
+  // Use useMemo to prevent defaultValues from being recreated on every render
+  const defaultValues = useMemo(
+    () => ({
+      creditedAmount: undefined as unknown as number,
+      amount: undefined as unknown as number,
+      groupFamilyId: "",
+    }),
+    []
+  );
 
   const {
     control,
@@ -42,56 +61,80 @@ export const CreditModal: React.FC<CreditModalProps> = ({
     setValue,
     watch,
   } = useForm<CreateCreditDto>({
-    defaultValues: {
-      creditedAmount: undefined as unknown as number,
-      amount: undefined as unknown as number,
-      groupFamilyId: "",
-    },
+    defaultValues,
     mode: "onChange",
   });
 
-  // Watch creditedAmount to sync with amount
   const creditedAmount = watch("creditedAmount");
 
-  // Sync amount with creditedAmount when creditedAmount changes
+  const handleFormReset = useCallback(() => {
+    reset(defaultValues);
+    setSelectedFamily(null);
+    setTypeOperation("credit");
+  }, [reset, defaultValues, setSelectedFamily, setTypeOperation]);
+
+  // Reset form when modal is closed or opened
+  useEffect(() => {
+    if (openModal) {
+      handleFormReset();
+    }
+  }, [openModal, handleFormReset]);
+
+  // Sync amount with creditedAmount
   useEffect(() => {
     setValue("amount", creditedAmount);
   }, [creditedAmount, setValue]);
 
   const onSubmit = async (data: CreateCreditDto) => {
     setIsProcessing(true);
-    const creditPayload = {
-      amount:
-        typeof data.amount === "string" ? parseFloat(data.amount) : data.amount,
-      creditedAmount:
-        typeof data.creditedAmount === "string"
-          ? parseFloat(data.creditedAmount)
-          : data.creditedAmount,
-      groupFamilyId: data.groupFamilyId,
-    };
+
     try {
-      if (onConfirmCredit) {
-        await onConfirmCredit(creditPayload);
-      } else {
+      if (typeOperation === "credit") {
+        const creditPayload = {
+          amount:
+            typeof data.amount === "string"
+              ? parseFloat(data.amount)
+              : data.amount,
+          creditedAmount:
+            typeof data.creditedAmount === "string"
+              ? parseFloat(data.creditedAmount)
+              : data.creditedAmount,
+          groupFamilyId: data.groupFamilyId,
+        };
+
         await addCredit(creditPayload);
       }
 
-      reset();
+      if (typeOperation === "debit") {
+        const debitPayload = {
+          amount:
+            typeof data.amount === "string"
+              ? parseFloat(data.amount)
+              : data.amount,
+          groupFamilyId: data.groupFamilyId,
+        };
+
+        await addDebit(debitPayload);
+      }
+
+      // Complete reset of the form
+      handleFormReset();
       setOpenModal(false);
-      setIsProcessing(false);
     } catch (error) {
-      console.error("Error adding credit:", error);
+      console.error("Error processing operation:", error);
+    } finally {
       setIsProcessing(false);
+      setTypeOperation("credit");
     }
   };
 
   return (
     <GenericModal
-      title="Inserir Crédito"
+      title={typeOperation === "credit" ? "Inserir Crédito" : "Inserir Débito"}
       open={openModal}
       handleClose={() => {
         if (!isProcessing) {
-          reset();
+          handleFormReset();
           setOpenModal(false);
         }
       }}
@@ -103,51 +146,94 @@ export const CreditModal: React.FC<CreditModalProps> = ({
         !watch("groupFamilyId") ||
         !watch("creditedAmount")
       }
-      buttonColor={"success"}
+      buttonColor={typeOperation === "credit" ? "success" : "error"}
       handleConfirm={handleSubmit(onSubmit)}
     >
       <Box component="form" noValidate sx={{ mb: 2 }}>
-        <FormControl fullWidth sx={{ mb: 3 }}>
-          <FormLabel component="legend">Grupo Familiar</FormLabel>
-          <Controller
-            name="groupFamilyId"
-            control={control}
-            rules={{ required: "Selecione um grupo familiar" }}
-            render={({ field }) => (
-              <Select
-                {...field}
-                displayEmpty
-                error={!!errors.groupFamilyId}
-                sx={{ mt: 1 }}
-                disabled={isLoadingGroupFamilies}
-              >
-                <MenuItem value="" disabled>
-                  {isLoadingGroupFamilies
-                    ? "Carregando..."
-                    : "Selecione um grupo familiar"}
-                </MenuItem>
-                {groupFamilies?.map((group: GroupFamilyWithOwner) => (
-                  <MenuItem key={group._id} value={group._id}>
-                    {group.ownerName || "Grupo sem proprietário"} - {group.name}
-                  </MenuItem>
-                ))}
-              </Select>
+        <FormControl>
+          <FormLabel id="demo-radio-buttons-group-label">Tipo</FormLabel>
+          <RadioGroup
+            aria-labelledby="demo-radio-buttons-group-label"
+            value={typeOperation}
+            name="radio-buttons-group"
+            onChange={(e) =>
+              setTypeOperation(e.target.value as "credit" | "debit")
+            }
+          >
+            <FormControlLabel
+              value="credit"
+              control={<Radio />}
+              label="Crédito"
+            />
+            <FormControlLabel
+              value="debit"
+              control={<Radio />}
+              label="Débito"
+            />
+          </RadioGroup>
+        </FormControl>
+        <FormControl fullWidth sx={{ my: 3 }}>
+          <Autocomplete
+            id={`buyer-select`}
+            options={groupFamilies || []}
+            autoHighlight
+            getOptionLabel={(option) => option.name}
+            value={selectedFamily}
+            onChange={(event, newValue) => {
+              setSelectedFamily(newValue);
+              if (!newValue) {
+                setValue(`groupFamilyId`, "");
+                return;
+              }
+              setValue(`groupFamilyId`, newValue._id!);
+            }}
+            renderOption={(props, option) => {
+              const { key, ...optionProps } = props;
+              return (
+                <Box
+                  key={key}
+                  component="li"
+                  sx={{ "& > img": { flexShrink: 0 } }}
+                  {...optionProps}
+                  value={option._id}
+                >
+                  <Avatar src={option.ownerAvatar} alt={option.ownerName} />
+                  <Text variant="subtitle1" sx={{ ml: 2 }}>
+                    {option.name}
+                  </Text>
+                </Box>
+              );
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Grupo Familiar"
+                size="small"
+                slotProps={{
+                  htmlInput: {
+                    ...params.inputProps,
+                    autoComplete: "new-password",
+                  },
+                }}
+              />
             )}
           />
-          {errors.groupFamilyId && (
-            <Text variant="caption" color="error">
-              {errors.groupFamilyId.message}
-            </Text>
-          )}
         </FormControl>
 
         <FormControl fullWidth sx={{ mb: 3 }}>
-          <FormLabel component="legend">Valor total a ser creditado</FormLabel>
+          <FormLabel component="legend">
+            {typeOperation === "credit"
+              ? "Valor a ser creditado"
+              : "Valor a ser debitado"}
+          </FormLabel>
           <Controller
             name="creditedAmount"
             control={control}
             rules={{
-              required: "Valor do crédito é obrigatório",
+              required:
+                typeOperation === "credit"
+                  ? "Valor do crédito é obrigatório"
+                  : "Valor do débito é obrigatório",
               pattern: {
                 value: /^\d+(\.\d{1,2})?$/,
                 message: "Valor inválido",
@@ -162,10 +248,13 @@ export const CreditModal: React.FC<CreditModalProps> = ({
             render={({ field }) => (
               <TextField
                 {...field}
+                key={`creditedAmount-field-${openModal}`} // Force re-render when modal opens/closes
                 variant="outlined"
                 fullWidth
+                size="small"
                 type="number"
                 placeholder="0.00"
+                value={field.value || ""} // Ensure empty string when value is undefined
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">R$</InputAdornment>
