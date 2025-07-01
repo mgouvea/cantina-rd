@@ -5,14 +5,12 @@ import Box from "@mui/material/Box";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
-import { CreditModal, Filtros, useSnackbar } from "../..";
+import { CreditModal, Filtros } from "../..";
 import { CreditResponse } from "@/types/credit";
-import { CreateCreditDto } from "@/types/credit";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { TabelaProps } from "@/types";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useAddCredit } from "@/hooks/mutations";
+import { TabelaProps } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -33,30 +31,9 @@ export default function TabelaCredito({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-  const { mutateAsync: addCredit } = useAddCredit();
-  const { showSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
 
   const [openCreditModal, setOpenCreditModal] = useState(false);
-
-  const handleConfirmCredit = async (data: CreateCreditDto) => {
-    try {
-      await addCredit(data);
-
-      showSnackbar({
-        severity: "success",
-        message: "Crédito inserido com sucesso!",
-      });
-
-      setOpenCreditModal(false);
-    } catch (error) {
-      console.error("Error inserting credit:", error);
-      showSnackbar({
-        severity: "error",
-        message: "Erro ao inserir crédito. Tente novamente.",
-      });
-    }
-  };
 
   const handleResetData = () => {
     queryClient.invalidateQueries({ queryKey: ["credits"] });
@@ -209,7 +186,6 @@ export default function TabelaCredito({
       <CreditModal
         openModal={openCreditModal}
         setOpenModal={setOpenCreditModal}
-        onConfirmCredit={handleConfirmCredit}
       />
     </Box>
   );

@@ -1,8 +1,12 @@
-import { CreateCreditDto } from "@/types/credit";
+import { CreateCreditDto, CreateDebitDto } from "@/types/credit";
 import { http } from "./api";
 
 export const CreateCredit = async (credit: CreateCreditDto) => {
   return (await http.post("credit", credit)).data;
+};
+
+export const CreateDebit = async (debit: CreateDebitDto) => {
+  return (await http.post("debit", debit)).data;
 };
 
 export const GetCredits = async () => {
