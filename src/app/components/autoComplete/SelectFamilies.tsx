@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, memo } from "react";
 import Autocomplete from "@mui/material/Autocomplete";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
@@ -9,7 +9,8 @@ import { Controller } from "react-hook-form";
 import { GroupFamilyWithOwner } from "@/types";
 import { useGroupFamilyStore } from "@/contexts";
 
-const OptionLabel = ({ option }: { option: GroupFamilyWithOwner }) => (
+// Memoize the option label component to prevent unnecessary re-renders
+const OptionLabel = memo(({ option }: { option: GroupFamilyWithOwner }) => (
   <Box
     sx={{
       display: "flex",
@@ -26,7 +27,10 @@ const OptionLabel = ({ option }: { option: GroupFamilyWithOwner }) => (
     )}
     <span>{option.name}</span>
   </Box>
-);
+));
+
+// Add display name to fix lint error
+OptionLabel.displayName = "OptionLabel";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -41,7 +45,8 @@ interface SelectFamiliesProps {
   hasPadding?: boolean;
 }
 
-export default function SelectFamilies({
+// Memoize the component to prevent unnecessary re-renders
+const SelectFamilies = memo(function SelectFamilies({
   invoiceForm,
   control,
   selectedFamilies,
@@ -49,6 +54,39 @@ export default function SelectFamilies({
   hasPadding,
 }: SelectFamiliesProps) {
   const { groupFamiliesWithOwner } = useGroupFamilyStore();
+
+  // Memoize sorted options to prevent re-sorting on every render
+  const sortedOptions = useMemo(() => {
+    return (
+      groupFamiliesWithOwner
+        ?.slice()
+        .sort((a: GroupFamilyWithOwner, b: GroupFamilyWithOwner) =>
+          a.name.localeCompare(b.name)
+        ) || []
+    );
+  }, [groupFamiliesWithOwner]);
+
+  // Memoize the select all handler
+  const handleSelectAll = useMemo(() => {
+    return () => {
+      onSelectFamilies(sortedOptions);
+      // Atualiza o valor no formulário
+      invoiceForm.setValue(
+        "groupFamilyIds",
+        sortedOptions
+          .map((item: GroupFamilyWithOwner) => item._id || "")
+          .filter((id: string) => id !== "")
+      );
+    };
+  }, [sortedOptions, onSelectFamilies, invoiceForm]);
+
+  // Memoize the clear all handler
+  const handleClearAll = useMemo(() => {
+    return () => {
+      onSelectFamilies([]);
+      invoiceForm.setValue("groupFamilyIds", []);
+    };
+  }, [onSelectFamilies, invoiceForm]);
 
   return (
     <Box
@@ -69,26 +107,7 @@ export default function SelectFamilies({
             gap: 1,
           }}
         >
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => {
-              const allFamilies =
-                groupFamiliesWithOwner
-                  ?.slice()
-                  .sort((a: GroupFamilyWithOwner, b: GroupFamilyWithOwner) =>
-                    a.name.localeCompare(b.name)
-                  ) || [];
-              onSelectFamilies(allFamilies);
-              // Atualiza o valor no formulário
-              invoiceForm.setValue(
-                "groupFamilyIds",
-                allFamilies
-                  .map((item: GroupFamilyWithOwner) => item._id || "")
-                  .filter((id: string) => id !== "")
-              );
-            }}
-          >
+          <Button size="small" variant="outlined" onClick={handleSelectAll}>
             Selecionar Todos
           </Button>
 
@@ -96,10 +115,7 @@ export default function SelectFamilies({
             size="small"
             variant="outlined"
             color="error"
-            onClick={() => {
-              onSelectFamilies([]);
-              invoiceForm.setValue("groupFamilyIds", []);
-            }}
+            onClick={handleClearAll}
           >
             Desmarcar Todos
           </Button>
@@ -114,17 +130,13 @@ export default function SelectFamilies({
             {...restField}
             multiple
             id="checkboxes-tags-demo"
-            options={
-              groupFamiliesWithOwner
-                ?.slice()
-                .sort((a: GroupFamilyWithOwner, b: GroupFamilyWithOwner) =>
-                  a.name.localeCompare(b.name)
-                ) || []
-            }
+            options={sortedOptions}
             disableCloseOnSelect
-            getOptionLabel={(option) =>
-              (<OptionLabel option={option} />) as unknown as string
-            }
+            disableListWrap
+            limitTags={3}
+            size="small"
+            filterSelectedOptions
+            getOptionLabel={(option) => option.name} // Simplified option label
             value={selectedFamilies}
             onChange={(_, newValue) => {
               onSelectFamilies(newValue);
@@ -160,4 +172,6 @@ export default function SelectFamilies({
       />
     </Box>
   );
-}
+});
+
+export default SelectFamilies;
