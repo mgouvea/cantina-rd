@@ -15,6 +15,8 @@ export default function FaturaCliente() {
   const router = usePathname();
   const { mutateAsync: fullInvoice } = useFullInvoices();
 
+  console.log("invoice", fullInvoice);
+
   const [invoice, setInvoice] = useState<FullInvoiceResponse | null>(null);
 
   const handleFullInvoice = async () => {
@@ -167,6 +169,8 @@ export default function FaturaCliente() {
                   (order) => order.buyerId === buyerId
                 );
 
+                const debit = invoice.debitAmount!;
+
                 if (buyerOrders.length === 0) return null;
 
                 // Calcular total por pessoa
@@ -192,6 +196,12 @@ export default function FaturaCliente() {
                     <Text variant="subtitle2" sx={{ fontWeight: "bold" }}>
                       Compras de {capitalizeFirstLastName(name)}:
                     </Text>
+
+                    {debit > 0 && (
+                      <Text variant="subtitle2" sx={{ fontWeight: "bold" }}>
+                        Debitos anteriores: R$ {debit.toFixed(2)}
+                      </Text>
+                    )}
 
                     {Object.entries(ordersByDate).map(([dateStr, orders]) => {
                       // Calcular total por data
