@@ -9,12 +9,12 @@ export type GroupFamily = {
   updatedAt?: Date;
 };
 
-export type GroupFamilyWithOwner = {
+export interface GroupFamilyWithOwner {
   _id?: string;
   name: string;
   ownerName: string;
   ownerAvatar: string;
-};
+}
 
 export interface SelectedMember {
   userId: string;
@@ -25,4 +25,8 @@ export interface SelectedMember {
 export interface TransferMember {
   userId: string;
   name: string;
+}
+
+export interface GroupFamilyInvoicesOpen extends GroupFamilyWithOwner {
+  value: number;
 }

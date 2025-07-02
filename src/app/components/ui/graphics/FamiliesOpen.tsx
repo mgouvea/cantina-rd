@@ -1,8 +1,21 @@
-import { Avatar, Box } from "@mui/material";
 import React from "react";
 import Text from "../text/Text";
+import { Avatar, Box } from "@mui/material";
+import { capitalizeFirstLastName } from "@/utils";
 
-export const FamiliesOpen = () => {
+interface FamiliesOpenProps {
+  name: string;
+  ownerName: string;
+  ownerAvatar: string;
+  value: number;
+}
+
+export const FamiliesOpen = ({
+  name,
+  ownerName,
+  ownerAvatar,
+  value,
+}: FamiliesOpenProps) => {
   return (
     <Box
       sx={{
@@ -21,20 +34,20 @@ export const FamiliesOpen = () => {
           gap: 1,
         }}
       >
-        <Avatar src="" alt="" sx={{ width: 36, height: 36 }} />
+        <Avatar src={ownerAvatar} alt="" sx={{ width: 36, height: 36 }} />
 
         <Box>
           <Text variant="subtitle2" color="#596772" fontWeight="bold">
-            Grupo Familiar
+            {name}
           </Text>
           <Text variant="caption" color="#596772">
-            Responsável
+            {capitalizeFirstLastName(ownerName)}
           </Text>
         </Box>
       </Box>
 
       <Text variant="subtitle1" color="error.main" fontWeight="bold">
-        R$ 0,00
+        R$ {value.toFixed(2)}
       </Text>
     </Box>
   );

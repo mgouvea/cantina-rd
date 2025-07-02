@@ -6,7 +6,7 @@ import ProductionQuantityLimitsOutlinedIcon from "@mui/icons-material/Production
 import Text from "@/app/components/ui/text/Text";
 import { Box, Tooltip } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { useTotalContents } from "@/hooks/queries/dashboard.query";
+import { useTotalContents } from "@/hooks/queries/useDashboard.query";
 import Loading from "../../loading/Loading";
 
 const COLORS = [

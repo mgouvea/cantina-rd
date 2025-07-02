@@ -1,11 +1,19 @@
 "use client";
 
+import AreaChart from "@/app/components/ui/graphics/AreaChart";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import Loading from "@/app/components/loading/Loading";
 import Text from "@/app/components/ui/text/Text";
 import { Box, Divider, Stack } from "@mui/material";
+import {
+  DashFilter,
+  FamiliesOpen,
+  TopClients,
+  TopProducts,
+  TotalBoxContent,
+} from "@/app/components";
 import { Suspense, useState } from "react";
-import { DashFilter, TotalBoxContent } from "@/app/components";
+import { useGroupFamilyInvoicesOpen } from "@/hooks/queries";
 
 // Custom scrollbar style
 const overflowStyle = {
@@ -37,6 +45,13 @@ export default function Dashboard() {
     startDate: Date | null;
     endDate: Date | null;
   }>({ startDate: null, endDate: null });
+
+  const {
+    data: groupFamilyInvoicesOpen,
+    isLoading: isLoadingGroupFamilyInvoicesOpen,
+  } = useGroupFamilyInvoicesOpen(filterDates.startDate!, filterDates.endDate!);
+
+  console.log("groupFamilyInvoicesOpen", groupFamilyInvoicesOpen);
 
   const renderContent = () => (
     <>
@@ -85,10 +100,10 @@ export default function Dashboard() {
           }}
         >
           <Text variant="subtitle2" color="#596772" fontWeight="bold">
-            Vendas vs À receber
+            Receitas vs Despesas
           </Text>
           <Box sx={{ flexGrow: 1, width: "100%", height: "calc(100% - 24px)" }}>
-            {/* <AreaChart /> */}
+            <AreaChart />
           </Box>
         </Box>
 
@@ -118,11 +133,19 @@ export default function Dashboard() {
               ...overflowStyle,
             }}
           >
-            {/* {Array.from({ length: 12 }).map((_, index) => (
-              <>
-                <FamiliesOpen key={index} />
-              </>
-            ))} */}
+            {isLoadingGroupFamilyInvoicesOpen ? (
+              <Loading minHeight={10} />
+            ) : (
+              groupFamilyInvoicesOpen?.map((family) => (
+                <FamiliesOpen
+                  key={family._id}
+                  name={family.name}
+                  ownerName={family.ownerName}
+                  ownerAvatar={family.ownerAvatar}
+                  value={family.value}
+                />
+              ))
+            )}
           </Box>
         </Box>
       </Box>
@@ -184,9 +207,9 @@ export default function Dashboard() {
                 mt: 1,
               }}
             >
-              {/* {Array.from({ length: 12 }).map((_, index) => (
+              {Array.from({ length: 12 }).map((_, index) => (
                 <TopProducts key={index} />
-              ))} */}
+              ))}
             </Box>
           </Box>
 
@@ -226,9 +249,9 @@ export default function Dashboard() {
                 mt: 1,
               }}
             >
-              {/* {Array.from({ length: 12 }).map((_, index) => (
+              {Array.from({ length: 12 }).map((_, index) => (
                 <TopClients key={index} />
-              ))} */}
+              ))}
             </Box>
           </Box>
         </Box>

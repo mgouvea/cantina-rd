@@ -35,6 +35,7 @@ export * from "./ui/forms/FormActions";
 export * from "./ui/forms/ProductsForm";
 export * from "./ui/forms/SubCategoriesForm";
 export * from "./ui/forms/GroupFamilyForm";
+export * from "./ui/graphics/AreaChart";
 export * from "./ui/graphics/DashFilter";
 export * from "./ui/graphics/FamiliesOpen";
 export * from "./ui/graphics/TopClients";
