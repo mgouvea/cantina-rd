@@ -25,7 +25,7 @@ export default function FaturaClienteLayout({
         }}
       >
         <Image
-          src="/cantinaRD.png"
+          src="/cantinaRD.svg"
           alt="Cantina RD"
           width={96}
           height={96}
