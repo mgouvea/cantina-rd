@@ -163,12 +163,12 @@ export const CreditModal: React.FC<CreditModalProps> = ({
             <FormControlLabel
               value="credit"
               control={<Radio />}
-              label="Crédito"
+              label="Crédito (Saldo positivo)"
             />
             <FormControlLabel
               value="debit"
               control={<Radio />}
-              label="Débito"
+              label="Débito (Saldo negativo)"
             />
           </RadioGroup>
         </FormControl>
