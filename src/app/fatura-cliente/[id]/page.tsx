@@ -193,15 +193,24 @@ export default function FaturaCliente() {
 
                 return (
                   <Box key={buyerId} sx={{ marginTop: 2, marginBottom: 2 }}>
-                    <Text variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                      Compras de {capitalizeFirstLastName(name)}:
-                    </Text>
-
                     {debit > 0 && (
                       <Text variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                        Debitos anteriores: R$ {debit.toFixed(2)}
+                        Debitos anteriores:{" "}
+                        <Text
+                          variant="subtitle2"
+                          sx={{ fontWeight: "bold", color: "error.main" }}
+                        >
+                          R$ {debit.toFixed(2)}
+                        </Text>
                       </Text>
                     )}
+
+                    <Text
+                      variant="subtitle2"
+                      sx={{ fontWeight: "bold", mt: 2 }}
+                    >
+                      Compras de {capitalizeFirstLastName(name)}:
+                    </Text>
 
                     {Object.entries(ordersByDate).map(([dateStr, orders]) => {
                       // Calcular total por data
