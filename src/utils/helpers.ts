@@ -135,3 +135,19 @@ export function getGroupFamilyNameById(
   );
   return groupFamily ? groupFamily.name : "N/A";
 }
+
+export function parseDateRange(startDate: Date, endDate: Date): string {
+  const params = new URLSearchParams();
+
+  if (startDate) {
+    params.append("startDate", startDate.toISOString());
+  }
+
+  if (endDate) {
+    params.append("endDate", endDate.toISOString());
+  }
+
+  const queryString = params.toString();
+
+  return queryString;
+}
