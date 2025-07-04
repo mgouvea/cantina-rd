@@ -1,8 +1,15 @@
 import { Avatar, Box } from "@mui/material";
 import React from "react";
 import Text from "../text/Text";
+import { TopClientsDto } from "@/types";
+import { capitalizeFirstLastName } from "@/utils";
 
-export const TopClients = () => {
+export const TopClients = ({
+  name,
+  totalSpent,
+  groupFamilyName,
+  urlImage,
+}: TopClientsDto) => {
   return (
     <Box
       sx={{
@@ -21,20 +28,20 @@ export const TopClients = () => {
           gap: 1,
         }}
       >
-        <Avatar src="" alt="" sx={{ width: 36, height: 36 }} />
+        <Avatar src={urlImage} alt="" sx={{ width: 36, height: 36 }} />
 
         <Box>
           <Text variant="subtitle2" color="#596772" fontWeight="bold">
-            Nome Cliente
+            {capitalizeFirstLastName(name)}
           </Text>
           <Text variant="caption" color="#596772">
-            Grupo familiar
+            {groupFamilyName}
           </Text>
         </Box>
       </Box>
 
       <Text variant="subtitle1" color="success.main" fontWeight="bold">
-        R$ 5
+        R$ {totalSpent}
       </Text>
     </Box>
   );

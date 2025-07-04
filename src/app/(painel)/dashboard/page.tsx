@@ -5,6 +5,8 @@ import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import Loading from "@/app/components/loading/Loading";
 import Text from "@/app/components/ui/text/Text";
 import { Box, Divider, Stack } from "@mui/material";
+import { Suspense, useState } from "react";
+
 import {
   DashFilter,
   FamiliesOpen,
@@ -12,8 +14,11 @@ import {
   TopProducts,
   TotalBoxContent,
 } from "@/app/components";
-import { Suspense, useState } from "react";
-import { useGroupFamilyInvoicesOpen } from "@/hooks/queries";
+import {
+  useGroupFamilyInvoicesOpen,
+  useMostSoldProducts,
+  useTopClients,
+} from "@/hooks/queries";
 
 // Custom scrollbar style
 const overflowStyle = {
@@ -51,7 +56,13 @@ export default function Dashboard() {
     isLoading: isLoadingGroupFamilyInvoicesOpen,
   } = useGroupFamilyInvoicesOpen(filterDates.startDate!, filterDates.endDate!);
 
-  console.log("groupFamilyInvoicesOpen", groupFamilyInvoicesOpen);
+  const { data: mostSoldProducts, isLoading: isLoadingMostSoldProducts } =
+    useMostSoldProducts(filterDates.startDate!, filterDates.endDate!);
+
+  const { data: topClients, isLoading: isLoadingTopClients } = useTopClients(
+    filterDates.startDate!,
+    filterDates.endDate!
+  );
 
   const renderContent = () => (
     <>
@@ -207,9 +218,13 @@ export default function Dashboard() {
                 mt: 1,
               }}
             >
-              {Array.from({ length: 12 }).map((_, index) => (
-                <TopProducts key={index} />
-              ))}
+              {isLoadingMostSoldProducts ? (
+                <Loading minHeight={10} />
+              ) : (
+                mostSoldProducts?.map((product) => (
+                  <TopProducts key={product._id} {...product} />
+                ))
+              )}
             </Box>
           </Box>
 
@@ -249,9 +264,13 @@ export default function Dashboard() {
                 mt: 1,
               }}
             >
-              {Array.from({ length: 12 }).map((_, index) => (
-                <TopClients key={index} />
-              ))}
+              {isLoadingTopClients ? (
+                <Loading minHeight={10} />
+              ) : (
+                topClients?.map((client) => (
+                  <TopClients key={client._id} {...client} />
+                ))
+              )}
             </Box>
           </Box>
         </Box>

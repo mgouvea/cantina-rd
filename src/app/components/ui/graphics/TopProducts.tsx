@@ -1,8 +1,14 @@
 import { Avatar, Box } from "@mui/material";
 import React from "react";
 import Text from "../text/Text";
+import { MostSoldProducts } from "@/types";
 
-export const TopProducts = () => {
+export const TopProducts = ({
+  name,
+  price,
+  totalQuantity,
+  urlImage,
+}: MostSoldProducts) => {
   return (
     <Box
       sx={{
@@ -21,20 +27,20 @@ export const TopProducts = () => {
           gap: 1,
         }}
       >
-        <Avatar src="" alt="" sx={{ width: 36, height: 36 }} />
+        <Avatar src={urlImage} alt={name} sx={{ width: 36, height: 36 }} />
 
         <Box>
           <Text variant="subtitle2" color="#596772" fontWeight="bold">
-            Nome Produto
+            {name}
           </Text>
           <Text variant="caption" color="#596772">
-            R$ Valor
+            R$ {price}
           </Text>
         </Box>
       </Box>
 
       <Text variant="subtitle1" color="success.main" fontWeight="bold">
-        5
+        {totalQuantity}
       </Text>
     </Box>
   );
