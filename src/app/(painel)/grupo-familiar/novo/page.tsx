@@ -38,7 +38,6 @@ import StepConnector, {
 } from "@mui/material/StepConnector";
 import { capitalize } from "@/utils";
 import { User } from "@/types";
-import { useQueryClient } from "@tanstack/react-query";
 import { useUserStore } from "@/contexts";
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -151,8 +150,6 @@ function ColorlibStepIcon(props: StepIconProps) {
 const steps = ["Nome do grupo", "Membros", "Responsável", "Salvar"];
 
 export default function NovoGrupoFamiliar() {
-  const queryClient = useQueryClient();
-
   const { allUsers } = useUserStore();
   const { showSnackbar } = useSnackbar();
 
@@ -249,18 +246,9 @@ export default function NovoGrupoFamiliar() {
         users: selectedMembers,
       });
 
-      showSnackbar({
-        message: "Grupo familiar salvo com sucesso",
-        severity: "success",
-      });
-      queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
-      queryClient.invalidateQueries({ queryKey: ["users"] });
       router.replace("/grupo-familiar");
     } catch (error) {
-      showSnackbar({
-        message: `Erro ao salvar grupo familiar - ${error}`,
-        severity: "error",
-      });
+      console.error("Erro ao salvar grupo familiar:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -272,7 +260,6 @@ export default function NovoGrupoFamiliar() {
     updateUser,
     showSnackbar,
     router,
-    queryClient,
   ]);
 
   const getOwnerName = useCallback(

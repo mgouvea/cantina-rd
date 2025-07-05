@@ -73,12 +73,20 @@ export function DashFilter({
 
   const handleDateRangeSelect = (rangesByKey: RangeKeyDict) => {
     const selection = rangesByKey.selection as DateRangePickerRange;
+
+    // Set the state with the original selection
     setState([selection]);
+
+    // Set the start date as is
     if (selection.startDate) {
       invoiceForm.setValue("startDate", selection.startDate);
     }
+
+    // For the end date, set it to 23:59:59 of the selected day
     if (selection.endDate) {
-      invoiceForm.setValue("endDate", selection.endDate);
+      const endDateWithTime = new Date(selection.endDate);
+      endDateWithTime.setHours(23, 59, 59, 999); // Set to end of day (23:59:59.999)
+      invoiceForm.setValue("endDate", endDateWithTime);
     }
   };
 
@@ -88,14 +96,28 @@ export function DashFilter({
   };
 
   const handleClearForm = () => {
+    // Reset form to initial values
     invoiceForm.reset(INITIAL_DASH_FILTER_FORM_VALUES);
+
+    // Reset state
+    const today = new Date();
+    const firstDay = getFirstDayOfCurrentMonth();
+    const endOfToday = new Date(today);
+    endOfToday.setHours(23, 59, 59, 999); // Set to end of day
+
     setState([
       {
-        startDate: getFirstDayOfCurrentMonth(),
-        endDate: new Date(),
+        startDate: firstDay,
+        endDate: today,
         key: "selection",
       } as DateRangePickerRange,
     ]);
+
+    // Call onFilter with the reset values to reload dashboard data
+    onFilter({
+      startDate: firstDay,
+      endDate: endOfToday,
+    });
   };
 
   return (

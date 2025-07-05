@@ -1,6 +1,6 @@
 import { useSnackbar } from "@/app/components";
 import {
-  AddOrRemoveMember,
+  AddMember,
   DeleteGroupFamily,
   PostAddGroupFamily,
   RemoveMember,
@@ -9,8 +9,26 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useAddGroupFamily = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+
   return useMutation({
     mutationFn: PostAddGroupFamily,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      showSnackbar({
+        message: "Grupo familiar salvo com sucesso",
+        severity: "success",
+      });
+    },
+    onError: () => {
+      showSnackbar({
+        message: "Erro ao salvar grupo familiar",
+        severity: "error",
+      });
+    },
   });
 };
 
@@ -20,15 +38,53 @@ export const useUpdateGroupFamily = () => {
   });
 };
 
-export const useUpdateMembersGroupFamily = () => {
+export const useRemoveMemberFromGroupFamily = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+
   return useMutation({
-    mutationFn: AddOrRemoveMember,
+    mutationFn: RemoveMember,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      showSnackbar({
+        message: `Membros removidos com sucesso!`,
+        severity: "success",
+        duration: 3000,
+      });
+    },
+    onError: () => {
+      showSnackbar({
+        message: `Erro ao remover membros`,
+        severity: "error",
+        duration: 3000,
+      });
+    },
   });
 };
 
-export const useRemoveMemberFromGroupFamily = () => {
+export const useAddMemberToGroupFamily = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+
   return useMutation({
-    mutationFn: RemoveMember,
+    mutationFn: AddMember,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      showSnackbar({
+        message: `Membros adicionados com sucesso!`,
+        severity: "success",
+        duration: 3000,
+      });
+    },
+    onError: () => {
+      showSnackbar({
+        message: `Erro ao adicionar membros`,
+        severity: "error",
+        duration: 3000,
+      });
+    },
   });
 };
 

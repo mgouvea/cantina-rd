@@ -1,4 +1,4 @@
-import { GroupFamily, SelectedMember } from "@/types";
+import { AddOrRemoveMember, GroupFamily } from "@/types";
 import { http } from "./api";
 
 export const PostAddGroupFamily = async (groupFamily: GroupFamily) => {
@@ -23,19 +23,26 @@ export const UpdateGroupFamily = async ({
   return (await http.patch(`group-family/${id}`, groupFamily)).data;
 };
 
-export const AddOrRemoveMember = async ({
-  id,
-  members,
-}: {
-  id: string;
-  members: SelectedMember[];
-}) => {
-  return (await http.patch(`group-family/add-or-remove-member/${id}`, members))
-    .data;
+export const AddMember = async ({
+  groupFamilyId,
+  membersIds,
+}: AddOrRemoveMember) => {
+  return (
+    await http.patch(`group-family/add-member/${groupFamilyId}`, {
+      membersIds: membersIds,
+    })
+  ).data;
 };
 
-export const RemoveMember = async (memberIds: string[]) => {
-  return (await http.patch(`group-family/remove-member`, { memberIds })).data;
+export const RemoveMember = async ({
+  groupFamilyId,
+  membersIds,
+}: AddOrRemoveMember) => {
+  return (
+    await http.patch(`group-family/remove-member/${groupFamilyId}`, {
+      membersIds: membersIds,
+    })
+  ).data;
 };
 
 export const DeleteGroupFamily = async (id: string) => {
