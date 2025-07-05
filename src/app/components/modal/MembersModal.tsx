@@ -4,8 +4,9 @@ import GenericModal from "./GenericModal";
 import ListMembers from "../ui/listMembers/ListMembers";
 import { SelectedMember, User } from "@/types";
 import { Stack } from "@mui/material";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useUsers } from "@/hooks/queries";
+import { useUserStore } from "@/contexts";
 
 import {
   useAddMemberToGroupFamily,
@@ -35,7 +36,22 @@ export const MemberModal = ({
   setSelectedUserIds,
   setIdGroupFamily,
 }: MembersModalProps) => {
-  const { data: allUsers } = useUsers(openModal);
+  // Use the store for users if available to avoid unnecessary fetching
+  const { allUsers: storeUsers } = useUserStore();
+
+  // Only fetch users if the modal is open and we don't have users in the store
+  const shouldFetchUsers =
+    openModal && (!storeUsers || storeUsers.length === 0);
+  const { data: fetchedUsers } = useUsers(shouldFetchUsers);
+
+  // Use store users if available, otherwise use fetched users
+  const allUsers = useMemo(() => {
+    return storeUsers && storeUsers.length > 0
+      ? storeUsers
+      : fetchedUsers || [];
+  }, [storeUsers, fetchedUsers]);
+
+  // Memoize mutations to prevent unnecessary re-renders
   const { mutateAsync: addMemberToGroupFamily } = useAddMemberToGroupFamily();
   const { mutateAsync: removeMemberFromGroupFamily } =
     useRemoveMemberFromGroupFamily();
@@ -43,48 +59,70 @@ export const MemberModal = ({
   const [clickedUsersFromListMembers, setClickedUsersFromListMembers] =
     useState<User[]>([]);
 
-  const handleAddOrRemoveMember = async () => {
-    const updateUserPayload = clickedUsersFromListMembers.map(
-      (item) => item._id!
-    );
+  // Memoize handler functions to prevent unnecessary re-renders
+  const handleAddOrRemoveMember = useCallback(async () => {
+    if (clickedUsersFromListMembers.length === 0) return;
 
-    const removeGroupFamilyFromUsers = clickedUsersFromListMembers.map(
-      (item) => item._id!
-    );
+    const memberIds = clickedUsersFromListMembers.map((item) => item._id!);
 
-    if (addOrRemove === "add") {
-      await addMemberToGroupFamily({
-        groupFamilyId: idGroupFamily,
-        membersIds: updateUserPayload,
-      });
-    } else {
-      await removeMemberFromGroupFamily({
-        groupFamilyId: idGroupFamily,
-        membersIds: removeGroupFamilyFromUsers,
-      });
+    try {
+      if (addOrRemove === "add") {
+        await addMemberToGroupFamily({
+          groupFamilyId: idGroupFamily,
+          membersIds: memberIds,
+        });
+      } else {
+        await removeMemberFromGroupFamily({
+          groupFamilyId: idGroupFamily,
+          membersIds: memberIds,
+        });
+      }
+    } finally {
+      // Clean up regardless of success or failure
+      setOpenModal(false);
+      setSelectedUserIds([]);
+      setMembers([]);
+      setIdGroupFamily(null);
+      setClickedUsersFromListMembers([]);
     }
+  }, [
+    clickedUsersFromListMembers,
+    addOrRemove,
+    idGroupFamily,
+    addMemberToGroupFamily,
+    removeMemberFromGroupFamily,
+    setOpenModal,
+    setSelectedUserIds,
+    setMembers,
+    setIdGroupFamily,
+  ]);
 
+  // Memoize modal close handler
+  const handleClose = useCallback(() => {
     setOpenModal(false);
+    // Clear selections when closing
     setSelectedUserIds([]);
-    setMembers([]);
-    setIdGroupFamily(null);
     setClickedUsersFromListMembers([]);
-  };
+  }, [setOpenModal, setSelectedUserIds]);
+
+  // Memoize modal title and button text to prevent unnecessary calculations
+  const modalTitle =
+    addOrRemove === "add" ? "Adicionar membro" : "Remover membro";
+  const confirmButtonText = addOrRemove === "add" ? "Adicionar" : "Remover";
+  const buttonColor = addOrRemove === "add" ? "success" : "error";
 
   return (
     <GenericModal
-      title={addOrRemove === "add" ? "Adicionar membro" : "Remover membro"}
+      title={modalTitle}
       open={openModal}
-      handleClose={() => {
-        setOpenModal(false);
-      }}
+      handleClose={handleClose}
       cancelButtonText="Cancelar"
-      confirmButtonText={addOrRemove === "add" ? "Adicionar" : "Remover"}
-      buttonColor={addOrRemove === "add" ? "success" : "error"}
+      confirmButtonText={confirmButtonText}
+      buttonColor={buttonColor}
       handleConfirm={handleAddOrRemoveMember}
     >
       <Stack sx={{ flexDirection: "column", gap: 3, width: "100%" }}>
-        {allUsers && (
+        {allUsers && allUsers.length > 0 && (
           <ListMembers
             members={members}
             setMembers={setMembers}
