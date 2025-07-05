@@ -147,15 +147,18 @@ export default function Dashboard() {
             {isLoadingGroupFamilyInvoicesOpen ? (
               <Loading minHeight={10} />
             ) : (
-              groupFamilyInvoicesOpen?.map((family) => (
-                <FamiliesOpen
-                  key={family._id}
-                  name={family.name}
-                  ownerName={family.ownerName}
-                  ownerAvatar={family.ownerAvatar}
-                  value={family.value}
-                />
-              ))
+              // Sort by value in descending order (highest to lowest)
+              [...(groupFamilyInvoicesOpen || [])]
+                .sort((a, b) => b.value - a.value)
+                .map((family) => (
+                  <FamiliesOpen
+                    key={family._id}
+                    name={family.name}
+                    ownerName={family.ownerName}
+                    ownerAvatar={family.ownerAvatar}
+                    value={family.value}
+                  />
+                ))
             )}
           </Box>
         </Box>
