@@ -1,6 +1,6 @@
 import { useSnackbar } from "@/app/components";
 import {
-  AddOrRemoveMember,
+  AddMember,
   DeleteGroupFamily,
   PostAddGroupFamily,
   RemoveMember,
@@ -20,15 +20,53 @@ export const useUpdateGroupFamily = () => {
   });
 };
 
-export const useUpdateMembersGroupFamily = () => {
+export const useRemoveMemberFromGroupFamily = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+
   return useMutation({
-    mutationFn: AddOrRemoveMember,
+    mutationFn: RemoveMember,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      showSnackbar({
+        message: `Membros removidos com sucesso!`,
+        severity: "success",
+        duration: 3000,
+      });
+    },
+    onError: () => {
+      showSnackbar({
+        message: `Erro ao remover membros`,
+        severity: "error",
+        duration: 3000,
+      });
+    },
   });
 };
 
-export const useRemoveMemberFromGroupFamily = () => {
+export const useAddMemberToGroupFamily = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+
   return useMutation({
-    mutationFn: RemoveMember,
+    mutationFn: AddMember,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      showSnackbar({
+        message: `Membros adicionados com sucesso!`,
+        severity: "success",
+        duration: 3000,
+      });
+    },
+    onError: () => {
+      showSnackbar({
+        message: `Erro ao adicionar membros`,
+        severity: "error",
+        duration: 3000,
+      });
+    },
   });
 };
 

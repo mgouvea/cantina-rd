@@ -1,4 +1,4 @@
-export type GroupFamily = {
+export interface GroupFamily {
   _id?: string;
   name: string;
   members: SelectedMember[];
@@ -7,7 +7,7 @@ export type GroupFamily = {
   ownerAvatar?: string;
   createdAt?: Date;
   updatedAt?: Date;
-};
+}
 
 export interface GroupFamilyWithOwner {
   _id?: string;
@@ -29,4 +29,9 @@ export interface TransferMember {
 
 export interface GroupFamilyInvoicesOpen extends GroupFamilyWithOwner {
   value: number;
+}
+
+export interface AddOrRemoveMember {
+  groupFamilyId: string;
+  membersIds: string[]; // userIds
 }

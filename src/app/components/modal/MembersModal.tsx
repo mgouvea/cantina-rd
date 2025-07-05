@@ -4,14 +4,13 @@ import GenericModal from "./GenericModal";
 import ListMembers from "../ui/listMembers/ListMembers";
 import { SelectedMember, User } from "@/types";
 import { Stack } from "@mui/material";
-import { useQueryClient } from "@tanstack/react-query";
-import { useSnackbar } from "../snackbar/SnackbarProvider";
 import { useState } from "react";
-import {
-  useUpdateMembersGroupFamily,
-  useUpdateUsersGroupFamily,
-} from "@/hooks/mutations";
 import { useUsers } from "@/hooks/queries";
+
+import {
+  useAddMemberToGroupFamily,
+  useRemoveMemberFromGroupFamily,
+} from "@/hooks/mutations";
 
 interface MembersModalProps {
   openModal: boolean;
@@ -36,67 +35,40 @@ export const MemberModal = ({
   setSelectedUserIds,
   setIdGroupFamily,
 }: MembersModalProps) => {
-  const queryClient = useQueryClient();
-  const { showSnackbar } = useSnackbar();
-
   const { data: allUsers } = useUsers(openModal);
-
-  const { mutateAsync: updateMembersGroupFamily } =
-    useUpdateMembersGroupFamily();
-  const { mutateAsync: updateUser } = useUpdateUsersGroupFamily();
+  const { mutateAsync: addMemberToGroupFamily } = useAddMemberToGroupFamily();
+  const { mutateAsync: removeMemberFromGroupFamily } =
+    useRemoveMemberFromGroupFamily();
 
   const [clickedUsersFromListMembers, setClickedUsersFromListMembers] =
     useState<User[]>([]);
 
   const handleAddOrRemoveMember = async () => {
-    const updateUserPayload = clickedUsersFromListMembers.map((item) => ({
-      userId: item._id!,
-      name: item.name,
-    }));
+    const updateUserPayload = clickedUsersFromListMembers.map(
+      (item) => item._id!
+    );
 
     const removeGroupFamilyFromUsers = clickedUsersFromListMembers.map(
       (item) => item._id!
     );
 
-    console.log("removeGroupFamilyFromUsers", removeGroupFamilyFromUsers);
-
-    try {
-      await updateMembersGroupFamily({
-        id: idGroupFamily,
-        members: members,
-      });
-
-      await updateUser({
+    if (addOrRemove === "add") {
+      await addMemberToGroupFamily({
         groupFamilyId: idGroupFamily,
-        users: updateUserPayload,
+        membersIds: updateUserPayload,
       });
-
-      // Após a operação bem-sucedida
-      queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      showSnackbar({
-        message: `Membros ${
-          addOrRemove === "add" ? "adicionados" : "removidos"
-        } com sucesso!`,
-        severity: "success",
-        duration: 3000,
+    } else {
+      await removeMemberFromGroupFamily({
+        groupFamilyId: idGroupFamily,
+        membersIds: removeGroupFamilyFromUsers,
       });
-    } catch (error) {
-      console.error(error);
-      showSnackbar({
-        message: `Erro ao ${
-          addOrRemove === "add" ? "adicionar" : "remover"
-        } membros`,
-        severity: "error",
-        duration: 3000,
-      });
-    } finally {
-      setOpenModal(false);
-      setSelectedUserIds([]);
-      setMembers([]);
-      setIdGroupFamily(null);
-      setClickedUsersFromListMembers([]);
     }
+
+    setOpenModal(false);
+    setSelectedUserIds([]);
+    setMembers([]);
+    setIdGroupFamily(null);
+    setClickedUsersFromListMembers([]);
   };
 
   return (
