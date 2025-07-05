@@ -9,8 +9,26 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useAddGroupFamily = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+
   return useMutation({
     mutationFn: PostAddGroupFamily,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groupFamily"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      showSnackbar({
+        message: "Grupo familiar salvo com sucesso",
+        severity: "success",
+      });
+    },
+    onError: () => {
+      showSnackbar({
+        message: "Erro ao salvar grupo familiar",
+        severity: "error",
+      });
+    },
   });
 };
 

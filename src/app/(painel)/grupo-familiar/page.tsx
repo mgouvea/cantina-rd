@@ -4,7 +4,7 @@ import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import Loading from "@/app/components/loading/Loading";
 import TabelaGrupoFamiliar from "@/app/components/ui/tables/TabelaGrupoFamiliar";
 import { useDeleteGroupFamily } from "@/hooks/mutations";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
 import { useGroupFamilyStore } from "@/contexts/store/groupFamily.store";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,8 @@ import { DeleteModal, MemberModal } from "@/app/components";
 
 import type { GroupFamily, SelectedMember } from "@/types";
 import { GridRowModel } from "@mui/x-data-grid";
+import { useUsers } from "@/hooks/queries";
+import { useUserStore } from "@/contexts";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -20,6 +22,7 @@ const breadcrumbItems = [
 
 export default function GroupFamily() {
   const { data, isLoading } = useGroupFamily();
+  const { data: dataUsers, isLoading: isLoadingUsers } = useUsers();
 
   const router = useRouter();
   const [openModal, setOpenModal] = useState(false);
@@ -34,6 +37,13 @@ export default function GroupFamily() {
 
   const { mutateAsync: deleteGroupFamily } = useDeleteGroupFamily();
   const { updateGroupFamilyToEdit, updateIsEditing } = useGroupFamilyStore();
+  const { updateAllUsers } = useUserStore();
+
+  useEffect(() => {
+    if (!isLoadingUsers) {
+      updateAllUsers(dataUsers);
+    }
+  }, [dataUsers, isLoadingUsers, updateAllUsers]);
 
   const handleEditClick = (row: GridRowModel) => () => {
     updateGroupFamilyToEdit(row as GroupFamily);
