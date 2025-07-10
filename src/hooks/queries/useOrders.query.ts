@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { GetAllOrders, GetAllOrdersVisitors } from "../services";
 
+// START Orders Socios ***************************************************************************
 export const useOrders = () => {
   return useQuery({
     queryKey: ["orders"],
@@ -10,7 +11,9 @@ export const useOrders = () => {
     gcTime: 1000 * 60 * 60 * 24, // 24 hours garbage collection time (formerly cacheTime)
   });
 };
+// END Orders Socios ***************************************************************************
 
+// START Orders Visitors **************************************************************************
 export const useOrdersVisitors = () => {
   return useQuery({
     queryKey: ["orders-visitors"],
@@ -20,3 +23,5 @@ export const useOrdersVisitors = () => {
     gcTime: 1000 * 60 * 60 * 24, // 24 hours garbage collection time (formerly cacheTime)
   });
 };
+
+// END Orders Visitors **************************************************************************
