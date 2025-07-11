@@ -8,7 +8,7 @@ import { capitalizeFirstLastName } from "@/utils";
 import { DeleteModal } from "../../modal/DeleteModal";
 import { GridRowModel } from "@mui/x-data-grid";
 import { OrderVisitor } from "@/types";
-import { useDeleteOrder } from "@/hooks/mutations";
+import { useDeleteOrderVisitor } from "@/hooks/mutations";
 import { useRouter } from "next/navigation";
 
 interface ComprasVisitorsWrapperProps {
@@ -21,7 +21,7 @@ export const ComprasVisitorsWrapper = ({
   isLoading,
 }: ComprasVisitorsWrapperProps) => {
   const router = useRouter();
-  const { mutateAsync: deleteOrder } = useDeleteOrder();
+  const { mutateAsync: deleteOrderVisitor } = useDeleteOrderVisitor();
 
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
 
@@ -43,7 +43,7 @@ export const ComprasVisitorsWrapper = ({
 
   const handleConfirmDeleteOrder = async () => {
     if (!orderIdToDelete) return;
-    await deleteOrder(orderIdToDelete);
+    await deleteOrderVisitor(orderIdToDelete);
 
     setOpenDeleteModal(false);
     setOrderIdToDelete(null);

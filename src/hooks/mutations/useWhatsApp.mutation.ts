@@ -1,8 +1,24 @@
-import { useMutation } from "@tanstack/react-query";
-import { GenerateNewQRCode } from "../services";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CreateInstance, RestartInstance } from "../services";
 
-export const useGenerateNewQRCode = () => {
+export const useCreateInstance = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: GenerateNewQRCode,
+    mutationFn: CreateInstance,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connection"] });
+    },
+  });
+};
+
+export const useRestartInstance = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: RestartInstance,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connection"] });
+    },
   });
 };

@@ -5,65 +5,49 @@ import Image from "next/image";
 import Loading from "@/app/components/loading/Loading";
 import Text from "@/app/components/ui/text/Text";
 import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
-import { useCurrentQRCode } from "@/hooks/queries/useWhatssApp.query";
-import { useEffect, useState } from "react";
-import { useGenerateNewQRCode } from "@/hooks/mutations/useWhatsApp.mutation";
+import { useState } from "react";
+import { useCheckConnection, useQRCode } from "@/hooks/queries";
+import { useCreateInstance, useRestartInstance } from "@/hooks/mutations";
+import { CreateInstance } from "@/types/whatsApp";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
   { label: "WhatsApp" },
 ];
 
-interface QrCodeProps {
-  isConnected: boolean;
-  qrCode: unknown;
-  qrCodeBase64: string;
-}
-
 export default function WhatsApp() {
   const theme = useTheme();
-  const { mutateAsync: generateNewQRCode } = useGenerateNewQRCode();
-  const { data: currentQRCode, isLoading: isLoadingCurrent } =
-    useCurrentQRCode();
 
-  const [qrCode, setQrCode] = useState<QrCodeProps | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [showLoadingTimer, setShowLoadingTimer] = useState(false);
+  const [instance, setInstance] = useState<CreateInstance | null>(null);
+  const [isLoadingCreateInstance, setIsLoadingCreateInstance] = useState(false);
 
-  // Set the QR code from the query when it loads
-  useEffect(() => {
-    if (currentQRCode && !qrCode && !isGenerating) {
-      setQrCode(currentQRCode);
+  const { data: checkConnection, isLoading: isLoadingCheckConnection } =
+    useCheckConnection();
+  const { data: qrCode } = useQRCode();
+
+  const { mutateAsync: createInstance } = useCreateInstance();
+  const { mutateAsync: restartInstance } = useRestartInstance();
+
+  const handleCreateInstance = async () => {
+    setIsLoadingCreateInstance(true);
+    if (checkConnection?.status === "CONNECTED") {
+      const restart = await restartInstance();
+      setInstance(restart);
+    } else {
+      const create = await createInstance();
+      setInstance(create);
     }
-  }, [currentQRCode, qrCode, isGenerating]);
-
-  const handleGenerateNewQRCode = async () => {
-    try {
-      setIsGenerating(true);
-      setShowLoadingTimer(true);
-
-      // Generate new QR code
-      const newQRCode = await generateNewQRCode();
-
-      // Ensure loading shows for at least 3 seconds
-      setTimeout(() => {
-        setQrCode(newQRCode);
-        setShowLoadingTimer(false);
-        setIsGenerating(false);
-      }, 3000);
-    } catch (error) {
-      console.error("Error generating new QR code:", error);
-      setShowLoadingTimer(false);
-      setIsGenerating(false);
-    }
+    setIsLoadingCreateInstance(false);
   };
 
+  console.log("qrCode", qrCode);
+
   const renderQRCode = () => {
-    if (isLoadingCurrent || isGenerating || showLoadingTimer) {
+    if (isLoadingCheckConnection || isLoadingCreateInstance) {
       return <Loading />;
     }
 
-    if (!qrCode) {
+    if (!instance?.qrcode && !qrCode) {
       return (
         <Box
           textAlign="center"
@@ -86,7 +70,7 @@ export default function WhatsApp() {
     return (
       <Box pr={10} py={2}>
         <Image
-          src={qrCode?.qrCodeBase64}
+          src={qrCode?.base64 || instance?.qrcode.base64}
           alt="WhatsApp QR Code"
           width={350}
           height={350}
@@ -115,29 +99,37 @@ export default function WhatsApp() {
         <Stack direction="row" justifyContent="space-between" px={10} py={2}>
           <Box sx={{ pt: 2 }}>
             <Text variant="h5" fontWeight="bold" mb={2} color="success">
-              Veja seu QR Code atual
+              Use o QR Code para conectar sua conta
             </Text>
 
-            <Text variant="body1" color="text.secondary" mb={4}>
-              {qrCode?.isConnected ? (
-                <>
-                  <Text variant="body1" color="success">
+            {isLoadingCheckConnection && (
+              <Box sx={{ display: "flex", justifyContent: "start", mb: 3 }}>
+                <Loading minHeight={5} />
+              </Box>
+            )}
+
+            {!isLoadingCheckConnection && (
+              <Stack direction="row" gap={1} mb={3}>
+                <Text variant="subtitle2" color="text.secondary">
+                  Status atual:
+                </Text>
+                {checkConnection?.status === "CONNECTED" ? (
+                  <Text variant="subtitle2" color="success" fontWeight="bold">
                     Conectado
                   </Text>
-                </>
-              ) : (
-                <Text variant="body1" color="error">
-                  Desconectado
-                </Text>
-              )}
-            </Text>
+                ) : (
+                  <Text variant="subtitle2" color="error" fontWeight="bold">
+                    Desconectado
+                  </Text>
+                )}
+              </Stack>
+            )}
 
             <Button
               variant="contained"
               color="success"
               size="large"
-              onClick={handleGenerateNewQRCode}
-              disabled={isGenerating || showLoadingTimer}
+              onClick={handleCreateInstance}
               sx={{
                 mt: "auto",
                 alignSelf: "flex-start",
@@ -146,7 +138,9 @@ export default function WhatsApp() {
                 mb: { xs: 3, md: 0 },
               }}
             >
-              Gerar novo QR Code
+              {checkConnection?.status === "CONNECTED"
+                ? "Reiniciar instância"
+                : "Criar nova instância"}
             </Button>
           </Box>
 
