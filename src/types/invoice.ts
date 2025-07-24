@@ -3,11 +3,11 @@ export interface CreateInvoiceDto {
   endDate: Date | null;
 }
 
-export interface CreateInvoiceClient extends CreateInvoiceDto {
+export interface CreateInvoiceClientDto extends CreateInvoiceDto {
   groupFamilyIds: string[];
 }
 
-export interface CreateInvoiceVisitors extends CreateInvoiceDto {
+export interface CreateInvoiceVisitorsDto extends CreateInvoiceDto {
   visitorsIds: string[];
 }
 

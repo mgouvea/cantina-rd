@@ -21,7 +21,7 @@ export const useAddInvoiceVisitors = () => {
   return useMutation({
     mutationFn: CreateInvoiceVisitors,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["invoices-visitors"] });
       queryClient.invalidateQueries({ queryKey: ["credits"] });
 
       showSnackbar({

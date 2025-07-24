@@ -6,14 +6,14 @@ import SelectFamilies from "../autoComplete/SelectFamilies";
 import SelectVisitors from "../autoComplete/SelectVisitors";
 import { Box } from "@mui/material";
 import {
-  CreateInvoiceClient,
-  CreateInvoiceVisitors,
+  CreateInvoiceClientDto,
+  CreateInvoiceVisitorsDto,
   GroupFamilyWithOwner,
   Visitor,
 } from "@/types";
 import { Range as DateRangePickerRange, RangeKeyDict } from "react-date-range";
 import { SelectData } from "../filters/SelectData";
-import { useAddInvoice } from "@/hooks/mutations";
+import { useAddInvoice, useAddInvoiceVisitors } from "@/hooks/mutations";
 import { useForm } from "react-hook-form";
 import { useVisitors } from "@/hooks/queries/useVisitors.query";
 
@@ -23,13 +23,13 @@ type NewInvoiceModalProps = {
   viewType?: "socios" | "visitantes";
 };
 
-const INITIAL_INVOICE_FORM_VALUES_CLIENT: CreateInvoiceClient = {
+const INITIAL_INVOICE_FORM_VALUES_CLIENT: CreateInvoiceClientDto = {
   groupFamilyIds: [],
   startDate: null,
   endDate: null,
 };
 
-const INITIAL_INVOICE_FORM_VALUES_VISITORS: CreateInvoiceVisitors = {
+const INITIAL_INVOICE_FORM_VALUES_VISITORS: CreateInvoiceVisitorsDto = {
   visitorsIds: [],
   startDate: null,
   endDate: null,
@@ -47,7 +47,9 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
       : INITIAL_INVOICE_FORM_VALUES_VISITORS;
   };
 
-  const invoiceForm = useForm<CreateInvoiceClient | CreateInvoiceVisitors>({
+  const invoiceForm = useForm<
+    CreateInvoiceClientDto | CreateInvoiceVisitorsDto
+  >({
     defaultValues: getInitialValues(),
     mode: "onChange",
   });
@@ -63,6 +65,7 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
 
   const { data: allVisitors } = useVisitors();
   const { mutateAsync: addInvoice } = useAddInvoice();
+  const { mutateAsync: addInvoiceVisitors } = useAddInvoiceVisitors();
 
   const [selectedFamilies, setSelectedFamilies] = useState<
     GroupFamilyWithOwner[]
@@ -92,21 +95,41 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
   }, [viewType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onSubmit = async (
-    data: CreateInvoiceClient | CreateInvoiceVisitors
+    data: CreateInvoiceClientDto | CreateInvoiceVisitorsDto
   ) => {
-    console.log("dataTest", data);
-    // setIsProcessing(true);
-    // const invoicePayload = {
-    //   groupFamilyIds:
-    //     typeof data.groupFamilyIds === "string"
-    //       ? [data.groupFamilyIds]
-    //       : data.groupFamilyIds,
-    //   startDate: data.startDate,
-    //   endDate: data.endDate,
-    // };
-    // await addInvoice(invoicePayload).then(() => {
-    //   setIsProcessing(false);
-    // });
+    try {
+      setIsProcessing(true);
+
+      if (viewType === "socios") {
+        // Para sócios: Garantir que temos um array de IDs de famílias
+        const clientData = data as CreateInvoiceClientDto;
+        const invoicePayload: CreateInvoiceClientDto = {
+          groupFamilyIds: Array.isArray(clientData.groupFamilyIds)
+            ? clientData.groupFamilyIds
+            : [clientData.groupFamilyIds].filter(Boolean),
+          startDate: clientData.startDate,
+          endDate: clientData.endDate,
+        };
+        await addInvoice(invoicePayload);
+      } else {
+        // Para visitantes: Garantir que temos um array de IDs de visitantes
+        // Usamos o estado selectedVisitors para garantir que temos os IDs corretos
+        const invoicePayload: CreateInvoiceVisitorsDto = {
+          visitorsIds: selectedVisitors.map((visitor) => visitor._id),
+          startDate: data.startDate,
+          endDate: data.endDate,
+        };
+        await addInvoiceVisitors(invoicePayload);
+      }
+
+      // Limpar o formulário após sucesso
+      handleClearForm();
+      setOpenModal(false);
+    } catch (error) {
+      console.error("Erro ao gerar fatura:", error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   // Date picker popover state

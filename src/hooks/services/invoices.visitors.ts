@@ -1,4 +1,4 @@
-import { CreateInvoiceDto } from "@/types/invoice";
+import { CreateInvoiceVisitorsDto } from "@/types";
 import { http } from ".";
 
 export const GetFullInvoiceVisitors = async (ids: string[]) => {
@@ -9,7 +9,9 @@ export const GetInvoiceVisitors = async () => {
   return (await http.get("visitors-invoice")).data;
 };
 
-export const CreateInvoiceVisitors = async (invoice: CreateInvoiceDto) => {
+export const CreateInvoiceVisitors = async (
+  invoice: CreateInvoiceVisitorsDto
+) => {
   return (await http.post("visitors-invoice", invoice)).data;
 };
 
