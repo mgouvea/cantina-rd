@@ -1,6 +1,6 @@
-import { useSnackbar } from "@/app/components";
-import { DeleteVisitor, PostAddVisitor } from "@/hooks/services";
+import { DeleteVisitor, PostAddVisitor } from "../services";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSnackbar } from "@/app/components";
 
 export const useAddVisitor = () => {
   return useMutation({

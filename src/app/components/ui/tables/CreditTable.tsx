@@ -1,13 +1,19 @@
 "use client";
 
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Box from "@mui/material/Box";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
+import { CreditModal } from "../../modal/CreditModal";
+import { CreditResponse } from "@/types/credit";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Filtros } from "../..";
-import { PaymentResponse, TabelaProps } from "@/types";
+import { Filters } from "../../filters/Filters";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { TabelaProps } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 import {
   CircularProgress,
@@ -19,17 +25,19 @@ import {
   useTheme,
 } from "@mui/material";
 
-export default function TabelaPagamentos({
+export default function CreditTable({
   data,
   isLoading,
-}: TabelaProps<PaymentResponse>) {
-  const queryClient = useQueryClient();
+}: TabelaProps<CreditResponse>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const queryClient = useQueryClient();
+
+  const [openCreditModal, setOpenCreditModal] = useState(false);
 
   const handleResetData = () => {
-    queryClient.invalidateQueries({ queryKey: ["payments"] });
+    queryClient.invalidateQueries({ queryKey: ["credits"] });
   };
 
   const columns: GridColDef[] = [
@@ -45,61 +53,30 @@ export default function TabelaPagamentos({
       ),
     },
     {
-      field: "invoicePeriod",
-      headerName: "Período",
-      width: isMobile ? 150 : isTablet ? 150 : 200,
-      flex: 1,
-      minWidth: 120,
-      editable: true,
-      renderCell: ({ value }) => {
-        const startDate = new Date(value.startDate).toLocaleDateString("pt-BR");
-        const endDate = new Date(value.endDate).toLocaleDateString("pt-BR");
-
-        return (
-          <Typography sx={{ py: 0.5 }}>
-            {startDate} - {endDate}
-          </Typography>
-        );
-      },
-    },
-    {
-      field: "invoiceTotalAmount",
+      field: "creditedAmount",
       headerName: "Valor total",
       width: isMobile ? 100 : isTablet ? 120 : 130,
       flex: 0.8,
       minWidth: 100,
       editable: true,
       renderCell: ({ value }) => (
-        <Typography sx={{ py: 0.5 }}>R$ {value}</Typography>
+        <Typography sx={{ py: 0.5 }}>R$ {Number(value).toFixed(2)}</Typography>
       ),
     },
     {
-      field: "amountPaid",
-      headerName: "Valor pago",
+      field: "amount",
+      headerName: "Valor atual",
       width: isMobile ? 100 : isTablet ? 120 : 130,
       flex: 0.8,
       minWidth: 100,
       editable: true,
       renderCell: ({ value }) => (
-        <Typography sx={{ py: 0.5 }}>R$ {value}</Typography>
+        <Typography sx={{ py: 0.5 }}>R$ {Number(value).toFixed(2)}</Typography>
       ),
     },
     {
-      field: "isPartial",
-      headerName: "Pagamento parcial",
-      width: isMobile ? 100 : isTablet ? 120 : 130,
-      flex: 0.8,
-      minWidth: 100,
-      align: "center",
-      headerAlign: "center",
-      editable: true,
-      renderCell: ({ value }) => (
-        <Typography sx={{ py: 0.5 }}>{value ? "Sim" : "Não"}</Typography>
-      ),
-    },
-    {
-      field: "paymentDate",
-      headerName: "Data pagamento",
+      field: "createdAt",
+      headerName: "Data de crédito",
       width: isMobile ? 80 : 100,
       flex: 1,
       minWidth: 80,
@@ -108,7 +85,7 @@ export default function TabelaPagamentos({
       headerAlign: "center",
       renderCell: ({ value }) => (
         <Typography sx={{ py: 0.5 }}>
-          {new Date(value).toLocaleDateString()}
+          {format(new Date(value), "dd/MM/yyyy HH:mm", { locale: ptBR })}
         </Typography>
       ),
     },
@@ -130,25 +107,36 @@ export default function TabelaPagamentos({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Pagamentos</Text>
+        <Text variant="h5">Créditos</Text>
 
-        <Tooltip title="Recarregar dados">
-          <IconButton
-            aria-label="add"
-            sx={{ color: "success.main" }}
-            onClick={handleResetData}
-          >
-            <CachedOutlinedIcon fontSize="medium" />
-          </IconButton>
-        </Tooltip>
+        <Stack direction="row" spacing={2}>
+          <Tooltip title="Inserir crédito">
+            <IconButton
+              aria-label="add"
+              sx={{ color: "success.main" }}
+              onClick={() => setOpenCreditModal(true)}
+            >
+              <AddCircleIcon fontSize="large" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Recarregar dados">
+            <IconButton
+              aria-label="add"
+              sx={{ color: "success.main" }}
+              onClick={handleResetData}
+            >
+              <CachedOutlinedIcon fontSize="medium" />
+            </IconButton>
+          </Tooltip>
+        </Stack>
       </Stack>
 
       {!isLoading && (!data || data.length === 0) && (
-        <EmptyContent title="Ainda não há pagamentos para exibir" />
+        <EmptyContent title="Ainda não há créditos para exibir" />
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data}>
+        <Filters rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
@@ -194,8 +182,12 @@ export default function TabelaPagamentos({
               />
             )
           }
-        </Filtros>
+        </Filters>
       )}
+      <CreditModal
+        openModal={openCreditModal}
+        setOpenModal={setOpenCreditModal}
+      />
     </Box>
   );
 }

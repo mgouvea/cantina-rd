@@ -13,7 +13,7 @@ import Text from "../text/Text";
 import { Box, Drawer, List, Toolbar } from "@mui/material";
 import { usePathname, useRouter } from "next/navigation";
 
-export function NewSidebar() {
+export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const drawerWidth = 260;

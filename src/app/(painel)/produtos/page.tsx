@@ -1,7 +1,8 @@
 "use client";
-import Loading from "@/app/components/loading/Loading";
+
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
-import TabelaProduto from "@/app/components/ui/tables/TabelaProduto";
+import Loading from "@/app/components/loading/Loading";
+import ProductTable from "@/app/components/ui/tables/ProductTable";
 import { useProducts } from "@/hooks/queries/useProducts.query";
 
 const breadcrumbItems = [
@@ -17,7 +18,7 @@ export default function Produtos() {
       return <Loading />;
     }
 
-    return <TabelaProduto data={data} isLoading={isLoading} />;
+    return <ProductTable data={data} isLoading={isLoading} />;
   };
 
   return (

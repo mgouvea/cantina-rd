@@ -1,8 +1,13 @@
 "use client";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useForm, Controller } from "react-hook-form";
+
 import GenericModal from "./GenericModal";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Text from "../ui/text/Text";
+import { Controller, useForm } from "react-hook-form";
+import { CreateCreditDto } from "@/types/credit";
+import { GroupFamilyWithOwner } from "@/types/groupFamily";
+import { useAddCredit, useAddDebit } from "@/hooks/mutations";
+import { useGroupFamilyWithOwner } from "@/hooks/queries";
 import {
   CircularProgress,
   Box,
@@ -16,10 +21,6 @@ import {
   Autocomplete,
   Avatar,
 } from "@mui/material";
-import { useAddCredit, useAddDebit } from "@/hooks/mutations";
-import { CreateCreditDto } from "@/types/credit";
-import { useGroupFamilyWithOwner } from "@/hooks/queries";
-import { GroupFamilyWithOwner } from "@/types/groupFamily";
 
 type CreditModalProps = {
   openModal: boolean;

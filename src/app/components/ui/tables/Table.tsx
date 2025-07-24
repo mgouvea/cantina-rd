@@ -13,7 +13,7 @@ interface TabelaProps extends DataGridProps {
   scroll?: boolean;
 }
 
-export function Tabela({
+export function Table({
   autoHeight = true,
   disableColumnMenu = true,
   disableColumnSelector = true,

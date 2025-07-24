@@ -1,5 +1,9 @@
 import React from "react";
+import SelectFamilies from "../autoComplete/SelectFamilies";
 import { CustomizedAccordions } from "../accordion/Accordion";
+import { GroupFamilyWithOwner } from "@/types";
+import { Search } from "./Search";
+import { useForm } from "react-hook-form";
 import {
   FormControl,
   InputLabel,
@@ -7,10 +11,6 @@ import {
   Select,
   Stack,
 } from "@mui/material";
-import { Pesquisa } from "./Pesquisa";
-import { GroupFamilyWithOwner } from "@/types";
-import SelectFamilies from "../autoComplete/SelectFamilies";
-import { useForm } from "react-hook-form";
 
 const STATUS_OPTIONS = [
   { value: "OPEN", label: "Em Aberto" },
@@ -51,7 +51,7 @@ export const InvoiceFilter = ({
     <CustomizedAccordions title="Filtros" open={false}>
       <Stack direction="column" spacing={2} sx={{ p: 1 }}>
         <Stack direction="row" spacing={2}>
-          <Pesquisa
+          <Search
             parametrosDeBusca={parametrosDeBusca}
             setParametrosDeBusca={setParametrosDeBusca}
           />

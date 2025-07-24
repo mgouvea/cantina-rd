@@ -4,8 +4,8 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
+import { ButtonComponent } from "../ui/button/ButtonComponent";
 import { TransitionProps } from "@mui/material/transitions";
-import { Botao } from "../ui/botao/Botao";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -53,17 +53,21 @@ export default function GenericModal({
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>{children}</DialogContent>
         <DialogActions sx={{ pb: 2, pr: 2 }}>
-          <Botao variant="outlined" color="warning" onClick={handleClose}>
+          <ButtonComponent
+            variant="outlined"
+            color="warning"
+            onClick={handleClose}
+          >
             {cancelButtonText}
-          </Botao>
-          <Botao
+          </ButtonComponent>
+          <ButtonComponent
             variant="contained"
             color={buttonColor}
             onClick={handleConfirm}
             disabled={disableConfirmButton}
           >
             {confirmButtonText}
-          </Botao>
+          </ButtonComponent>
         </DialogActions>
       </Dialog>
     </React.Fragment>

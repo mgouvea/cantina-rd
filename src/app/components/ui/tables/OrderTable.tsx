@@ -9,7 +9,7 @@ import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
 import { capitalize, capitalizeFirstLastName } from "@/utils";
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
-import { Filtros } from "../..";
+import { Filters } from "../../filters/Filters";
 import { Order, ProductItem, TabelaProps } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -23,7 +23,7 @@ import {
   useTheme,
 } from "@mui/material";
 
-export default function TabelaCompras({
+export default function OrderTable({
   data,
   isLoading,
   handleEditClick,
@@ -232,7 +232,7 @@ export default function TabelaCompras({
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data}>
+        <Filters rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
@@ -278,7 +278,7 @@ export default function TabelaCompras({
               />
             )
           }
-        </Filtros>
+        </Filters>
       )}
     </Box>
   );

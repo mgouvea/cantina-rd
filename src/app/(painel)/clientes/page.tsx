@@ -4,27 +4,26 @@ import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import EmojiPeopleOutlinedIcon from "@mui/icons-material/EmojiPeopleOutlined";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import Loading from "@/app/components/loading/Loading";
-import TabelaCliente from "@/app/components/ui/tables/TabelaCliente";
-import TabelaVisitantes from "@/app/components/ui/tables/TabelaVisitantes";
+import TabelaCliente from "@/app/components/ui/tables/TableClient";
+import VisitorTable from "@/app/components/ui/tables/VisitorTable";
 import { a11yProps, capitalizeFirstLastName } from "@/utils";
 import { Box, Stack, Tab, Tabs, useTheme } from "@mui/material";
-import { User } from "@/types";
 import { CustomTabPanel, DeleteModal, useSnackbar } from "@/app/components";
+import { GridRowModel } from "@mui/x-data-grid";
 import { Suspense, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { User } from "@/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useUsers } from "@/hooks/queries";
+import { useUsers, useVisitors } from "@/hooks/queries";
 import { useUserStore } from "@/contexts";
-import { useVisitors } from "@/hooks/queries/useVisitors.query";
 
-import { GridRowModel } from "@mui/x-data-grid";
 import {
   useAddAdmin,
   useDeleteAdmin,
   useDeleteUser,
+  useDeleteVisitor,
   useUpdateUser,
 } from "@/hooks/mutations";
-import { useDeleteVisitor } from "@/hooks/mutations/useVisitors.mutation";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -226,7 +225,7 @@ function ClientesContent() {
           />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1} dir={theme.direction}>
-          <TabelaVisitantes
+          <VisitorTable
             data={visitorsData}
             isLoading={visitorsLoading}
             handleDeleteClick={(row: GridRowModel) =>

@@ -7,7 +7,7 @@ import {
   Stack,
 } from "@mui/material";
 import React from "react";
-import { EntradaTexto } from "../entradaTexto/EntradaTexto";
+import { EntradaTexto } from "../inputText/InputText";
 import { FormActions } from "./FormActions";
 import { Control, Controller } from "react-hook-form";
 import { capitalize, findUserById } from "@/utils";

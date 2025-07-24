@@ -10,19 +10,19 @@ import Text from "../text/Text";
 import { capitalize, getCategoryNameById } from "@/utils";
 import { Categories, SubCategories } from "@/types";
 import { CircularProgress, IconButton, Stack } from "@mui/material";
-import { Filtros } from "../..";
 import { useCategoryStore, useSubCategoryStore } from "@/contexts";
 import { useDeleteSubCategory } from "@/hooks/mutations";
 import { useRouter } from "next/navigation";
 
 import { DataGrid, GridColDef, GridActionsCellItem } from "@mui/x-data-grid";
+import { Filters } from "../../filters/Filters";
 
 interface TabelaProps {
   data: Categories[];
   isLoading: boolean;
 }
 
-export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
+export default function SubCategoriesTable({ data, isLoading }: TabelaProps) {
   const router = useRouter();
 
   const { mutateAsync: deleteSubCategory } = useDeleteSubCategory();
@@ -122,7 +122,7 @@ export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data}>
+        <Filters rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
@@ -136,7 +136,7 @@ export default function TabelaSubcategorias({ data, isLoading }: TabelaProps) {
               />
             )
           }
-        </Filtros>
+        </Filters>
       )}
     </Box>
   );

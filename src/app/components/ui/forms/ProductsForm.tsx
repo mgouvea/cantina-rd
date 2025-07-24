@@ -2,9 +2,10 @@
 
 import { capitalize } from "@/utils";
 import { Categories, fotoUploadProps, Products, SubCategories } from "@/types";
-import { EntradaTexto } from "../entradaTexto/EntradaTexto";
+import { EntradaTexto } from "../inputText/InputText";
 import { FormActions } from "./FormActions";
-import { UploadPicture } from "../uploadFoto/UploadPicture";
+import { UploadPicture } from "../upload/UploadPicture";
+import { useAddProduct, useUpdateProduct } from "@/hooks/mutations";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCategories, useSubCategories } from "@/hooks/queries";
 import { useForm } from "react-hook-form";
@@ -21,10 +22,6 @@ import {
   SelectChangeEvent,
   Stack,
 } from "@mui/material";
-import {
-  useAddProduct,
-  useUpdateProduct,
-} from "@/hooks/mutations/useProducts.mutation";
 
 // Define partial type for form initialization
 type ProductFormValues = Omit<Products, "createdAt" | "updatedAt">;

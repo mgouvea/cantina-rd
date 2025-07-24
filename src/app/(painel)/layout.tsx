@@ -1,6 +1,6 @@
-import { NewSidebar } from "@/app/components";
 import Header from "@/app/components/ui/header/Header";
 import { Box, Stack } from "@mui/material";
+import { Sidebar } from "../components";
 
 export default function RootLayout({
   children,
@@ -9,7 +9,7 @@ export default function RootLayout({
 }>) {
   return (
     <Stack direction="row" sx={{ height: "100vh", overflow: "hidden" }}>
-      <NewSidebar />
+      <Sidebar />
 
       <Box
         sx={{

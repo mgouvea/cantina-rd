@@ -1,51 +1,71 @@
-export * from "./breadcrumb/GenericBreadcrumb";
 export * from "./accordion/Accordion";
+
 export * from "./autoComplete/SelectFamilies";
-export * from "./filtros/Filtros";
-export * from "./filtros/InvoiceFilter";
-export * from "./filtros/SelectData";
-export * from "./svg/IlustracaoEmpty";
-export * from "./filtros/Pesquisa";
+export * from "./autoComplete/SelectVisitors";
+
+export * from "./breadcrumb/GenericBreadcrumb";
+
+export * from "./filters/Filters";
+export * from "./filters/InvoiceFilter";
+export * from "./filters/Search";
+export * from "./filters/SelectData";
+
 export * from "./loading/Loading";
+
+export * from "./modal/CreditModal";
+export * from "./modal/DeleteModal";
 export * from "./modal/GenericModal";
 export * from "./modal/MembersModal";
-export * from "./modal/DeleteModal";
-export * from "./modal/PaymentModal";
-export * from "./modal/CreditModal";
 export * from "./modal/NewInvoiceModal";
+export * from "./modal/PaymentModal";
+
 export * from "./snackbar/SnackbarProvider";
-export * from "./ui/header/Header";
-export * from "./ui/icons/CustomIcons";
-export * from "./ui/sidebar/NewSidebar";
-export * from "./ui/tables/Tabela";
-export * from "./ui/tables/TabelaCliente";
-export * from "./ui/tables/TabelaProduto";
-export * from "./ui/tables/TabelaCompras";
-export * from "./ui/tables/TabelaFaturas";
-export * from "./ui/tables/TabelaVisitantes";
-export * from "./ui/tables/TabelaComprasVisitors";
-export * from "./ui/tables/TabelaPagamentos";
-export * from "./ui/tables/TabelaCredito";
-export * from "./ui/tabs/CustomTabs";
-export * from "./ui/botao/Botao";
+export * from "./svg/IlustracaoEmpty";
+
+export * from "./ui/button/ButtonComponent";
 export * from "./ui/emptyContent/EmptyContent";
-export * from "./ui/entradaTexto/EntradaTexto";
+
 export * from "./ui/forms/CategoriesForm";
 export * from "./ui/forms/FormActions";
+export * from "./ui/forms/GroupFamilyForm";
 export * from "./ui/forms/ProductsForm";
 export * from "./ui/forms/SubCategoriesForm";
-export * from "./ui/forms/GroupFamilyForm";
+export * from "./ui/forms/FormNewOrders";
+
 export * from "./ui/graphics/AreaChart";
 export * from "./ui/graphics/DashFilter";
 export * from "./ui/graphics/FamiliesOpen";
 export * from "./ui/graphics/TopClients";
 export * from "./ui/graphics/TopProducts";
 export * from "./ui/graphics/TotalBoxContent";
+
+export * from "./ui/header/Header";
+export * from "./ui/icons/CustomIcons";
+export * from "./ui/inputText/InputText";
+export * from "./ui/sidebar/Sidebar";
+
+export * from "./ui/tables/CategoriesTable";
+export * from "./ui/tables/CreditTable";
+export * from "./ui/tables/GroupFamilyTable";
+export * from "./ui/tables/InvoiceTable";
+export * from "./ui/tables/OrderTable";
+export * from "./ui/tables/PaymentTable";
+export * from "./ui/tables/ProductTable";
+export * from "./ui/tables/SubCategoriesTable";
+export * from "./ui/tables/Table";
+export * from "./ui/tables/TableClient";
+export * from "./ui/tables/VisitorInvoiceTable";
+export * from "./ui/tables/VisitorOrderTable";
+export * from "./ui/tables/VisitorTable";
+
+export * from "./ui/tabs/CustomTabs";
 export * from "./ui/text/Text";
 export * from "./ui/transferList/TransferList";
-export * from "./ui/uploadFoto/UploadPicture";
-export * from "./ui/wrapper/BoxStyle";
+export * from "./ui/upload/UploadPicture";
+
+export * from "./ui/wrapper/style/BoxStyle";
 export * from "./ui/wrapper/ContentWrapper";
-export * from "./ui/wrapper/FaturaWrapper";
-export * from "./ui/wrapper/ComprasWrapper";
-export * from "./ui/wrapper/ComprasVisitorsWrapper";
+export * from "./ui/wrapper/InvoiceWrapper";
+export * from "./ui/wrapper/OrderWrapper";
+export * from "./ui/wrapper/VisitorInvoiceWrapper";
+export * from "./ui/wrapper/VisitorOrderWrapper";

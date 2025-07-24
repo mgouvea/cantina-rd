@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import TabelaComprasVisitors from "../tables/TabelaComprasVisitors";
+import VisitorOrderTable from "../tables/VisitorOrderTable";
 import { Box } from "@mui/material";
-import { BoxStyle } from "./BoxStyle";
+import { BoxStyle } from "./style/BoxStyle";
 import { capitalizeFirstLastName } from "@/utils";
 import { DeleteModal } from "../../modal/DeleteModal";
 import { GridRowModel } from "@mui/x-data-grid";
@@ -11,15 +11,15 @@ import { OrderVisitor } from "@/types";
 import { useDeleteOrderVisitor } from "@/hooks/mutations";
 import { useRouter } from "next/navigation";
 
-interface ComprasVisitorsWrapperProps {
+interface VisitorOrderWrapperProps {
   data: OrderVisitor[];
   isLoading: boolean;
 }
 
-export const ComprasVisitorsWrapper = ({
+export const VisitorOrderWrapper = ({
   data,
   isLoading,
-}: ComprasVisitorsWrapperProps) => {
+}: VisitorOrderWrapperProps) => {
   const router = useRouter();
   const { mutateAsync: deleteOrderVisitor } = useDeleteOrderVisitor();
 
@@ -52,7 +52,7 @@ export const ComprasVisitorsWrapper = ({
 
   return (
     <Box sx={BoxStyle}>
-      <TabelaComprasVisitors
+      <VisitorOrderTable
         data={data}
         isLoading={isLoading}
         handleEditClick={handleEditClick}

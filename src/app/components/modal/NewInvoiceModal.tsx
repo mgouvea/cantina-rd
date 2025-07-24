@@ -1,24 +1,36 @@
 "use client";
 
 import GenericModal from "./GenericModal";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SelectFamilies from "../autoComplete/SelectFamilies";
+import SelectVisitors from "../autoComplete/SelectVisitors";
 import { Box } from "@mui/material";
-import { CreateInvoiceDto } from "@/types/invoice";
-import { GroupFamilyWithOwner } from "@/types";
+import {
+  CreateInvoiceClient,
+  CreateInvoiceVisitors,
+  GroupFamilyWithOwner,
+  Visitor,
+} from "@/types";
+import { Range as DateRangePickerRange, RangeKeyDict } from "react-date-range";
+import { SelectData } from "../filters/SelectData";
 import { useAddInvoice } from "@/hooks/mutations";
 import { useForm } from "react-hook-form";
-
-import { Range as DateRangePickerRange, RangeKeyDict } from "react-date-range";
-import { SelectData } from "../filtros/SelectData";
+import { useVisitors } from "@/hooks/queries/useVisitors.query";
 
 type NewInvoiceModalProps = {
   openModal: boolean;
   setOpenModal: (open: boolean) => void;
+  viewType?: "socios" | "visitantes";
 };
 
-const INITIAL_INVOICE_FORM_VALUES: CreateInvoiceDto = {
+const INITIAL_INVOICE_FORM_VALUES_CLIENT: CreateInvoiceClient = {
   groupFamilyIds: [],
+  startDate: null,
+  endDate: null,
+};
+
+const INITIAL_INVOICE_FORM_VALUES_VISITORS: CreateInvoiceVisitors = {
+  visitorsIds: [],
   startDate: null,
   endDate: null,
 };
@@ -26,14 +38,21 @@ const INITIAL_INVOICE_FORM_VALUES: CreateInvoiceDto = {
 export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
   openModal,
   setOpenModal,
+  viewType = "socios", // Default to socios if not provided
 }) => {
-  const invoiceForm = useForm<CreateInvoiceDto>({
-    defaultValues: INITIAL_INVOICE_FORM_VALUES,
-    mode: "onChange", // Enable validation on change for immediate feedback
+  // Get initial values based on viewType
+  const getInitialValues = () => {
+    return viewType === "socios"
+      ? INITIAL_INVOICE_FORM_VALUES_CLIENT
+      : INITIAL_INVOICE_FORM_VALUES_VISITORS;
+  };
+
+  const invoiceForm = useForm<CreateInvoiceClient | CreateInvoiceVisitors>({
+    defaultValues: getInitialValues(),
+    mode: "onChange",
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
-
   const [state, setState] = useState<DateRangePickerRange[]>([
     {
       startDate: new Date(),
@@ -42,33 +61,52 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
     },
   ]);
 
+  const { data: allVisitors } = useVisitors();
   const { mutateAsync: addInvoice } = useAddInvoice();
 
   const [selectedFamilies, setSelectedFamilies] = useState<
     GroupFamilyWithOwner[]
   >([]);
+  const [selectedVisitors, setSelectedVisitors] = useState<Visitor[]>([]);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { isValid },
-    reset,
-    watch,
-  } = invoiceForm;
+  const { control, handleSubmit, reset, setValue } = invoiceForm;
 
-  const onSubmit = async (data: CreateInvoiceDto) => {
-    setIsProcessing(true);
-    const invoicePayload = {
-      groupFamilyIds:
-        typeof data.groupFamilyIds === "string"
-          ? [data.groupFamilyIds]
-          : data.groupFamilyIds,
-      startDate: data.startDate,
-      endDate: data.endDate,
-    };
-    await addInvoice(invoicePayload).then(() => {
-      setIsProcessing(false);
-    });
+  // Sync selected families/visitors with form when they change
+  useEffect(() => {
+    if (viewType === "socios") {
+      setValue(
+        "groupFamilyIds",
+        selectedFamilies.map((family) => family._id || "")
+      );
+    } else {
+      setValue(
+        "visitorsIds",
+        selectedVisitors.map((visitor) => visitor._id)
+      );
+    }
+  }, [selectedFamilies, selectedVisitors, viewType, setValue]);
+
+  // Reset form when viewType changes
+  useEffect(() => {
+    handleClearForm();
+  }, [viewType]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const onSubmit = async (
+    data: CreateInvoiceClient | CreateInvoiceVisitors
+  ) => {
+    console.log("dataTest", data);
+    // setIsProcessing(true);
+    // const invoicePayload = {
+    //   groupFamilyIds:
+    //     typeof data.groupFamilyIds === "string"
+    //       ? [data.groupFamilyIds]
+    //       : data.groupFamilyIds,
+    //   startDate: data.startDate,
+    //   endDate: data.endDate,
+    // };
+    // await addInvoice(invoicePayload).then(() => {
+    //   setIsProcessing(false);
+    // });
   };
 
   // Date picker popover state
@@ -104,14 +142,20 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
     setSelectedFamilies(families);
   };
 
+  const handleSelectVisitors = (visitors: Visitor[]) => {
+    setSelectedVisitors(visitors);
+  };
+
   const handleDateRangeSelect = (rangesByKey: RangeKeyDict) => {
     const selection = rangesByKey.selection as DateRangePickerRange;
     setState([selection]);
+
+    // Update form values for both types
     if (selection.startDate) {
-      invoiceForm.setValue("startDate", selection.startDate);
+      setValue("startDate", selection.startDate);
     }
     if (selection.endDate) {
-      invoiceForm.setValue("endDate", selection.endDate);
+      setValue("endDate", selection.endDate);
     }
   };
 
@@ -120,15 +164,28 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
   };
 
   const handleClearForm = () => {
-    reset(INITIAL_INVOICE_FORM_VALUES); // Use destructured reset
+    // Reset form with appropriate initial values based on viewType
+    reset(getInitialValues());
     setSelectedFamilies([]);
+    setSelectedVisitors([]);
     setState([
       {
         startDate: new Date(),
         endDate: new Date(),
         key: "selection",
-      } as DateRangePickerRange, // Cast to ensure correct type interpretation
+      },
     ]);
+  };
+
+  // Check if form is valid based on viewType
+  const isFormValid = () => {
+    const hasDateRange = state[0]?.startDate && state[0]?.endDate;
+
+    if (viewType === "socios") {
+      return selectedFamilies.length > 0 && hasDateRange;
+    } else {
+      return selectedVisitors.length > 0 && hasDateRange;
+    }
   };
 
   return (
@@ -143,26 +200,32 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
       }}
       cancelButtonText="Cancelar"
       confirmButtonText={isProcessing ? "Processando..." : "Confirmar"}
-      disableConfirmButton={
-        isProcessing ||
-        !isValid ||
-        (watch("groupFamilyIds") || []).length === 0 ||
-        !watch("startDate") ||
-        !watch("endDate")
-      }
+      disableConfirmButton={isProcessing || !isFormValid()}
       buttonColor={"success"}
       handleConfirm={handleSubmit(onSubmit)}
     >
       <Box sx={{ my: 2 }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3, my: 2 }}>
-          {/* Family selection */}
-          <SelectFamilies
-            invoiceForm={invoiceForm}
-            control={control}
-            selectedFamilies={selectedFamilies}
-            onSelectFamilies={handleSelectFamilies}
-            hasPadding
-          />
+          {viewType !== "visitantes" && (
+            <SelectFamilies
+              invoiceForm={invoiceForm}
+              control={control}
+              selectedFamilies={selectedFamilies}
+              onSelectFamilies={handleSelectFamilies}
+              hasPadding
+            />
+          )}
+
+          {viewType === "visitantes" && (
+            <SelectVisitors
+              invoiceForm={invoiceForm}
+              control={control}
+              selectedVisitors={selectedVisitors}
+              onSelectVisitors={handleSelectVisitors}
+              allVisitors={allVisitors}
+              hasPadding
+            />
+          )}
 
           {/* Date selection */}
           <SelectData

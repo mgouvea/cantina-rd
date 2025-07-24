@@ -7,6 +7,7 @@ export * from "./users";
 export * from "./orders";
 export * from "./order.visitors";
 export * from "./invoices";
+export * from "./invoices.visitors";
 export * from "./visitors";
 export * from "./whatssApp";
 export * from "./payments";

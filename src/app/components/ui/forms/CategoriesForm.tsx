@@ -3,9 +3,9 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Box, Stack } from "@mui/material";
 import { Categories, fotoUploadProps } from "@/types/products";
-import { EntradaTexto } from "../entradaTexto/EntradaTexto";
+import { EntradaTexto } from "../inputText/InputText";
 import { FormActions } from "./FormActions";
-import { UploadPicture } from "../uploadFoto/UploadPicture";
+import { UploadPicture } from "../upload/UploadPicture";
 import { useAddCategory, useUpdateCategory } from "@/hooks/mutations";
 import { useCategoryStore } from "@/contexts";
 import { useForm } from "react-hook-form";

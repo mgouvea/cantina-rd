@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { Botao } from "../botao/Botao";
+import { ButtonComponent } from "../button/ButtonComponent";
 
 interface FormActionsProps {
   onClear: () => void;
@@ -29,7 +29,7 @@ export const FormActions = ({
       px: { xs: 2, sm: 4 },
     }}
   >
-    <Botao
+    <ButtonComponent
       variant="contained"
       color="error"
       onClick={() => {
@@ -38,8 +38,8 @@ export const FormActions = ({
       sx={{ paddingX: 7, borderRadius: "8px" }}
     >
       {isGroupFamilyEdit ? "Voltar" : "Limpar"}
-    </Botao>
-    <Botao
+    </ButtonComponent>
+    <ButtonComponent
       variant="contained"
       color="success"
       onClick={onSave}
@@ -55,6 +55,6 @@ export const FormActions = ({
         : isFatura
         ? "Gerar"
         : "Cadastrar"}
-    </Botao>
+    </ButtonComponent>
   </Box>
 );
