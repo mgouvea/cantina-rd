@@ -9,8 +9,8 @@ import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import React, { useEffect, useState } from "react";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
-import { capitalizeFirstLastName, findUserById } from "@/utils";
-import { CreatePaymentDto, FullInvoiceResponse, User } from "@/types";
+import { capitalize, capitalizeFirstLastName } from "@/utils";
+import { CreatePaymentDto, FullInvoiceResponse } from "@/types";
 import { DeleteModal } from "../../modal/DeleteModal";
 import { Filters } from "../../filters/Filters";
 import { format } from "date-fns";
@@ -43,6 +43,7 @@ import {
   GridColDef,
   GridActionsCellItem,
   GridRowModel,
+  GridRenderCellParams,
 } from "@mui/x-data-grid";
 
 interface TabelaProps {
@@ -52,58 +53,46 @@ interface TabelaProps {
   setOpenModal: (open: boolean) => void;
 }
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-}
+const ConsumptionDetails = ({ invoice }: { invoice: FullInvoiceResponse }) => {
+  const [expandedDate, setExpandedDate] = React.useState<string | null>(null);
 
-interface ConsumptionEntry {
-  date: string;
-  products: Product[];
-}
-
-interface ConsumptionByPerson {
-  [userId: string]: ConsumptionEntry[];
-}
-
-const ConsumptionDetails = ({
-  consumptionData,
-  dataUser,
-}: {
-  consumptionData: ConsumptionByPerson;
-  dataUser: User[] | null;
-}) => {
-  const [expandedUser, setExpandedUser] = React.useState<string | null>(null);
-
-  if (!consumptionData || Object.keys(consumptionData).length === 0) {
+  if (!invoice || !invoice.orders || invoice.orders.length === 0) {
     return <Typography variant="body2">Nenhum consumo registrado</Typography>;
   }
 
-  const toggleUserExpand = (userId: string) => {
-    setExpandedUser(expandedUser === userId ? null : userId);
+  const toggleDateExpand = (date: string) => {
+    setExpandedDate(expandedDate === date ? null : date);
   };
 
-  const calculateUserTotal = (entries: ConsumptionEntry[]): number => {
-    return entries.reduce((total, entry) => {
-      const entryTotal = entry.products.reduce(
-        (sum, product) => sum + product.price * product.quantity,
-        0
-      );
-      return total + entryTotal;
-    }, 0);
+  // Group orders by date
+  const ordersByDate = invoice.orders.reduce<
+    Record<string, (typeof invoice.orders)[0][]>
+  >((acc, order) => {
+    const dateKey = format(new Date(order.createdAt), "yyyy-MM-dd");
+    if (!acc[dateKey]) {
+      acc[dateKey] = [];
+    }
+    acc[dateKey].push(order);
+    return acc;
+  }, {});
+
+  // Calculate total for a specific date
+  const calculateDateTotal = (orders: (typeof invoice.orders)[0][]): number => {
+    return orders.reduce((total, order) => total + order.totalPrice, 0);
   };
 
   return (
     <Box sx={{ maxHeight: 300, overflow: "auto", width: "100%" }}>
-      {Object.entries(consumptionData).map(([userId, entries]) => {
-        const userTotal = calculateUserTotal(entries);
+      {Object.entries(ordersByDate).map(([dateKey, orders]) => {
+        const dateTotal = calculateDateTotal(orders);
+        const formattedDate = format(new Date(dateKey), "dd/MM/yyyy", {
+          locale: ptBR,
+        });
 
         return (
-          <Paper key={userId} sx={{ mb: 1, p: 1 }}>
+          <Paper key={dateKey} sx={{ mb: 1, p: 1 }}>
             <Box
-              onClick={() => toggleUserExpand(userId)}
+              onClick={() => toggleDateExpand(dateKey)}
               sx={{
                 cursor: "pointer",
                 display: "flex",
@@ -111,26 +100,23 @@ const ConsumptionDetails = ({
                 alignItems: "center",
               }}
             >
-              <Typography variant="subtitle2">
-                Membro:{" "}
-                {capitalizeFirstLastName(findUserById(userId, dataUser)?.name)}
-              </Typography>
+              <Typography variant="subtitle2">Data: {formattedDate}</Typography>
               <Chip
-                label={`R$ ${userTotal.toFixed(2)}`}
+                label={`R$ ${dateTotal.toFixed(2)}`}
                 color="primary"
                 size="small"
               />
             </Box>
 
-            <Collapse in={expandedUser === userId}>
+            <Collapse in={expandedDate === dateKey}>
               <List dense>
-                {entries.map((entry, entryIndex) => (
-                  <React.Fragment key={entryIndex}>
+                {orders.map((order, orderIndex) => (
+                  <React.Fragment key={order._id}>
                     <ListItem>
                       <ListItemText
                         primary={
                           <Typography variant="body2">
-                            {format(new Date(entry.date), "dd/MM/yyyy HH:mm", {
+                            {format(new Date(order.createdAt), "HH:mm", {
                               locale: ptBR,
                             })}
                           </Typography>
@@ -138,7 +124,7 @@ const ConsumptionDetails = ({
                       />
                     </ListItem>
                     <Divider />
-                    {entry.products.map((product, productIndex) => (
+                    {order.products.map((product, productIndex) => (
                       <ListItem key={productIndex} sx={{ pl: 4 }}>
                         <ListItemText
                           primary={
@@ -159,7 +145,7 @@ const ConsumptionDetails = ({
                         />
                       </ListItem>
                     ))}
-                    {entryIndex < entries.length - 1 && (
+                    {orderIndex < orders.length - 1 && (
                       <Divider sx={{ my: 1 }} />
                     )}
                   </React.Fragment>
@@ -291,13 +277,13 @@ export default function VisitorInvoiceTable({
 
   const columns: GridColDef[] = [
     {
-      field: "name",
+      field: "visitorName",
       headerName: "Nome visitante",
       width: isSmallScreen ? 100 : 120,
       editable: false,
       sortable: true,
       align: "center",
-      renderCell: (params) => params.value,
+      renderCell: (params) => capitalize(params.value),
     },
     {
       field: "startDate",
@@ -317,22 +303,19 @@ export default function VisitorInvoiceTable({
       renderCell: (params) =>
         format(new Date(params.value), "dd/MM/yyyy", { locale: ptBR }),
     },
-    // {
-    //   field: "consumoPorPessoa",
-    //   headerName: "Consumo por pessoa",
-    //   width: isSmallScreen ? 250 : 350,
-    //   editable: false,
-    //   renderCell: (params: GridRenderCellParams) => (
-    //     <Tooltip title="Clique para ver detalhes" arrow placement="top">
-    //       <Box sx={{ width: "100%" }}>
-    //         <ConsumptionDetails
-    //           consumptionData={params.value}
-    //           dataUser={dataUser}
-    //         />
-    //       </Box>
-    //     </Tooltip>
-    //   ),
-    // },
+    {
+      field: "orders",
+      headerName: "Consumo",
+      width: isSmallScreen ? 250 : 350,
+      editable: false,
+      renderCell: (params: GridRenderCellParams) => (
+        <Tooltip title="Clique para ver detalhes" arrow placement="top">
+          <Box sx={{ width: "100%" }}>
+            <ConsumptionDetails invoice={params.row} />
+          </Box>
+        </Tooltip>
+      ),
+    },
     {
       field: "totalAmount",
       headerName: "Valor total",
