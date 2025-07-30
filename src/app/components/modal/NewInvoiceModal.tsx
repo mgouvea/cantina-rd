@@ -15,11 +15,12 @@ import { Range as DateRangePickerRange, RangeKeyDict } from "react-date-range";
 import { SelectData } from "../filters/SelectData";
 import { useAddInvoice, useAddInvoiceVisitors } from "@/hooks/mutations";
 import { useForm } from "react-hook-form";
-import { useVisitors } from "@/hooks/queries/useVisitors.query";
+import { useVisitorsWithoutDateFilter } from "@/hooks/queries/useVisitors.query";
 
 type NewInvoiceModalProps = {
   openModal: boolean;
   setOpenModal: (open: boolean) => void;
+  handleResetData: () => void;
   viewType?: "socios" | "visitantes";
 };
 
@@ -38,6 +39,7 @@ const INITIAL_INVOICE_FORM_VALUES_VISITORS: CreateInvoiceVisitorsDto = {
 export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
   openModal,
   setOpenModal,
+  handleResetData,
   viewType = "socios", // Default to socios if not provided
 }) => {
   // Get initial values based on viewType
@@ -63,7 +65,7 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
     },
   ]);
 
-  const { data: allVisitors } = useVisitors();
+  const { data: allVisitors } = useVisitorsWithoutDateFilter();
   const { mutateAsync: addInvoice } = useAddInvoice();
   const { mutateAsync: addInvoiceVisitors } = useAddInvoiceVisitors();
 
@@ -111,6 +113,7 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
           endDate: clientData.endDate,
         };
         await addInvoice(invoicePayload);
+        handleResetData();
       } else {
         // Para visitantes: Garantir que temos um array de IDs de visitantes
         // Usamos o estado selectedVisitors para garantir que temos os IDs corretos
@@ -120,6 +123,7 @@ export const NewInvoiceModal: React.FC<NewInvoiceModalProps> = ({
           endDate: data.endDate,
         };
         await addInvoiceVisitors(invoicePayload);
+        handleResetData();
       }
 
       // Limpar o formulário após sucesso

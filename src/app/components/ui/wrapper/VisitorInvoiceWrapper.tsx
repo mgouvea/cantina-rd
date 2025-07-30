@@ -57,6 +57,7 @@ export const VisitorInvoiceWrapper = ({
       <NewInvoiceModal
         openModal={openModal}
         setOpenModal={setOpenModal}
+        handleResetData={handleResetData}
         viewType={viewType}
       />
     </Box>

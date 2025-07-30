@@ -22,7 +22,6 @@ export const useAddInvoiceVisitors = () => {
     mutationFn: CreateInvoiceVisitors,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices-visitors"] });
-      queryClient.invalidateQueries({ queryKey: ["credits"] });
 
       showSnackbar({
         message: "Fatura gerada com sucesso",
@@ -56,7 +55,7 @@ export const useDeleteInvoiceVisitors = () => {
     mutationFn: DeleteInvoiceVisitors,
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["invoices-visitors"] });
       showSnackbar({
         message: "Fatura deletada com sucesso!",
         severity: "success",
@@ -88,7 +87,7 @@ export const useSendInvoiceVisitorsByWhatsApp = () => {
   return useMutation({
     mutationFn: SendInvoiceVisitorsByWhatsApp,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["invoices-visitors"] });
       showSnackbar({
         message: "Fatura enviada com sucesso!",
         severity: "success",

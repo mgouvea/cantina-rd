@@ -22,3 +22,7 @@ export const DeleteVisitor = async (visitorId: string) => {
 export const GetAllVisitors = async () => {
   return (await http.get("visitors")).data;
 };
+
+export const GetAllVisitorsWithoutDateFilter = async () => {
+  return (await http.get("visitors/without-date-filter")).data;
+};

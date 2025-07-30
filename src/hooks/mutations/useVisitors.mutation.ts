@@ -15,7 +15,9 @@ export const useDeleteVisitor = () => {
   return useMutation({
     mutationFn: DeleteVisitor,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["visitors"] });
+      queryClient.invalidateQueries({
+        queryKey: ["invoices-visitors"],
+      });
 
       showSnackbar({
         message: "Visitante deletado com sucesso!",
