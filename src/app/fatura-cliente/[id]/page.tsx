@@ -15,8 +15,6 @@ export default function FaturaCliente() {
   const router = usePathname();
   const { mutateAsync: fullInvoice } = useFullInvoices();
 
-  console.log("invoice", fullInvoice);
-
   const [invoice, setInvoice] = useState<FullInvoiceResponse | null>(null);
 
   const handleFullInvoice = async () => {

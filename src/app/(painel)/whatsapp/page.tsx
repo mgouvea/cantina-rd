@@ -40,8 +40,6 @@ export default function WhatsApp() {
     setIsLoadingCreateInstance(false);
   };
 
-  console.log("qrCode", qrCode);
-
   const renderQRCode = () => {
     if (isLoadingCheckConnection || isLoadingCreateInstance) {
       return <Loading />;
