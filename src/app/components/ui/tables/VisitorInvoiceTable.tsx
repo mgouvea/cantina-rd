@@ -187,7 +187,7 @@ export default function VisitorInvoiceTable({
 
   const handleDeleteClick = (row: GridRowModel) => async () => {
     setInvoiceIdToDelete(row._id);
-    setInvoiceNameToDelete(row.ownerName);
+    setInvoiceNameToDelete(row.visitorName);
     setOpenDeleteModal(true);
   };
 
@@ -197,6 +197,7 @@ export default function VisitorInvoiceTable({
     setOpenDeleteModal(false);
     setInvoiceIdToDelete(null);
     setInvoiceNameToDelete(null);
+    onResetData();
   };
 
   const handlePaymentClick = (row: GridRowModel) => async () => {

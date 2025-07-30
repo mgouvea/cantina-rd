@@ -18,7 +18,7 @@ import { useGroupFamilyStore, useUserStore } from "@/contexts";
 import { useInvoices } from "@/hooks/queries/useInvoices.query";
 import { usePayments } from "@/hooks/queries/usePayments.query";
 import { useSearchParams } from "next/navigation";
-import { useVisitors } from "@/hooks/queries/useVisitors.query";
+import { useVisitorsWithoutDateFilter } from "@/hooks/queries/useVisitors.query";
 
 import {
   CustomTabPanel,
@@ -64,7 +64,8 @@ function FaturasContent() {
   const { data: dataVisitors, isLoading: isLoadingVisitors } =
     useOrdersVisitors();
   const { data: allInvoices, isLoading: isLoadingInvoices } = useInvoices();
-  const { data: allVisitors, isLoading: isLoadingAllVisitors } = useVisitors();
+  const { data: allVisitors, isLoading: isLoadingAllVisitors } =
+    useVisitorsWithoutDateFilter();
   const { data: dataUser, isLoading: isLoadingUser } = useUsers();
   const { data: groupFamilies, isLoading: isLoadingGroupFamily } =
     useGroupFamily();

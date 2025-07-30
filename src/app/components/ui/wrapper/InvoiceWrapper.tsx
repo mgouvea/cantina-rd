@@ -70,7 +70,11 @@ export const InvoiceWrapper = ({
         setOpenModal={setOpenModal}
       />
 
-      <NewInvoiceModal openModal={openModal} setOpenModal={setOpenModal} />
+      <NewInvoiceModal
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+        handleResetData={handleResetData}
+      />
     </Box>
   );
 };
