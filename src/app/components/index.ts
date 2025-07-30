@@ -56,6 +56,7 @@ export * from "./ui/tables/Table";
 export * from "./ui/tables/TableClient";
 export * from "./ui/tables/VisitorInvoiceTable";
 export * from "./ui/tables/VisitorOrderTable";
+export * from "./ui/tables/VisitorPaymentTable";
 export * from "./ui/tables/VisitorTable";
 
 export * from "./ui/tabs/CustomTabs";
@@ -69,3 +70,4 @@ export * from "./ui/wrapper/InvoiceWrapper";
 export * from "./ui/wrapper/OrderWrapper";
 export * from "./ui/wrapper/VisitorInvoiceWrapper";
 export * from "./ui/wrapper/VisitorOrderWrapper";
+export * from "./ui/wrapper/VisitorPaymentWrapper";

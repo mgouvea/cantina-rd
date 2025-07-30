@@ -10,7 +10,7 @@ import React, { useEffect, useState } from "react";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
 import { capitalize, capitalizeFirstLastName } from "@/utils";
-import { CreatePaymentDto, FullInvoiceResponse } from "@/types";
+import { CreateVisitorPaymentDto, FullInvoiceResponse } from "@/types";
 import { DeleteModal } from "../../modal/DeleteModal";
 import { Filters } from "../../filters/Filters";
 import { format } from "date-fns";
@@ -18,7 +18,6 @@ import { PaymentModal } from "../../modal/PaymentModal";
 import { ptBR } from "date-fns/locale";
 
 import {
-  useAddPayment,
   useDeleteInvoiceVisitors,
   useSendInvoiceVisitorsByWhatsApp,
 } from "@/hooks/mutations";
@@ -45,6 +44,7 @@ import {
   GridRowModel,
   GridRenderCellParams,
 } from "@mui/x-data-grid";
+import { useAddPaymentVisitors } from "@/hooks/mutations/usePayments-visitors.mutation";
 
 interface TabelaProps {
   data: FullInvoiceResponse[] | undefined;
@@ -170,7 +170,7 @@ export default function VisitorInvoiceTable({
   const { mutateAsync: deleteInvoice } = useDeleteInvoiceVisitors();
   const { mutateAsync: sendInvoiceByWhatsApp } =
     useSendInvoiceVisitorsByWhatsApp();
-  const { mutateAsync: confirmPayment } = useAddPayment();
+  const { mutateAsync: confirmPayment } = useAddPaymentVisitors();
 
   const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(
     null
@@ -232,16 +232,14 @@ export default function VisitorInvoiceTable({
               : invoiceValue! // Paga o valor total
             : modalData.partialValue!; // Pagamento parcial conforme informado
 
-        const paymentData: CreatePaymentDto = {
+        const paymentData: CreateVisitorPaymentDto = {
           invoiceId: paymentId!,
           amountPaid: amountPaid,
-          paymentDate: new Date(),
           isPartial: modalData.paymentType === "partial",
-          isCredit: false,
         };
 
         await confirmPayment(paymentData);
-
+        onResetData();
         resolve();
       } catch (error) {
         reject(error);

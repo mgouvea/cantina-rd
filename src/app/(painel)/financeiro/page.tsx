@@ -26,6 +26,7 @@ import {
   OrderWrapper,
   VisitorInvoiceWrapper,
   VisitorOrderWrapper,
+  VisitorPaymentWrapper,
 } from "@/app/components";
 import {
   useCredits,
@@ -200,7 +201,7 @@ function FaturasContent() {
               <PaymentTable data={payments || []} isLoading={false} />
             )
           ) : (
-            <EmptyContent title="Visão de Visitantes - Pagamentos (Em implementação)" />
+            <VisitorPaymentWrapper />
           )}
         </CustomTabPanel>
         <CustomTabPanel value={value} index={3} dir={theme.direction}>

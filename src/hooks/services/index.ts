@@ -11,4 +11,5 @@ export * from "./invoices.visitors";
 export * from "./visitors";
 export * from "./whatssApp";
 export * from "./payments";
+export * from "./payments.visitors";
 export * from "./credits";
