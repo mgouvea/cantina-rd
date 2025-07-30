@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, ButtonProps } from "@mui/material";
 
-export const Botao: React.FC<ButtonProps> = (props) => {
+export const ButtonComponent: React.FC<ButtonProps> = (props) => {
   return (
     <Button
       {...props}

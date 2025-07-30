@@ -16,7 +16,6 @@ import {
   TextField,
 } from "@mui/material";
 import { Client } from "@/types/client";
-import { Filtros } from "../..";
 
 import {
   DataGrid,
@@ -27,6 +26,7 @@ import {
 import { User } from "@/types";
 import GenericModal from "../../modal/GenericModal";
 import { useRouter } from "next/navigation";
+import { Filters } from "../../filters/Filters";
 interface TabelaProps {
   data: Client[];
   isLoading: boolean;
@@ -44,7 +44,7 @@ interface TabelaProps {
   setOpenModal: (open: boolean) => void;
 }
 
-export default function TabelaCliente({
+export default function TableClient({
   data,
   isLoading,
   enableOrDisableAdmin,
@@ -184,7 +184,7 @@ export default function TabelaCliente({
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data}>
+        <Filters rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
@@ -197,13 +197,13 @@ export default function TabelaCliente({
                 rowHeight={60}
                 initialState={{
                   sorting: {
-                    sortModel: [{ field: 'name', sort: 'asc' }],
+                    sortModel: [{ field: "name", sort: "asc" }],
                   },
                 }}
               />
             )
           }
-        </Filtros>
+        </Filters>
       )}
 
       <GenericModal

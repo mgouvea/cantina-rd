@@ -1,3 +1,5 @@
+"use client";
+
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -8,9 +10,11 @@ import Text from "../text/Text";
 import { capitalizeFirstLastName } from "@/utils";
 import { CreateOrderDto, ProductItem } from "@/types/orders";
 import { Products } from "@/types";
+import { useAddManyOrders } from "@/hooks/mutations";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useGroupFamilyStore, useUserStore } from "@/contexts";
 import { useProducts } from "@/hooks/queries";
+
 import {
   Autocomplete,
   Avatar,
@@ -31,7 +35,6 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useAddManyOrders } from "@/hooks/mutations";
 
 // Interface para representar múltiplas ordens de compra
 interface MultipleOrdersForm {

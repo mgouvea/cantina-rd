@@ -6,7 +6,8 @@ import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
 import { capitalize, formatarTelefone } from "@/utils";
 import { CircularProgress, Stack } from "@mui/material";
-import { Filtros } from "../..";
+import { Filters } from "../../filters/Filters";
+import { Visitor } from "@/types";
 
 import {
   DataGrid,
@@ -14,14 +15,13 @@ import {
   GridActionsCellItem,
   GridRowModel,
 } from "@mui/x-data-grid";
-import { Visitor } from "@/types/visitors";
 interface TabelaProps {
   data: Visitor[];
   isLoading: boolean;
   handleDeleteClick: (row: GridRowModel, isVisitor?: boolean) => () => void;
 }
 
-export default function TabelaVisitantes({
+export default function VisitorTable({
   data,
   isLoading,
   handleDeleteClick,
@@ -95,7 +95,7 @@ export default function TabelaVisitantes({
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data}>
+        <Filters rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
@@ -110,7 +110,7 @@ export default function TabelaVisitantes({
               />
             )
           }
-        </Filtros>
+        </Filters>
       )}
     </Box>
   );

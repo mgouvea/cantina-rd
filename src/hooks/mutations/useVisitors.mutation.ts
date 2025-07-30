@@ -1,6 +1,6 @@
-import { useSnackbar } from "@/app/components";
-import { DeleteVisitor, PostAddVisitor } from "@/hooks/services";
+import { DeleteVisitor, PostAddVisitor } from "../services";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSnackbar } from "@/app/components";
 
 export const useAddVisitor = () => {
   return useMutation({
@@ -15,7 +15,9 @@ export const useDeleteVisitor = () => {
   return useMutation({
     mutationFn: DeleteVisitor,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["visitors"] });
+      queryClient.invalidateQueries({
+        queryKey: ["invoices-visitors"],
+      });
 
       showSnackbar({
         message: "Visitante deletado com sucesso!",

@@ -11,7 +11,6 @@ import GroupRemoveOutlinedIcon from "@mui/icons-material/GroupRemoveOutlined";
 import Text from "../text/Text";
 import { capitalize, capitalizeFirstLastName } from "@/utils";
 import { CircularProgress, IconButton, Stack, Typography } from "@mui/material";
-import { Filtros } from "../..";
 import { GroupFamily, SelectedMember } from "@/types/groupFamily";
 import { useRouter } from "next/navigation";
 import Avatar from "@mui/material/Avatar";
@@ -24,8 +23,9 @@ import {
   GridActionsCellItem,
   GridRowModel,
 } from "@mui/x-data-grid";
+import { Filters } from "../../filters/Filters";
 
-interface TabelaProps {
+interface GroupFamilyTableProps {
   data: GroupFamily[];
   isLoading: boolean;
   handleEditClick: (row: GridRowModel) => () => void;
@@ -36,13 +36,13 @@ interface TabelaProps {
   ) => () => void;
 }
 
-export default function TabelaGrupoFamiliar({
+export default function GroupFamilyTable({
   data,
   isLoading,
   handleEditClick,
   handleDeleteClick,
   handleEditMembers,
-}: TabelaProps) {
+}: GroupFamilyTableProps) {
   const router = useRouter();
 
   const columns: GridColDef[] = [
@@ -177,7 +177,7 @@ export default function TabelaGrupoFamiliar({
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data}>
+        <Filters rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
@@ -197,7 +197,7 @@ export default function TabelaGrupoFamiliar({
               />
             )
           }
-        </Filtros>
+        </Filters>
       )}
     </Box>
   );

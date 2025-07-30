@@ -2,7 +2,7 @@ import { fotoUploadProps, User, UserAdmin } from "@/types";
 import { Box, Stack } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import Text from "../text/Text";
-import { EntradaTexto } from "../entradaTexto/EntradaTexto";
+import { EntradaTexto } from "../inputText/InputText";
 import SwitchSelector from "react-switch-selector";
 import { useState, useMemo, useCallback } from "react";
 import { FormActions } from "./FormActions";
@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "../../snackbar/SnackbarProvider";
 import { useAddAdmin, useAddUser, useUpdateUser } from "@/hooks/mutations";
-import { UploadPicture } from "../uploadFoto/UploadPicture";
+import { UploadPicture } from "../upload/UploadPicture";
 import { useUserStore } from "@/contexts";
 
 const optionsSwitch = [

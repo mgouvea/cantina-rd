@@ -8,10 +8,10 @@ import Text from "../text/Text";
 import { capitalize } from "@/utils";
 import { CircularProgress, Stack, Typography } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
-import { Filtros } from "../..";
+import { Filters } from "../../filters/Filters";
 import { OrderVisitor, ProductItem, TabelaProps } from "@/types";
 
-export default function TabelaComprasVisitors({
+export default function VisitorOrderTable({
   data,
   isLoading,
   handleEditClick,
@@ -167,7 +167,7 @@ export default function TabelaComprasVisitors({
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data}>
+        <Filters rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
@@ -183,7 +183,7 @@ export default function TabelaComprasVisitors({
               />
             )
           }
-        </Filtros>
+        </Filters>
       )}
     </Box>
   );

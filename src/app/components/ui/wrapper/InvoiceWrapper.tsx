@@ -1,9 +1,9 @@
 "use client";
 
+import InvoiceTable from "../tables/InvoiceTable";
 import React, { useCallback, useEffect, useState } from "react";
-import TabelaFaturas from "../tables/TabelaFaturas";
 import { Box } from "@mui/material";
-import { BoxStyle } from "./BoxStyle";
+import { BoxStyle } from "./style/BoxStyle";
 import { GroupFamily, User } from "@/types";
 import { NewInvoiceModal } from "../../modal/NewInvoiceModal";
 import { useFullInvoices } from "@/hooks/mutations";
@@ -12,17 +12,17 @@ import { useGroupFamilyWithOwner } from "@/hooks/queries";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
-interface FaturaWrapperProps {
+interface InvoiceWrapperProps {
   groupFamilies: GroupFamily[];
   dataUser: User[] | null;
   allInvoicesIds: string[] | null;
 }
 
-export const FaturaWrapper = ({
+export const InvoiceWrapper = ({
   groupFamilies,
   dataUser,
   allInvoicesIds,
-}: FaturaWrapperProps) => {
+}: InvoiceWrapperProps) => {
   const { data: groupFamiliesWithOwner } = useGroupFamilyWithOwner();
   const { mutateAsync: fullInvoices, isPending: isLoadingFullInvoices } =
     useFullInvoices();
@@ -61,7 +61,7 @@ export const FaturaWrapper = ({
 
   return (
     <Box sx={BoxStyle}>
-      <TabelaFaturas
+      <InvoiceTable
         data={fullInvoicesData}
         groupFamilies={groupFamilies}
         dataUser={dataUser}
@@ -70,7 +70,11 @@ export const FaturaWrapper = ({
         setOpenModal={setOpenModal}
       />
 
-      <NewInvoiceModal openModal={openModal} setOpenModal={setOpenModal} />
+      <NewInvoiceModal
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+        handleResetData={handleResetData}
+      />
     </Box>
   );
 };

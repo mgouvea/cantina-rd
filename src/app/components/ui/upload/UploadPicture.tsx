@@ -2,10 +2,10 @@
 
 import { fotoUploadProps } from "@/types";
 import { Avatar, Box, IconButton } from "@mui/material";
-import { Botao } from "../botao/Botao";
 import { ChangeEvent, useCallback, memo } from "react";
 import ClearOutlinedIcon from "@mui/icons-material/ClearOutlined";
 import AddIcon from "@mui/icons-material/Add";
+import { ButtonComponent } from "../button/ButtonComponent";
 
 const UploadPictureComponent = ({
   fotoUpload,
@@ -124,7 +124,7 @@ const UploadImageButtonComponent = ({
       id="file-input"
     />
     <label htmlFor="file-input">
-      <Botao
+      <ButtonComponent
         variant="outlined"
         startIcon={<AddIcon />}
         color="primary"
@@ -132,7 +132,7 @@ const UploadImageButtonComponent = ({
         sx={{ width: "fit-content" }}
       >
         Selecionar foto
-      </Botao>
+      </ButtonComponent>
     </label>
   </Box>
 );

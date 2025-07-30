@@ -1,5 +1,5 @@
-import { Visitor } from "@/types/visitors";
 import { http } from ".";
+import { Visitor } from "@/types";
 
 export const PostAddVisitor = async (visitor: Visitor) => {
   return (await http.post("visitors", visitor)).data;
@@ -21,4 +21,8 @@ export const DeleteVisitor = async (visitorId: string) => {
 
 export const GetAllVisitors = async () => {
   return (await http.get("visitors")).data;
+};
+
+export const GetAllVisitorsWithoutDateFilter = async () => {
+  return (await http.get("visitors/without-date-filter")).data;
 };

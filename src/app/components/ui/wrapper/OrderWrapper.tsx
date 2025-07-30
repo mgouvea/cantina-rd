@@ -2,8 +2,7 @@
 
 import React, { useState } from "react";
 import { Box } from "@mui/material";
-import { BoxStyle } from "./BoxStyle";
-import TabelaCompras from "../tables/TabelaCompras";
+import { BoxStyle } from "./style/BoxStyle";
 import { Order } from "@/types";
 import { GridRowModel } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
@@ -11,13 +10,14 @@ import { useDeleteOrder } from "@/hooks/mutations";
 import { DeleteModal } from "../../modal/DeleteModal";
 import { capitalizeFirstLastName } from "@/utils";
 import { FormNewOrders } from "../forms/FormNewOrders";
+import OrderTable from "../tables/OrderTable";
 
-interface ComprasWrapperProps {
+interface OrderWrapperProps {
   data: Order[];
   isLoading: boolean;
 }
 
-export const ComprasWrapper = ({ data, isLoading }: ComprasWrapperProps) => {
+export const OrderWrapper = ({ data, isLoading }: OrderWrapperProps) => {
   const router = useRouter();
   const { mutateAsync: deleteOrder } = useDeleteOrder();
 
@@ -58,7 +58,7 @@ export const ComprasWrapper = ({ data, isLoading }: ComprasWrapperProps) => {
       {newOrder ? (
         <FormNewOrders onClickBack={handleNewOrderClick} />
       ) : (
-        <TabelaCompras
+        <OrderTable
           data={data}
           isLoading={isLoading}
           handleEditClick={handleEditClick}

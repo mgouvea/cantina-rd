@@ -11,18 +11,18 @@ import Text from "../text/Text";
 import { capitalize } from "@/utils";
 import { Categories } from "@/types";
 import { CircularProgress, IconButton, Stack } from "@mui/material";
-import { Filtros } from "../..";
 import { useCategoryStore } from "@/contexts";
 import { useDeleteCategory } from "@/hooks/mutations";
 import { useRouter } from "next/navigation";
 
 import { DataGrid, GridColDef, GridActionsCellItem } from "@mui/x-data-grid";
+import { Filters } from "../../filters/Filters";
 interface TabelaProps {
   data: Categories[];
   isLoading: boolean;
 }
 
-export default function TabelaCategorias({ data, isLoading }: TabelaProps) {
+export default function CategoriesTable({ data, isLoading }: TabelaProps) {
   const router = useRouter();
 
   const { mutateAsync: deleteCategory } = useDeleteCategory();
@@ -125,7 +125,7 @@ export default function TabelaCategorias({ data, isLoading }: TabelaProps) {
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data}>
+        <Filters rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
@@ -139,7 +139,7 @@ export default function TabelaCategorias({ data, isLoading }: TabelaProps) {
               />
             )
           }
-        </Filtros>
+        </Filters>
       )}
     </Box>
   );

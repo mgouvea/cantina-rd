@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Box } from "@mui/material";
-import { Pesquisa } from "./Pesquisa";
-import { InvoiceFilter } from "./InvoiceFilter";
 import { GroupFamilyWithOwner } from "@/types";
+import { InvoiceFilter } from "./InvoiceFilter";
+import { Search } from "./Search";
 
-type FiltrosProps = {
+type FiltersProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children: (filteredRows: any[]) => React.ReactNode;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,7 +14,7 @@ type FiltrosProps = {
   type?: string;
 };
 
-export const Filtros: React.FC<FiltrosProps> = ({ children, rows, type }) => {
+export const Filters: React.FC<FiltersProps> = ({ children, rows, type }) => {
   const [parametrosDeBusca, setParametrosDeBusca] = useState("");
   const [selectedFamilies, setSelectedFamilies] = useState<
     GroupFamilyWithOwner[]
@@ -68,7 +68,7 @@ export const Filtros: React.FC<FiltrosProps> = ({ children, rows, type }) => {
           }}
         >
           {type !== "invoice" && (
-            <Pesquisa
+            <Search
               parametrosDeBusca={parametrosDeBusca}
               setParametrosDeBusca={setParametrosDeBusca}
             />

@@ -1,8 +1,15 @@
-export type CreateInvoiceDto = {
-  groupFamilyIds: string[];
+export interface CreateInvoiceDto {
   startDate: Date | null;
   endDate: Date | null;
-};
+}
+
+export interface CreateInvoiceClientDto extends CreateInvoiceDto {
+  groupFamilyIds: string[];
+}
+
+export interface CreateInvoiceVisitorsDto extends CreateInvoiceDto {
+  visitorsIds: string[];
+}
 
 export type InvoiceDto = {
   _id: string;

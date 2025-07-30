@@ -2,26 +2,31 @@
 
 import AssuredWorkloadIcon from "@mui/icons-material/AssuredWorkload";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
+import CreditTable from "@/app/components/ui/tables/CreditTable";
 import EmojiPeopleOutlinedIcon from "@mui/icons-material/EmojiPeopleOutlined";
+import EmptyContent from "@/app/components/ui/emptyContent/EmptyContent";
 import Loading from "@/app/components/loading/Loading";
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
+import PaymentTable from "@/app/components/ui/tables/PaymentTable";
 import PeopleIcon from "@mui/icons-material/People";
 import PriceCheckIcon from "@mui/icons-material/PriceCheck";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import TabelaCredito from "@/app/components/ui/tables/TabelaCredito";
-import TabelaPagamentos from "@/app/components/ui/tables/TabelaPagamentos";
 import { a11yProps } from "@/utils";
-import { InvoiceDto } from "@/types/invoice";
+import { InvoiceDto } from "@/types";
 import { Suspense, useEffect, useState } from "react";
+import { useGroupFamilyStore, useUserStore } from "@/contexts";
 import { useInvoices } from "@/hooks/queries/useInvoices.query";
-import { usePayments } from "@/hooks/queries/payments.query";
+import { usePayments } from "@/hooks/queries/usePayments.query";
 import { useSearchParams } from "next/navigation";
+import { useVisitorsWithoutDateFilter } from "@/hooks/queries/useVisitors.query";
 
 import {
-  ComprasVisitorsWrapper,
-  ComprasWrapper,
   CustomTabPanel,
-  FaturaWrapper,
+  InvoiceWrapper,
+  OrderWrapper,
+  VisitorInvoiceWrapper,
+  VisitorOrderWrapper,
+  VisitorPaymentWrapper,
 } from "@/app/components";
 import {
   useCredits,
@@ -39,8 +44,6 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
-import { useGroupFamilyStore, useUserStore } from "@/contexts";
-import EmptyContent from "@/app/components/ui/emptyContent/EmptyContent";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -62,6 +65,8 @@ function FaturasContent() {
   const { data: dataVisitors, isLoading: isLoadingVisitors } =
     useOrdersVisitors();
   const { data: allInvoices, isLoading: isLoadingInvoices } = useInvoices();
+  const { data: allVisitors, isLoading: isLoadingAllVisitors } =
+    useVisitorsWithoutDateFilter();
   const { data: dataUser, isLoading: isLoadingUser } = useUsers();
   const { data: groupFamilies, isLoading: isLoadingGroupFamily } =
     useGroupFamily();
@@ -69,6 +74,8 @@ function FaturasContent() {
   const { data: credits, isLoading: isLoadingCredits } = useCredits();
 
   const [allInvoicesIds, setAllInvoicesIds] = useState<string[] | null>(null);
+
+  const [allVisitorsIds, setAllVisitorsIds] = useState<string[] | null>(null);
 
   const { updateAllGroupFamilies } = useGroupFamilyStore();
   const { updateAllUsers } = useUserStore();
@@ -78,6 +85,12 @@ function FaturasContent() {
       setAllInvoicesIds(allInvoices.map((invoice: InvoiceDto) => invoice._id));
     }
   }, [allInvoices, isLoadingInvoices]);
+
+  useEffect(() => {
+    if (allVisitors && allVisitors.length > 0 && !isLoadingVisitors) {
+      setAllVisitorsIds(allVisitors.map((visitor: InvoiceDto) => visitor._id));
+    }
+  }, [allVisitors, isLoadingVisitors]);
 
   useEffect(() => {
     updateAllGroupFamilies(groupFamilies);
@@ -103,7 +116,8 @@ function FaturasContent() {
       isLoadingOrders ||
       isLoadingGroupFamily ||
       isLoadingUser ||
-      isLoadingVisitors
+      isLoadingVisitors ||
+      isLoadingAllVisitors
     ) {
       return <Loading />;
     }
@@ -157,9 +171,9 @@ function FaturasContent() {
         </Box>
         <CustomTabPanel value={value} index={0} dir={theme.direction}>
           {viewType === "socios" ? (
-            <ComprasWrapper data={dataOrders} isLoading={isLoadingOrders} />
+            <OrderWrapper data={dataOrders} isLoading={isLoadingOrders} />
           ) : (
-            <ComprasVisitorsWrapper
+            <VisitorOrderWrapper
               data={dataVisitors}
               isLoading={isLoadingVisitors}
             />
@@ -167,13 +181,16 @@ function FaturasContent() {
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1} dir={theme.direction}>
           {viewType === "socios" ? (
-            <FaturaWrapper
+            <InvoiceWrapper
               groupFamilies={groupFamilies}
               dataUser={dataUser}
               allInvoicesIds={allInvoicesIds}
             />
           ) : (
-            <EmptyContent title="Visão de Visitantes - Faturas (Em implementação)" />
+            <VisitorInvoiceWrapper
+              allVisitorsIds={allVisitorsIds}
+              viewType={viewType}
+            />
           )}
         </CustomTabPanel>
         <CustomTabPanel value={value} index={2} dir={theme.direction}>
@@ -181,10 +198,10 @@ function FaturasContent() {
             isLoadingPayments ? (
               <Loading />
             ) : (
-              <TabelaPagamentos data={payments || []} isLoading={false} />
+              <PaymentTable data={payments || []} isLoading={false} />
             )
           ) : (
-            <EmptyContent title="Visão de Visitantes - Pagamentos (Em implementação)" />
+            <VisitorPaymentWrapper />
           )}
         </CustomTabPanel>
         <CustomTabPanel value={value} index={3} dir={theme.direction}>
@@ -192,7 +209,7 @@ function FaturasContent() {
             isLoadingCredits ? (
               <Loading />
             ) : (
-              <TabelaCredito data={credits || []} isLoading={false} />
+              <CreditTable data={credits || []} isLoading={false} />
             )
           ) : (
             <EmptyContent title="Não há opção de crédito para visitantes" />

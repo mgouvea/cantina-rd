@@ -5,7 +5,6 @@ import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Filtros } from "../..";
 import { PaymentResponse, TabelaProps } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -18,8 +17,9 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import { Filters } from "../../filters/Filters";
 
-export default function TabelaPagamentos({
+export default function PaymentTable({
   data,
   isLoading,
 }: TabelaProps<PaymentResponse>) {
@@ -148,7 +148,7 @@ export default function TabelaPagamentos({
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data}>
+        <Filters rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
@@ -194,7 +194,7 @@ export default function TabelaPagamentos({
               />
             )
           }
-        </Filtros>
+        </Filters>
       )}
     </Box>
   );

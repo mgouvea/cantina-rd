@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { capitalize } from "@/utils";
 import { Categories, SubCategories } from "@/types/products";
-import { EntradaTexto } from "../entradaTexto/EntradaTexto";
+import { EntradaTexto } from "../inputText/InputText";
 import { FormActions } from "./FormActions";
 import { useAddSubCategory, useUpdateSubCategory } from "@/hooks/mutations";
 import { useCategories } from "@/hooks/queries";

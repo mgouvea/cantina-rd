@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { SelectData } from "../../filtros/SelectData";
+import { SelectData } from "../../filters/SelectData";
 import { useState } from "react";
 import { Range as DateRangePickerRange, RangeKeyDict } from "react-date-range";
 import { useForm } from "react-hook-form";

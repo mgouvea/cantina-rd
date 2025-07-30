@@ -1,12 +1,12 @@
-import { InputAdornment, TextField } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { InputAdornment, TextField } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
-type PesquisaProps = {
+type SearchProps = {
   parametrosDeBusca: string;
   setParametrosDeBusca: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export const Pesquisa: React.FC<PesquisaProps> = ({
+export const Search: React.FC<SearchProps> = ({
   parametrosDeBusca,
   setParametrosDeBusca,
 }) => {
@@ -16,11 +16,11 @@ export const Pesquisa: React.FC<PesquisaProps> = ({
       fullWidth
       sx={{
         my: 2,
-        '& .MuiOutlinedInput-root': {
-          borderRadius: '8px',
-          maxHeight: '48px',
+        "& .MuiOutlinedInput-root": {
+          borderRadius: "8px",
+          maxHeight: "48px",
         },
-        maxWidth: '492px',
+        maxWidth: "492px",
       }}
       value={parametrosDeBusca}
       onChange={(event) => setParametrosDeBusca(event.target.value)}

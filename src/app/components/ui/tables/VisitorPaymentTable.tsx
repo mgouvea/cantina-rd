@@ -1,18 +1,12 @@
 "use client";
 
-import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Box from "@mui/material/Box";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
-import { CreditModal, Filtros } from "../..";
-import { CreditResponse } from "@/types/credit";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { TabelaProps } from "@/types";
+import { VisitorPaymentResponse, TabelaProps } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 
 import {
   CircularProgress,
@@ -23,59 +17,92 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import { Filters } from "../../filters/Filters";
+import { capitalizeFirstLastName } from "@/utils";
 
-export default function TabelaCredito({
+export default function VisitorPaymentTable({
   data,
   isLoading,
-}: TabelaProps<CreditResponse>) {
+}: TabelaProps<VisitorPaymentResponse>) {
+  const queryClient = useQueryClient();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-  const queryClient = useQueryClient();
-
-  const [openCreditModal, setOpenCreditModal] = useState(false);
 
   const handleResetData = () => {
-    queryClient.invalidateQueries({ queryKey: ["credits"] });
+    queryClient.invalidateQueries({ queryKey: ["payments-visitors"] });
   };
 
   const columns: GridColDef[] = [
     {
-      field: "groupFamilyName",
-      headerName: "Grupo familiar",
+      field: "visitorName",
+      headerName: "Visitante",
       width: isMobile ? 150 : isTablet ? 150 : 200,
       flex: 1,
       minWidth: 120,
       editable: true,
       renderCell: ({ value }) => (
-        <Typography sx={{ py: 0.5 }}>{value}</Typography>
+        <Typography sx={{ py: 0.5 }}>
+          {capitalizeFirstLastName(value)}
+        </Typography>
       ),
     },
     {
-      field: "creditedAmount",
+      field: "invoicePeriod",
+      headerName: "Período",
+      width: isMobile ? 150 : isTablet ? 150 : 200,
+      flex: 1,
+      minWidth: 120,
+      editable: true,
+      renderCell: ({ value }) => {
+        const startDate = new Date(value.startDate).toLocaleDateString("pt-BR");
+        const endDate = new Date(value.endDate).toLocaleDateString("pt-BR");
+
+        return (
+          <Typography sx={{ py: 0.5 }}>
+            {startDate} - {endDate}
+          </Typography>
+        );
+      },
+    },
+    {
+      field: "invoiceTotalAmount",
       headerName: "Valor total",
       width: isMobile ? 100 : isTablet ? 120 : 130,
       flex: 0.8,
       minWidth: 100,
       editable: true,
       renderCell: ({ value }) => (
-        <Typography sx={{ py: 0.5 }}>R$ {Number(value).toFixed(2)}</Typography>
+        <Typography sx={{ py: 0.5 }}>R$ {value}</Typography>
       ),
     },
     {
-      field: "amount",
-      headerName: "Valor atual",
+      field: "amountPaid",
+      headerName: "Valor pago",
       width: isMobile ? 100 : isTablet ? 120 : 130,
       flex: 0.8,
       minWidth: 100,
       editable: true,
       renderCell: ({ value }) => (
-        <Typography sx={{ py: 0.5 }}>R$ {Number(value).toFixed(2)}</Typography>
+        <Typography sx={{ py: 0.5 }}>R$ {value}</Typography>
       ),
     },
     {
-      field: "createdAt",
-      headerName: "Data de crédito",
+      field: "isPartial",
+      headerName: "Pagamento parcial",
+      width: isMobile ? 100 : isTablet ? 120 : 130,
+      flex: 0.8,
+      minWidth: 100,
+      align: "center",
+      headerAlign: "center",
+      editable: true,
+      renderCell: ({ value }) => (
+        <Typography sx={{ py: 0.5 }}>{value ? "Sim" : "Não"}</Typography>
+      ),
+    },
+    {
+      field: "paymentDate",
+      headerName: "Data pagamento",
       width: isMobile ? 80 : 100,
       flex: 1,
       minWidth: 80,
@@ -84,7 +111,7 @@ export default function TabelaCredito({
       headerAlign: "center",
       renderCell: ({ value }) => (
         <Typography sx={{ py: 0.5 }}>
-          {format(new Date(value), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+          {new Date(value).toLocaleDateString()}
         </Typography>
       ),
     },
@@ -106,36 +133,25 @@ export default function TabelaCredito({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Créditos</Text>
+        <Text variant="h5">Pagamentos</Text>
 
-        <Stack direction="row" spacing={2}>
-          <Tooltip title="Inserir crédito">
-            <IconButton
-              aria-label="add"
-              sx={{ color: "success.main" }}
-              onClick={() => setOpenCreditModal(true)}
-            >
-              <AddCircleIcon fontSize="large" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Recarregar dados">
-            <IconButton
-              aria-label="add"
-              sx={{ color: "success.main" }}
-              onClick={handleResetData}
-            >
-              <CachedOutlinedIcon fontSize="medium" />
-            </IconButton>
-          </Tooltip>
-        </Stack>
+        <Tooltip title="Recarregar dados">
+          <IconButton
+            aria-label="add"
+            sx={{ color: "success.main" }}
+            onClick={handleResetData}
+          >
+            <CachedOutlinedIcon fontSize="medium" />
+          </IconButton>
+        </Tooltip>
       </Stack>
 
       {!isLoading && (!data || data.length === 0) && (
-        <EmptyContent title="Ainda não há créditos para exibir" />
+        <EmptyContent title="Ainda não há pagamentos para exibir" />
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data}>
+        <Filters rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
@@ -181,12 +197,8 @@ export default function TabelaCredito({
               />
             )
           }
-        </Filtros>
+        </Filters>
       )}
-      <CreditModal
-        openModal={openCreditModal}
-        setOpenModal={setOpenCreditModal}
-      />
     </Box>
   );
 }

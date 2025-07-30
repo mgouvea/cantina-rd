@@ -8,7 +8,7 @@ import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
 import { useState } from "react";
 import { useCheckConnection, useQRCode } from "@/hooks/queries";
 import { useCreateInstance, useRestartInstance } from "@/hooks/mutations";
-import { CreateInstance } from "@/types/whatsApp";
+import { CreateInstance } from "@/types";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -39,8 +39,6 @@ export default function WhatsApp() {
     }
     setIsLoadingCreateInstance(false);
   };
-
-  console.log("qrCode", qrCode);
 
   const renderQRCode = () => {
     if (isLoadingCheckConnection || isLoadingCreateInstance) {

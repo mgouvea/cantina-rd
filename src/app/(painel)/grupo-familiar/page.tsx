@@ -1,19 +1,19 @@
 "use client";
 
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
+import GroupFamilyTable from "@/app/components/ui/tables/GroupFamilyTable";
 import Loading from "@/app/components/loading/Loading";
-import TabelaGrupoFamiliar from "@/app/components/ui/tables/TabelaGrupoFamiliar";
+import { DeleteModal, MemberModal } from "@/app/components";
+import { GridRowModel } from "@mui/x-data-grid";
 import { useDeleteGroupFamily } from "@/hooks/mutations";
 import { useEffect, useState } from "react";
 import { useGroupFamily } from "@/hooks/queries/useGroupFamily.query";
 import { useGroupFamilyStore } from "@/contexts/store/groupFamily.store";
 import { useRouter } from "next/navigation";
-import { DeleteModal, MemberModal } from "@/app/components";
-
-import type { GroupFamily, SelectedMember } from "@/types";
-import { GridRowModel } from "@mui/x-data-grid";
 import { useUsers } from "@/hooks/queries";
 import { useUserStore } from "@/contexts";
+
+import type { GroupFamily, SelectedMember } from "@/types";
 
 const breadcrumbItems = [
   { label: "Início", href: "/dashboard" },
@@ -79,7 +79,7 @@ export default function GroupFamily() {
     }
 
     return (
-      <TabelaGrupoFamiliar
+      <GroupFamilyTable
         data={data}
         isLoading={isLoading}
         handleEditClick={handleEditClick}

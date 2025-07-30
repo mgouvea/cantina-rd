@@ -25,4 +25,24 @@ export interface PaymentResponse {
   invoiceTotalAmount: number;
 }
 
+export interface VisitorPaymentResponse {
+  _id: string;
+  invoiceId: string;
+  amountPaid: number;
+  paymentDate: Date;
+  isPartial: boolean;
+  createdAt: Date;
+  visitorName: string;
+  invoicePeriod: {
+    startDate: Date;
+    endDate: Date;
+  };
+  invoiceStatus: string;
+  invoiceTotalAmount: number;
+}
+
 export type CreatePaymentDto = Omit<PaymentDto, "_id" | "createdAt">;
+export type CreateVisitorPaymentDto = Omit<
+  PaymentDto,
+  "_id" | "createdAt" | "isCredit" | "paymentDate"
+>;

@@ -9,11 +9,18 @@ import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import React, { useEffect, useState } from "react";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
-import { CreatePaymentDto, GroupFamily, User } from "@/types";
-import { DeleteModal, Filtros, PaymentModal } from "../..";
+import { DeleteModal } from "../../modal/DeleteModal";
+import { Filters } from "../../filters/Filters";
 import { format } from "date-fns";
-import { FullInvoiceResponse } from "@/types/invoice";
+import { PaymentModal } from "../../modal/PaymentModal";
 import { ptBR } from "date-fns/locale";
+
+import {
+  CreatePaymentDto,
+  FullInvoiceResponse,
+  GroupFamily,
+  User,
+} from "@/types";
 
 import {
   useAddPayment,
@@ -179,7 +186,7 @@ const ConsumptionDetails = ({
   );
 };
 
-export default function TabelaFaturas({
+export default function InvoiceTable({
   data,
   isLoading,
   groupFamilies,
@@ -278,22 +285,6 @@ export default function TabelaFaturas({
   const handleResetData = () => {
     onResetData();
   };
-
-  // Create a custom hook for responsive columns
-  // const useResponsiveColumns = () => {
-  //   const [windowWidth, setWindowWidth] = useState(
-  //     typeof window !== "undefined" ? window.innerWidth : 1200
-  //   );
-
-  //   React.useEffect(() => {
-  //     const handleResize = () => setWindowWidth(window.innerWidth);
-  //     window.addEventListener("resize", handleResize);
-  //     return () => window.removeEventListener("resize", handleResize);
-  //   }, []);
-
-  //   // Return smaller widths for smaller screens
-  //   return windowWidth < 1200;
-  // };
 
   const useResponsiveColumns = () => {
     const [windowWidth, setWindowWidth] = useState<number | null>(null);
@@ -575,7 +566,7 @@ export default function TabelaFaturas({
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data} type="invoice">
+        <Filters rows={data} type="invoice">
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
@@ -614,7 +605,7 @@ export default function TabelaFaturas({
               </Box>
             )
           }
-        </Filtros>
+        </Filters>
       )}
 
       <DeleteModal

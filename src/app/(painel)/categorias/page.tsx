@@ -1,17 +1,17 @@
 "use client";
 
+import CategoriesTable from "@/app/components/ui/tables/CategoriesTable";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import ListOutlinedIcon from "@mui/icons-material/ListOutlined";
 import Loading from "@/app/components/loading/Loading";
-import TabelaCategorias from "@/app/components/ui/tables/TabelaCategorias";
-import TabelaSubcategorias from "@/app/components/ui/tables/TabelaSubcategoria";
+import SubCategoriesTable from "@/app/components/ui/tables/SubCategoriesTable";
 import { a11yProps } from "@/utils";
 import { Box, Stack, Tab, Tabs, useTheme } from "@mui/material";
 import { CustomTabPanel } from "@/app/components";
+import { Suspense, useEffect, useState } from "react";
 import { useCategories } from "@/hooks/queries";
 import { useCategoryStore } from "@/contexts";
-import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSubCategories } from "@/hooks/queries";
 
@@ -93,10 +93,10 @@ function CategoriasContent() {
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0} dir={theme.direction}>
-          <TabelaCategorias data={categories} isLoading={isLoading} />
+          <CategoriesTable data={categories} isLoading={isLoading} />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1} dir={theme.direction}>
-          <TabelaSubcategorias
+          <SubCategoriesTable
             data={subCategories}
             isLoading={subCategoriesLoading}
           />

@@ -9,7 +9,6 @@ import EmptyContent from "../emptyContent/EmptyContent";
 import Image from "next/image";
 import Text from "../text/Text";
 import { capitalize } from "@/utils";
-import { Filtros } from "../../filtros/Filtros";
 import { Products } from "@/types";
 import {
   useDeleteProduct,
@@ -27,13 +26,14 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import { Filters } from "../../filters/Filters";
 
-interface TabelaProps {
+interface ProductTableProps {
   data: Products[];
   isLoading: boolean;
 }
 
-export default function TabelaProduto({ data, isLoading }: TabelaProps) {
+export default function ProductTable({ data, isLoading }: ProductTableProps) {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -260,7 +260,7 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
       )}
 
       {!isLoading && data && data.length > 0 && (
-        <Filtros rows={data}>
+        <Filters rows={data}>
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
@@ -295,7 +295,7 @@ export default function TabelaProduto({ data, isLoading }: TabelaProps) {
               />
             )
           }
-        </Filtros>
+        </Filters>
       )}
     </Box>
   );
