@@ -286,22 +286,6 @@ export default function InvoiceTable({
     onResetData();
   };
 
-  // Create a custom hook for responsive columns
-  // const useResponsiveColumns = () => {
-  //   const [windowWidth, setWindowWidth] = useState(
-  //     typeof window !== "undefined" ? window.innerWidth : 1200
-  //   );
-
-  //   React.useEffect(() => {
-  //     const handleResize = () => setWindowWidth(window.innerWidth);
-  //     window.addEventListener("resize", handleResize);
-  //     return () => window.removeEventListener("resize", handleResize);
-  //   }, []);
-
-  //   // Return smaller widths for smaller screens
-  //   return windowWidth < 1200;
-  // };
-
   const useResponsiveColumns = () => {
     const [windowWidth, setWindowWidth] = useState<number | null>(null);
 
