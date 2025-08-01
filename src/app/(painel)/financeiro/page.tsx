@@ -60,6 +60,7 @@ function FaturasContent() {
 
   const [value, setValue] = useState<number>(initialTab);
   const [viewType, setViewType] = useState<"socios" | "visitantes">("socios");
+  const [viewCreditArchive, setViewCreditArchive] = useState(false);
 
   const { data: dataOrders, isLoading: isLoadingOrders } = useOrders();
   const { data: dataVisitors, isLoading: isLoadingVisitors } =
@@ -71,7 +72,15 @@ function FaturasContent() {
   const { data: groupFamilies, isLoading: isLoadingGroupFamily } =
     useGroupFamily();
   const { data: payments, isLoading: isLoadingPayments } = usePayments();
-  const { data: credits, isLoading: isLoadingCredits } = useCredits();
+  const {
+    data: credits,
+    isLoading: isLoadingCredits,
+    refetch: refetchCredits,
+  } = useCredits(viewCreditArchive);
+
+  useEffect(() => {
+    refetchCredits();
+  }, [viewCreditArchive, refetchCredits]);
 
   const [allInvoicesIds, setAllInvoicesIds] = useState<string[] | null>(null);
 
@@ -109,6 +118,10 @@ function FaturasContent() {
     if (newViewType !== null) {
       setViewType(newViewType);
     }
+  };
+
+  const handleViewCreditArchive = () => {
+    setViewCreditArchive((prev) => !prev);
   };
 
   const renderContent = () => {
@@ -209,7 +222,12 @@ function FaturasContent() {
             isLoadingCredits ? (
               <Loading />
             ) : (
-              <CreditTable data={credits || []} isLoading={false} />
+              <CreditTable
+                data={credits || []}
+                isLoading={false}
+                viewCreditArchive={viewCreditArchive}
+                onViewCreditArchive={handleViewCreditArchive}
+              />
             )
           ) : (
             <EmptyContent title="Não há opção de crédito para visitantes" />

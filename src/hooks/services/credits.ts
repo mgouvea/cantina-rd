@@ -9,6 +9,10 @@ export const CreateDebit = async (debit: CreateDebitDto) => {
   return (await http.post("debit", debit)).data;
 };
 
-export const GetCredits = async () => {
+export const GetActiveCredits = async () => {
   return (await http.get("credit")).data;
+};
+
+export const GetArchiveCredits = async () => {
+  return (await http.get("credit/archive")).data;
 };
