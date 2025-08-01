@@ -4,6 +4,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Box from "@mui/material/Box";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import EmptyContent from "../emptyContent/EmptyContent";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import Text from "../text/Text";
 import { CreditModal } from "../../modal/CreditModal";
 import { CreditResponse } from "@/types/credit";
@@ -28,7 +29,12 @@ import {
 export default function CreditTable({
   data,
   isLoading,
-}: TabelaProps<CreditResponse>) {
+  viewCreditArchive,
+  onViewCreditArchive,
+}: TabelaProps<CreditResponse> & {
+  viewCreditArchive: boolean;
+  onViewCreditArchive: () => void;
+}) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -107,16 +113,41 @@ export default function CreditTable({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Créditos</Text>
+        <Text variant="h5">
+          {viewCreditArchive ? "Créditos arquivados" : "Créditos ativos"}
+        </Text>
 
         <Stack direction="row" spacing={2}>
+          <Tooltip
+            title={
+              viewCreditArchive ? "Creditos ativos" : "Creditos arquivados"
+            }
+          >
+            <IconButton
+              aria-label="add"
+              sx={{ color: viewCreditArchive ? "#fff" : "warning.main" }}
+              onClick={() => onViewCreditArchive()}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "0.3rem",
+                  bgcolor: viewCreditArchive ? "error.main" : "transparent",
+                  borderRadius: "8px",
+                }}
+              >
+                <Inventory2OutlinedIcon fontSize="medium" />
+              </Box>
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Inserir crédito">
             <IconButton
               aria-label="add"
               sx={{ color: "success.main" }}
               onClick={() => setOpenCreditModal(true)}
             >
-              <AddCircleIcon fontSize="large" />
+              <AddCircleIcon fontSize="medium" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Recarregar dados">
