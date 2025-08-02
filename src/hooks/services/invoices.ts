@@ -1,8 +1,11 @@
 import { CreateInvoiceDto } from "@/types/invoice";
 import { http } from ".";
 
-export const GetFullInvoice = async (ids: string[]) => {
-  return (await http.post("invoices/full", { ids })).data;
+export const GetFullInvoice = async (
+  ids: string[],
+  isArchivedInvoice: "true" | "false" | "all"
+) => {
+  return (await http.post("invoices/full", { ids, isArchivedInvoice })).data;
 };
 
 export const GetInvoice = async () => {

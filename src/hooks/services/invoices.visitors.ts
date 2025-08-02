@@ -1,8 +1,11 @@
 import { CreateInvoiceVisitorsDto } from "@/types";
 import { http } from ".";
 
-export const GetFullInvoiceVisitors = async (ids: string[]) => {
-  return (await http.post("visitors-invoice/full", { ids })).data;
+export const GetFullInvoiceVisitors = async (
+  ids: string[],
+  isArchivedInvoice: "true" | "false" | "all"
+) => {
+  return (await http.post("visitors-invoice/full", { ids, isArchivedInvoice })).data;
 };
 
 export const GetInvoiceVisitors = async () => {

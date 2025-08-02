@@ -11,7 +11,12 @@ import { useSnackbar } from "@/app/components";
 
 export const useFullInvoices = () => {
   return useMutation({
-    mutationFn: GetFullInvoice,
+    mutationFn: (params: {
+      ids: string[];
+      isArchivedInvoice: "true" | "false" | "all";
+    }) => {
+      return GetFullInvoice(params.ids, params.isArchivedInvoice);
+    },
   });
 };
 
