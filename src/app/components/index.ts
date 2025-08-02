@@ -41,6 +41,7 @@ export * from "./ui/graphics/TotalBoxContent";
 
 export * from "./ui/header/Header";
 export * from "./ui/icons/CustomIcons";
+export * from "./ui/icons/WhatsAppResendIcon";
 export * from "./ui/inputText/InputText";
 export * from "./ui/sidebar/Sidebar";
 

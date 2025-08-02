@@ -17,6 +17,10 @@ export const SendInvoiceByWhatsApp = async (invoiceId: string) => {
   return (await http.post(`invoices/${invoiceId}/send-whatsapp`)).data;
 };
 
+export const ResetWhatsAppInvoice = async () => {
+  return (await http.patch(`invoices/reset-whatsapp`)).data;
+};
+
 export const DeleteInvoice = async (invoiceId: string) => {
   return (await http.delete(`invoices/${invoiceId}`)).data;
 };

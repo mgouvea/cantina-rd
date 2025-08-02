@@ -25,6 +25,7 @@ import {
 import {
   useAddPayment,
   useDeleteInvoice,
+  useResetWhatsAppInvoice,
   useSendInvoiceByWhatsApp,
 } from "@/hooks/mutations";
 
@@ -55,6 +56,7 @@ import {
   findUserById,
   getGroupFamilyNameById,
 } from "@/utils";
+import WhatsAppResendIcon from "../icons/WhatsAppResendIcon";
 
 interface TabelaProps {
   data: FullInvoiceResponse[] | undefined;
@@ -198,6 +200,10 @@ export default function InvoiceTable({
 
   const { mutateAsync: deleteInvoice } = useDeleteInvoice();
   const { mutateAsync: sendInvoiceByWhatsApp } = useSendInvoiceByWhatsApp();
+  const {
+    mutateAsync: resetWhatsAppInvoice,
+    isPending: isLoadingResetWhatsAppInvoice,
+  } = useResetWhatsAppInvoice();
   const { mutateAsync: confirmPayment } = useAddPayment();
 
   const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(
@@ -284,6 +290,11 @@ export default function InvoiceTable({
 
   const handleResetData = () => {
     onResetData();
+  };
+
+  const handleEnableResendInvoice = async () => {
+    await resetWhatsAppInvoice();
+    handleResetData();
   };
 
   const useResponsiveColumns = () => {
@@ -539,6 +550,11 @@ export default function InvoiceTable({
         <Text variant="h5">Faturas Registradas</Text>
 
         <Stack direction="row" alignItems="center">
+          <Tooltip title="Habilitar reenvio por WhatsApp">
+            <div onClick={handleEnableResendInvoice}>
+              <WhatsAppResendIcon isPending={isLoadingResetWhatsAppInvoice} />
+            </div>
+          </Tooltip>
           <Tooltip title="Adicionar nova fatura">
             <IconButton
               color="success"

@@ -18,6 +18,9 @@ export const CreateInvoiceVisitors = async (
 export const SendInvoiceVisitorsByWhatsApp = async (invoiceId: string) => {
   return (await http.post(`visitors-invoice/${invoiceId}/send-whatsapp`)).data;
 };
+export const ResetWhatsAppVisitorsInvoice = async () => {
+  return (await http.patch(`visitors-invoice/reset-whatsapp`)).data;
+};
 
 export const DeleteInvoiceVisitors = async (invoiceId: string) => {
   return (await http.delete(`visitors-invoice/${invoiceId}`)).data;

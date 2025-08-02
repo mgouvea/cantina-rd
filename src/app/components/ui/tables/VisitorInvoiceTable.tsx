@@ -19,6 +19,7 @@ import { ptBR } from "date-fns/locale";
 
 import {
   useDeleteInvoiceVisitors,
+  useResetWhatsAppVisitorsInvoice,
   useSendInvoiceVisitorsByWhatsApp,
 } from "@/hooks/mutations";
 
@@ -45,6 +46,7 @@ import {
   GridRenderCellParams,
 } from "@mui/x-data-grid";
 import { useAddPaymentVisitors } from "@/hooks/mutations/usePayments-visitors.mutation";
+import WhatsAppResendIcon from "../icons/WhatsAppResendIcon";
 
 interface TabelaProps {
   data: FullInvoiceResponse[] | undefined;
@@ -170,6 +172,11 @@ export default function VisitorInvoiceTable({
   const { mutateAsync: deleteInvoice } = useDeleteInvoiceVisitors();
   const { mutateAsync: sendInvoiceByWhatsApp } =
     useSendInvoiceVisitorsByWhatsApp();
+  const {
+    mutateAsync: resetWhatsAppInvoice,
+    isPending: isResettingWhatsAppInvoice,
+  } = useResetWhatsAppVisitorsInvoice();
+
   const { mutateAsync: confirmPayment } = useAddPaymentVisitors();
 
   const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(
@@ -255,6 +262,11 @@ export default function VisitorInvoiceTable({
 
   const handleResetData = () => {
     onResetData();
+  };
+
+  const handleEnableResendInvoice = async () => {
+    await resetWhatsAppInvoice();
+    handleResetData();
   };
 
   const useResponsiveColumns = () => {
@@ -506,6 +518,11 @@ export default function VisitorInvoiceTable({
         <Text variant="h5">Faturas Registradas</Text>
 
         <Stack direction="row" alignItems="center">
+          <Tooltip title="Reenviar fatura">
+            <div onClick={handleEnableResendInvoice}>
+              <WhatsAppResendIcon isPending={isResettingWhatsAppInvoice} />
+            </div>
+          </Tooltip>
           <Tooltip title="Adicionar nova fatura">
             <IconButton
               color="success"
