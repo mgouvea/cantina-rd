@@ -5,10 +5,12 @@ import Box from "@mui/material/Box";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EmptyContent from "../emptyContent/EmptyContent";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import React, { useEffect, useState } from "react";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
+import WhatsAppResendIcon from "../icons/WhatsAppResendIcon";
 import { DeleteModal } from "../../modal/DeleteModal";
 import { Filters } from "../../filters/Filters";
 import { format } from "date-fns";
@@ -25,6 +27,7 @@ import {
 import {
   useAddPayment,
   useDeleteInvoice,
+  useResetWhatsAppInvoice,
   useSendInvoiceByWhatsApp,
 } from "@/hooks/mutations";
 
@@ -191,13 +194,22 @@ export default function InvoiceTable({
   isLoading,
   groupFamilies,
   dataUser,
+  viewInvoiceArchive,
+  onViewInvoiceArchive,
   onResetData,
   setOpenModal,
-}: TabelaProps) {
+}: TabelaProps & {
+  viewInvoiceArchive: boolean;
+  onViewInvoiceArchive: () => void;
+}) {
   const [sendingInvoiceId, setSendingInvoiceId] = useState<string | null>(null);
 
   const { mutateAsync: deleteInvoice } = useDeleteInvoice();
   const { mutateAsync: sendInvoiceByWhatsApp } = useSendInvoiceByWhatsApp();
+  const {
+    mutateAsync: resetWhatsAppInvoice,
+    isPending: isLoadingResetWhatsAppInvoice,
+  } = useResetWhatsAppInvoice();
   const { mutateAsync: confirmPayment } = useAddPayment();
 
   const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(
@@ -284,6 +296,11 @@ export default function InvoiceTable({
 
   const handleResetData = () => {
     onResetData();
+  };
+
+  const handleEnableResendInvoice = async () => {
+    await resetWhatsAppInvoice();
+    handleResetData();
   };
 
   const useResponsiveColumns = () => {
@@ -539,6 +556,34 @@ export default function InvoiceTable({
         <Text variant="h5">Faturas Registradas</Text>
 
         <Stack direction="row" alignItems="center">
+          <Tooltip
+            title={
+              viewInvoiceArchive ? "Ver faturas em aberto" : "Ver faturas pagas"
+            }
+          >
+            <IconButton
+              aria-label="toggle-archive-view"
+              sx={{ color: viewInvoiceArchive ? "#fff" : "warning.main" }}
+              onClick={() => onViewInvoiceArchive()}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "0.3rem",
+                  bgcolor: viewInvoiceArchive ? "error.main" : "transparent",
+                  borderRadius: "8px",
+                }}
+              >
+                <Inventory2OutlinedIcon fontSize="medium" />
+              </Box>
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Habilitar reenvio por WhatsApp">
+            <div onClick={handleEnableResendInvoice}>
+              <WhatsAppResendIcon isPending={isLoadingResetWhatsAppInvoice} />
+            </div>
+          </Tooltip>
           <Tooltip title="Adicionar nova fatura">
             <IconButton
               color="success"

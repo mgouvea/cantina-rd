@@ -30,6 +30,8 @@ export const InvoiceWrapper = ({
   const { updateGroupFamiliesWithOwner } = useGroupFamilyStore();
 
   const [fullInvoicesData, setFullInvoicesData] = useState([]);
+  // false = show active invoices (open/partially paid), true = show archived invoices (fully paid)
+  const [viewInvoiceArchive, setViewInvoiceArchive] = useState(false);
   const [resetFullInvoices, setResetFullInvoices] = useState(false);
 
   const [openModal, setOpenModal] = useState(false);
@@ -37,12 +39,22 @@ export const InvoiceWrapper = ({
   const handleFullInvoices = useCallback(async () => {
     try {
       if (!allInvoicesIds) return;
-      const data = await fullInvoices(allInvoicesIds);
+      const data = await fullInvoices({
+        ids: allInvoicesIds,
+        isArchivedInvoice: viewInvoiceArchive ? "true" : "false",
+      });
       setFullInvoicesData(data);
     } catch (error) {
       console.error(error);
     }
-  }, [allInvoicesIds, fullInvoices]);
+  }, [allInvoicesIds, fullInvoices, viewInvoiceArchive]);
+
+  // Toggle between viewing active invoices (false) and archived/paid invoices (true)
+  const handleViewInvoiceArchive = () => {
+    setViewInvoiceArchive((prev) => !prev);
+    // No need to call handleFullInvoices explicitly as the useEffect will trigger
+    // when viewInvoiceArchive changes
+  };
 
   useEffect(() => {
     if (!!groupFamiliesWithOwner) {
@@ -53,7 +65,12 @@ export const InvoiceWrapper = ({
   useEffect(() => {
     if (!allInvoicesIds) return;
     handleFullInvoices();
-  }, [allInvoicesIds, handleFullInvoices, resetFullInvoices]);
+  }, [
+    allInvoicesIds,
+    handleFullInvoices,
+    resetFullInvoices,
+    viewInvoiceArchive,
+  ]);
 
   const handleResetData = () => {
     setResetFullInvoices((prev) => !prev);
@@ -68,6 +85,8 @@ export const InvoiceWrapper = ({
         isLoading={isLoadingFullInvoices}
         onResetData={handleResetData}
         setOpenModal={setOpenModal}
+        viewInvoiceArchive={viewInvoiceArchive}
+        onViewInvoiceArchive={handleViewInvoiceArchive}
       />
 
       <NewInvoiceModal

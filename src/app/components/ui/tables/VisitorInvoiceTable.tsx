@@ -4,6 +4,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Box from "@mui/material/Box";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import EmptyContent from "../emptyContent/EmptyContent";
 import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import React, { useEffect, useState } from "react";
@@ -19,6 +20,7 @@ import { ptBR } from "date-fns/locale";
 
 import {
   useDeleteInvoiceVisitors,
+  useResetWhatsAppVisitorsInvoice,
   useSendInvoiceVisitorsByWhatsApp,
 } from "@/hooks/mutations";
 
@@ -45,12 +47,15 @@ import {
   GridRenderCellParams,
 } from "@mui/x-data-grid";
 import { useAddPaymentVisitors } from "@/hooks/mutations/usePayments-visitors.mutation";
+import WhatsAppResendIcon from "../icons/WhatsAppResendIcon";
 
 interface TabelaProps {
   data: FullInvoiceResponse[] | undefined;
   isLoading: boolean;
   onResetData: () => void;
   setOpenModal: (open: boolean) => void;
+  viewInvoiceArchive: boolean;
+  onViewInvoiceArchive: () => void;
 }
 
 const ConsumptionDetails = ({ invoice }: { invoice: FullInvoiceResponse }) => {
@@ -164,12 +169,19 @@ export default function VisitorInvoiceTable({
   isLoading,
   onResetData,
   setOpenModal,
+  viewInvoiceArchive,
+  onViewInvoiceArchive,
 }: TabelaProps) {
   const [sendingInvoiceId, setSendingInvoiceId] = useState<string | null>(null);
 
   const { mutateAsync: deleteInvoice } = useDeleteInvoiceVisitors();
   const { mutateAsync: sendInvoiceByWhatsApp } =
     useSendInvoiceVisitorsByWhatsApp();
+  const {
+    mutateAsync: resetWhatsAppInvoice,
+    isPending: isResettingWhatsAppInvoice,
+  } = useResetWhatsAppVisitorsInvoice();
+
   const { mutateAsync: confirmPayment } = useAddPaymentVisitors();
 
   const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(
@@ -255,6 +267,11 @@ export default function VisitorInvoiceTable({
 
   const handleResetData = () => {
     onResetData();
+  };
+
+  const handleEnableResendInvoice = async () => {
+    await resetWhatsAppInvoice();
+    handleResetData();
   };
 
   const useResponsiveColumns = () => {
@@ -506,6 +523,34 @@ export default function VisitorInvoiceTable({
         <Text variant="h5">Faturas Registradas</Text>
 
         <Stack direction="row" alignItems="center">
+          <Tooltip
+            title={
+              viewInvoiceArchive ? "Ver faturas em aberto" : "Ver faturas pagas"
+            }
+          >
+            <IconButton
+              aria-label="toggle-archive-view"
+              sx={{ color: viewInvoiceArchive ? "#fff" : "warning.main" }}
+              onClick={() => onViewInvoiceArchive()}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "0.3rem",
+                  bgcolor: viewInvoiceArchive ? "error.main" : "transparent",
+                  borderRadius: "8px",
+                }}
+              >
+                <Inventory2OutlinedIcon fontSize="medium" />
+              </Box>
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Reenviar fatura">
+            <div onClick={handleEnableResendInvoice}>
+              <WhatsAppResendIcon isPending={isResettingWhatsAppInvoice} />
+            </div>
+          </Tooltip>
           <Tooltip title="Adicionar nova fatura">
             <IconButton
               color="success"

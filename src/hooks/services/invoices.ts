@@ -1,8 +1,11 @@
 import { CreateInvoiceDto } from "@/types/invoice";
 import { http } from ".";
 
-export const GetFullInvoice = async (ids: string[]) => {
-  return (await http.post("invoices/full", { ids })).data;
+export const GetFullInvoice = async (
+  ids: string[],
+  isArchivedInvoice: "true" | "false" | "all"
+) => {
+  return (await http.post("invoices/full", { ids, isArchivedInvoice })).data;
 };
 
 export const GetInvoice = async () => {
@@ -15,6 +18,10 @@ export const CreateInvoice = async (invoice: CreateInvoiceDto) => {
 
 export const SendInvoiceByWhatsApp = async (invoiceId: string) => {
   return (await http.post(`invoices/${invoiceId}/send-whatsapp`)).data;
+};
+
+export const ResetWhatsAppInvoice = async () => {
+  return (await http.patch(`invoices/reset-whatsapp`)).data;
 };
 
 export const DeleteInvoice = async (invoiceId: string) => {

@@ -1,8 +1,11 @@
 import { CreateInvoiceVisitorsDto } from "@/types";
 import { http } from ".";
 
-export const GetFullInvoiceVisitors = async (ids: string[]) => {
-  return (await http.post("visitors-invoice/full", { ids })).data;
+export const GetFullInvoiceVisitors = async (
+  ids: string[],
+  isArchivedInvoice: "true" | "false" | "all"
+) => {
+  return (await http.post("visitors-invoice/full", { ids, isArchivedInvoice })).data;
 };
 
 export const GetInvoiceVisitors = async () => {
@@ -17,6 +20,9 @@ export const CreateInvoiceVisitors = async (
 
 export const SendInvoiceVisitorsByWhatsApp = async (invoiceId: string) => {
   return (await http.post(`visitors-invoice/${invoiceId}/send-whatsapp`)).data;
+};
+export const ResetWhatsAppVisitorsInvoice = async () => {
+  return (await http.patch(`visitors-invoice/reset-whatsapp`)).data;
 };
 
 export const DeleteInvoiceVisitors = async (invoiceId: string) => {
