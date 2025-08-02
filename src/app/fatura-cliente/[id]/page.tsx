@@ -20,7 +20,10 @@ export default function FaturaCliente() {
   const handleFullInvoice = async () => {
     const id = router.split("/")[2];
     try {
-      const responseData = await fullInvoice([id]);
+      const responseData = await fullInvoice({
+        ids: [id],
+        isArchivedInvoice: "all",
+      });
 
       // Verificar se a resposta é um array e extrair o primeiro item
       const response = Array.isArray(responseData)
