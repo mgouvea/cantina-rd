@@ -13,3 +13,4 @@ export * from "./whatssApp";
 export * from "./payments";
 export * from "./payments.visitors";
 export * from "./credits";
+export * from "./expenses";

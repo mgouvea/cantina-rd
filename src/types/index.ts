@@ -11,3 +11,4 @@ export * from "./tables";
 export * from "./user";
 export * from "./visitors";
 export * from "./whatsApp";
+export * from "./expense";

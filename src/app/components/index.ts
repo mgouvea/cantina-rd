@@ -14,7 +14,9 @@ export * from "./loading/Loading";
 
 export * from "./modal/CreditModal";
 export * from "./modal/DeleteModal";
+export * from "./modal/ExpensesModal";
 export * from "./modal/GenericModal";
+export * from "./modal/ImageModal";
 export * from "./modal/MembersModal";
 export * from "./modal/NewInvoiceModal";
 export * from "./modal/PaymentModal";
@@ -47,6 +49,7 @@ export * from "./ui/sidebar/Sidebar";
 
 export * from "./ui/tables/CategoriesTable";
 export * from "./ui/tables/CreditTable";
+export * from "./ui/tables/ExpensesTable";
 export * from "./ui/tables/GroupFamilyTable";
 export * from "./ui/tables/InvoiceTable";
 export * from "./ui/tables/OrderTable";

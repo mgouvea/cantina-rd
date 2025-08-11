@@ -4,7 +4,6 @@ import AssuredWorkloadIcon from "@mui/icons-material/AssuredWorkload";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import CreditTable from "@/app/components/ui/tables/CreditTable";
 import EmojiPeopleOutlinedIcon from "@mui/icons-material/EmojiPeopleOutlined";
-import EmptyContent from "@/app/components/ui/emptyContent/EmptyContent";
 import Loading from "@/app/components/loading/Loading";
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
 import PaymentTable from "@/app/components/ui/tables/PaymentTable";
@@ -175,11 +174,13 @@ function FaturasContent() {
               label="Pagamentos"
               {...a11yProps(2)}
             />
-            <Tab
-              icon={<PaidOutlinedIcon />}
-              label="Credito"
-              {...a11yProps(3)}
-            />
+            {viewType === "socios" && (
+              <Tab
+                icon={<PaidOutlinedIcon />}
+                label="Credito"
+                {...a11yProps(3)}
+              />
+            )}
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0} dir={theme.direction}>
@@ -217,9 +218,9 @@ function FaturasContent() {
             <VisitorPaymentWrapper />
           )}
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={3} dir={theme.direction}>
-          {viewType === "socios" ? (
-            isLoadingCredits ? (
+        {viewType === "socios" && (
+          <CustomTabPanel value={value} index={3} dir={theme.direction}>
+            {isLoadingCredits ? (
               <Loading />
             ) : (
               <CreditTable
@@ -228,11 +229,9 @@ function FaturasContent() {
                 viewCreditArchive={viewCreditArchive}
                 onViewCreditArchive={handleViewCreditArchive}
               />
-            )
-          ) : (
-            <EmptyContent title="Não há opção de crédito para visitantes" />
-          )}
-        </CustomTabPanel>
+            )}
+          </CustomTabPanel>
+        )}
       </Stack>
     );
   };

@@ -5,8 +5,9 @@ import DashboardCustomizeRoundedIcon from "@mui/icons-material/DashboardCustomiz
 import FamilyRestroomOutlinedIcon from "@mui/icons-material/FamilyRestroomOutlined";
 import FastfoodRoundedIcon from "@mui/icons-material/FastfoodRounded";
 import Image from "next/image";
-import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
-import QrCodeScannerOutlinedIcon from "@mui/icons-material/QrCodeScannerOutlined";
+// import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import React, { useCallback, useMemo } from "react";
 import SupervisorAccountRoundedIcon from "@mui/icons-material/SupervisorAccountRounded";
 import Text from "../text/Text";
@@ -25,18 +26,19 @@ export function Sidebar() {
     | "Clientes"
     | "Grupo Familiar"
     | "Produtos"
-    | "Categorias";
+    | "Categorias"
+    | "Despesas";
 
   // Memoize the navigation items to prevent unnecessary re-renders
   const navigationItems = useMemo(
     () => [
       { title: "Dashboard" as NavigationTitle, route: "/dashboard" },
       { title: "Financeiro" as NavigationTitle, route: "/financeiro" },
+      { title: "Despesas" as NavigationTitle, route: "/despesas" },
       { title: "Clientes" as NavigationTitle, route: "/clientes" },
       { title: "Grupo Familiar" as NavigationTitle, route: "/grupo-familiar" },
       { title: "Produtos" as NavigationTitle, route: "/produtos" },
       { title: "Categorias" as NavigationTitle, route: "/categorias" },
-      // { title: "WhatsApp" as NavigationTitle, route: "/whatsapp" },
     ],
     []
   );
@@ -46,12 +48,12 @@ export function Sidebar() {
     () =>
       ({
         Dashboard: <DashboardCustomizeRoundedIcon />,
-        Financeiro: <LocalAtmOutlinedIcon />,
+        Financeiro: <AccountBalanceIcon />,
+        Despesas: <MonetizationOnIcon />,
         Clientes: <SupervisorAccountRoundedIcon />,
         "Grupo Familiar": <FamilyRestroomOutlinedIcon />,
         Produtos: <FastfoodRoundedIcon />,
         Categorias: <CategoryIcon />,
-        WhatsApp: <QrCodeScannerOutlinedIcon />,
       } as Record<NavigationTitle, JSX.Element>),
     []
   );

@@ -15,6 +15,7 @@ const UploadPictureComponent = ({
   avatarTitle,
   setFotoUpload,
   fotoUpdate,
+  isSmall = false,
 }: {
   fotoUpload: fotoUploadProps | null;
   onRemove: () => void;
@@ -23,6 +24,7 @@ const UploadPictureComponent = ({
   avatarTitle: string;
   setFotoUpload: (value: fotoUploadProps | null) => void;
   fotoUpdate?: string;
+  isSmall?: boolean;
 }) => {
   const handleUploadFile = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -81,8 +83,8 @@ const UploadPictureComponent = ({
         <Avatar
           alt={avatarTitle}
           sx={{
-            width: 106,
-            height: 106,
+            width: isSmall ? 64 : 106,
+            height: isSmall ? 64 : 106,
             cursor: fotoUpload ? "pointer" : "default",
           }}
           src={fotoUpload?.base64 || fotoUpdate}
