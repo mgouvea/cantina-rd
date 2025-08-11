@@ -48,6 +48,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     watch,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<PaymentFormData>({
     defaultValues: {
@@ -65,6 +66,16 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     }
   }, [paymentType, setValue]);
 
+  // Resetar o formulário quando o modal for fechado
+  useEffect(() => {
+    if (!openModal) {
+      reset({
+        paymentType: "total",
+        partialValue: "",
+      });
+    }
+  }, [openModal, reset]);
+
   const onSubmit = async (data: PaymentFormData) => {
     setIsProcessing(true);
     try {
@@ -75,8 +86,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           data.paymentType === "partial"
             ? parseFloat(data.partialValue)
             : data.paymentType === "total" && paidAmount > 0
-            ? remainingAmount  // Se for pagamento total e já tiver pago algo, envia o valor restante
-            : undefined,       // Se for pagamento total sem pagamento anterior, envia undefined
+            ? remainingAmount // Se for pagamento total e já tiver pago algo, envia o valor restante
+            : undefined, // Se for pagamento total sem pagamento anterior, envia undefined
       });
 
       // Só fecha o modal após a conclusão bem-sucedida
@@ -91,7 +102,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   // Calcular o valor restante a ser pago
   const remainingAmount = invoiceValue - paidAmount;
-  
+
   // Formatar os valores para exibição
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -99,7 +110,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       currency: "BRL",
     }).format(value);
   };
-  
+
   const formattedInvoiceValue = formatCurrency(invoiceValue);
   const formattedPaidAmount = formatCurrency(paidAmount);
   const formattedRemainingAmount = formatCurrency(remainingAmount);
@@ -113,6 +124,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       handleClose={() => {
         if (!isProcessing) {
           setOpenModal(false);
+          // Resetar o formulário ao fechar o modal
+          reset({
+            paymentType: "total",
+            partialValue: "",
+          });
         }
       }}
       cancelButtonText="Cancelar"
@@ -124,7 +140,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         <Text variant="subtitle1" color="textSecondary" sx={{ mb: 2 }}>
           Valor total da fatura: {formattedInvoiceValue}
         </Text>
-        
+
         {paidAmount > 0 && (
           <>
             <Text variant="subtitle1" color="success.main" sx={{ mb: 1 }}>
@@ -146,7 +162,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 <FormControlLabel
                   value="total"
                   control={<Radio />}
-                  label={paidAmount > 0 ? `Pagamento do valor restante (${formattedRemainingAmount})` : "Pagamento total da fatura"}
+                  label={
+                    paidAmount > 0
+                      ? `Pagamento do valor restante (${formattedRemainingAmount})`
+                      : "Pagamento total da fatura"
+                  }
                 />
                 <FormControlLabel
                   value="partial"
