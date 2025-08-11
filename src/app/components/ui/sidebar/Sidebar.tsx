@@ -5,19 +5,33 @@ import DashboardCustomizeRoundedIcon from "@mui/icons-material/DashboardCustomiz
 import FamilyRestroomOutlinedIcon from "@mui/icons-material/FamilyRestroomOutlined";
 import FastfoodRoundedIcon from "@mui/icons-material/FastfoodRounded";
 import Image from "next/image";
-// import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import SupervisorAccountRoundedIcon from "@mui/icons-material/SupervisorAccountRounded";
 import Text from "../text/Text";
 import { Box, Drawer, List, Toolbar } from "@mui/material";
 import { usePathname, useRouter } from "next/navigation";
 
+// Criando um contexto para compartilhar o estado do drawer entre componentes
+export const SidebarContext = React.createContext<{
+  isMobile: boolean;
+  isDrawerOpen: boolean;
+  toggleDrawer: () => void;
+}>({
+  isMobile: false,
+  isDrawerOpen: false,
+  toggleDrawer: () => {},
+});
+
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const drawerWidth = 260;
+
+  // Usar o contexto do sidebar em vez de gerenciar estado localmente
+  const { isMobile, isDrawerOpen, toggleDrawer } =
+    React.useContext(SidebarContext);
 
   // Define a type for navigation item titles to ensure type safety
   type NavigationTitle =
@@ -150,11 +164,14 @@ export function Sidebar() {
 
   return (
     <Drawer
-      variant="permanent"
+      variant={isMobile ? "temporary" : "permanent"}
+      open={isMobile ? isDrawerOpen : true}
+      onClose={toggleDrawer}
       disableScrollLock={true}
       sx={{
-        width: drawerWidth,
+        width: isMobile ? "100%" : drawerWidth,
         flexShrink: 0,
+        display: { xs: "block", md: "block" },
         [`& .MuiDrawer-paper`]: {
           width: drawerWidth,
           boxSizing: "border-box",

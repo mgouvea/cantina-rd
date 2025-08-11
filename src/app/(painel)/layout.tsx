@@ -1,34 +1,63 @@
+"use client";
+
 import Header from "@/app/components/ui/header/Header";
-import { Box, Stack } from "@mui/material";
-import { Sidebar } from "../components";
+import { Box, Stack, useMediaQuery, useTheme } from "@mui/material";
+import { Sidebar, SidebarContext } from "../components/ui/sidebar/Sidebar";
+import { useState, useCallback, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <Stack direction="row" sx={{ height: "100vh", overflow: "hidden" }}>
-      <Sidebar />
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const pathname = usePathname();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  
+  const toggleDrawer = useCallback(() => {
+    setIsDrawerOpen(prev => !prev);
+  }, []);
+  
+  // Fechar o drawer quando mudar de rota em dispositivos móveis
+  useEffect(() => {
+    if (isMobile) {
+      setIsDrawerOpen(false);
+    }
+  }, [pathname, isMobile]);
+  
+  // Valor do contexto para compartilhar com os componentes filhos
+  const sidebarContextValue = {
+    isMobile,
+    isDrawerOpen,
+    toggleDrawer
+  };
 
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          backgroundColor: "#fff",
-        }}
-      >
+  return (
+    <SidebarContext.Provider value={sidebarContextValue}>
+      <Stack direction="row" sx={{ height: "100vh", overflow: "hidden" }}>
+        <Sidebar />
+
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            backgroundColor: "#fff",
+            width: "100%",
+          }}
+        >
         <Header />
 
         <Box
           sx={{
-            margin: "4rem 1rem 0 0",
-            padding: "2rem",
+            margin: isMobile ? "4rem 0 0 0" : "4rem 1rem 0 0",
+            padding: isMobile ? "1rem" : "2rem",
             height: "100%",
             overflowY: "auto",
-            borderTopLeftRadius: "24px",
-            borderTopRightRadius: "24px",
+            borderTopLeftRadius: isMobile ? "0" : "24px",
+            borderTopRightRadius: isMobile ? "0" : "24px",
             backgroundColor: "#eef2f6",
             flexGrow: 1,
             "&::-webkit-scrollbar": {
@@ -51,6 +80,7 @@ export default function RootLayout({
           {children}
         </Box>
       </Box>
-    </Stack>
+      </Stack>
+    </SidebarContext.Provider>
   );
 }
