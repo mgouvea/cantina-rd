@@ -19,13 +19,14 @@ const Transition = React.forwardRef(function Transition(
 interface GenericModalProps {
   title: string;
   children: React.ReactNode;
-  cancelButtonText: string;
-  confirmButtonText: string;
+  cancelButtonText?: string;
+  confirmButtonText?: string;
   buttonColor?: "success" | "error";
   open: boolean;
   handleClose: () => void;
   handleConfirm: () => void;
   disableConfirmButton?: boolean;
+  isImageModal?: boolean;
 }
 
 export default function GenericModal({
@@ -38,6 +39,7 @@ export default function GenericModal({
   handleClose,
   handleConfirm,
   disableConfirmButton = false,
+  isImageModal = false,
 }: GenericModalProps) {
   return (
     <React.Fragment>
@@ -52,23 +54,25 @@ export default function GenericModal({
       >
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>{children}</DialogContent>
-        <DialogActions sx={{ pb: 2, pr: 2 }}>
-          <ButtonComponent
-            variant="outlined"
-            color="warning"
-            onClick={handleClose}
-          >
-            {cancelButtonText}
-          </ButtonComponent>
-          <ButtonComponent
-            variant="contained"
-            color={buttonColor}
-            onClick={handleConfirm}
-            disabled={disableConfirmButton}
-          >
-            {confirmButtonText}
-          </ButtonComponent>
-        </DialogActions>
+        {!isImageModal && (
+          <DialogActions sx={{ pb: 2, pr: 2 }}>
+            <ButtonComponent
+              variant="outlined"
+              color="warning"
+              onClick={handleClose}
+            >
+              {cancelButtonText}
+            </ButtonComponent>
+            <ButtonComponent
+              variant="contained"
+              color={buttonColor}
+              onClick={handleConfirm}
+              disabled={disableConfirmButton}
+            >
+              {confirmButtonText}
+            </ButtonComponent>
+          </DialogActions>
+        )}
       </Dialog>
     </React.Fragment>
   );

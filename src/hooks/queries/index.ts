@@ -10,3 +10,4 @@ export * from "./useProducts.query";
 export * from "./useUsers.query";
 export * from "./useVisitors.query";
 export * from "./useWhatssApp.query";
+export * from "./useExpenses.query";

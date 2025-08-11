@@ -62,6 +62,20 @@ export function formatDate(date: Date | string | undefined): string {
     : "";
 }
 
+export function formatMonthYear(date: Date | string | undefined): string {
+  if (!date) return "";
+
+  const dateObj = date instanceof Date ? date : new Date(date);
+
+  // Format to get month name and year in Portuguese
+  return dateObj
+    .toLocaleDateString("pt-BR", {
+      month: "long",
+      year: "numeric",
+    })
+    .replace(" de ", " de "); // Ensure proper spacing
+}
+
 export function formatTime(date: Date | string | undefined): string {
   if (date instanceof Date) {
     return date?.toLocaleTimeString("pt-BR", {

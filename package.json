@@ -16,6 +16,7 @@
     "@mui/x-charts": "^8.6.0",
     "@mui/x-data-grid": "^7.18.0",
     "@mui/x-data-grid-generator": "^7.18.0",
+    "@mui/x-date-pickers": "^8.10.0",
     "@tanstack/react-query": "^5.56.2",
     "@tanstack/react-query-devtools": "^5.74.7",
     "@types/react-input-mask": "^3.0.6",
