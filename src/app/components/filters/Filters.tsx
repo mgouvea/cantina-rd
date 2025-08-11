@@ -6,6 +6,14 @@ import { GroupFamilyWithOwner } from "@/types";
 import { InvoiceFilter } from "./InvoiceFilter";
 import { Search } from "./Search";
 
+// Função para normalizar texto removendo acentos
+const normalizeText = (text: string): string => {
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+};
+
 type FiltersProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children: (filteredRows: any[]) => React.ReactNode;
@@ -26,10 +34,12 @@ export const Filters: React.FC<FiltersProps> = ({ children, rows, type }) => {
     let result = rows || [];
 
     if (parametrosDeBusca) {
+      const normalizedSearch = normalizeText(parametrosDeBusca);
       result = result.filter((row) =>
-        Object.values(row).some((value) =>
-          String(value).toLowerCase().includes(parametrosDeBusca.toLowerCase())
-        )
+        Object.values(row).some((value) => {
+          const normalizedValue = normalizeText(String(value));
+          return normalizedValue.includes(normalizedSearch);
+        })
       );
     }
 
