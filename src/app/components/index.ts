@@ -25,6 +25,10 @@ export * from "./snackbar/SnackbarProvider";
 export * from "./svg/IlustracaoEmpty";
 
 export * from "./ui/button/ButtonComponent";
+
+export * from "./ui/CardWrapper/CardProducts";
+export * from "./ui/CardWrapper/GenericCardWrapper";
+
 export * from "./ui/emptyContent/EmptyContent";
 
 export * from "./ui/forms/CategoriesForm";

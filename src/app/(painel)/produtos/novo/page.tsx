@@ -6,7 +6,7 @@ import GenericBreadcrumbs from "@/app/components/breadcrumb/GenericBreadcrumb";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Text from "@/app/components/ui/text/Text";
-import { Box, IconButton, Stack, Tooltip, useTheme } from "@mui/material";
+import { Box, IconButton, Stack, Tooltip, useTheme, useMediaQuery } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -51,6 +51,7 @@ const breadcrumbItems = [
 export default function NovoProduto() {
   const theme = useTheme();
   const router = useRouter();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [value, setValue] = useState(0);
 
@@ -59,14 +60,20 @@ export default function NovoProduto() {
   };
 
   return (
-    <Stack>
-      <GenericBreadcrumbs items={breadcrumbItems} />
+    <Stack sx={{ px: isMobile ? 1 : 0 }}>
+      {!isMobile && <GenericBreadcrumbs items={breadcrumbItems} />}
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5" fontWeight="bold">
-          Cadastrar novo produto
+      <Stack 
+        direction="row" 
+        justifyContent="space-between" 
+        alignItems="center"
+        sx={{ mt: isMobile ? 1 : 0 }}
+      >
+        <Text variant={isMobile ? "h6" : "h5"} fontWeight="bold">
+          {isMobile ? "Novo produto" : "Cadastrar novo produto"}
         </Text>
         <IconButton
+          size={isMobile ? "small" : "medium"}
           sx={{
             backgroundColor: "success.dark",
             "&:hover": { backgroundColor: "success.main", transition: "0.3s" },
@@ -74,7 +81,7 @@ export default function NovoProduto() {
           onClick={() => router.replace("/produtos")}
         >
           <Tooltip title="Voltar">
-            <ArrowBackIcon fontSize="medium" sx={{ color: "#fff" }} />
+            <ArrowBackIcon fontSize={isMobile ? "small" : "medium"} sx={{ color: "#fff" }} />
           </Tooltip>
         </IconButton>
       </Stack>
@@ -89,6 +96,8 @@ export default function NovoProduto() {
           backgroundColor: "#fff",
           borderRadius: { xs: "8px", md: "16px" },
           mt: { xs: 2, md: 5 },
+          overflow: "hidden",
+          boxShadow: isMobile ? "0 2px 8px rgba(0,0,0,0.1)" : "none",
         }}
       >
         <Box
@@ -96,6 +105,9 @@ export default function NovoProduto() {
             borderBottom: 1,
             borderColor: "divider",
             bgcolor: "background.paper",
+            position: isMobile ? "sticky" : "static",
+            top: isMobile ? 0 : "auto",
+            zIndex: isMobile ? 10 : 1,
           }}
         >
           <Tabs
@@ -119,18 +131,23 @@ export default function NovoProduto() {
               "& .MuiTab-root": {
                 backgroundColor: "background.paper",
                 color: "text.primary",
+                minHeight: isMobile ? "48px" : "64px",
+                py: isMobile ? 0.5 : 1,
               },
             }}
           >
             <Tab
-              icon={<FastfoodRoundedIcon />}
+              icon={isMobile ? undefined : <FastfoodRoundedIcon />}
+              iconPosition="start"
               label="Produto"
               {...a11yProps(0)}
             />
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0} dir={theme.direction}>
-          <ProductsForm />
+          <Box sx={{ p: isMobile ? 0 : 2 }}>
+            <ProductsForm />
+          </Box>
         </CustomTabPanel>
       </Stack>
     </Stack>

@@ -371,13 +371,11 @@ export const ProductsForm = () => {
           alignItems="center"
           gap={2}
         >
-          <Box sx={{ width: "80%" }}>
-            <EntradaTexto
-              name="tag"
-              control={productsControl}
-              label="Tag do produto"
-            />
-          </Box>
+          <EntradaTexto
+            name="tag"
+            control={productsControl}
+            label="Tag do produto"
+          />
           {getProductValues().tag && (
             <Chip label={`${getProductValues().tag || ""}`} color="success" />
           )}
