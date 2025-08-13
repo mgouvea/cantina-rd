@@ -10,6 +10,8 @@ import {
   MenuItem,
   Select,
   Stack,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 
 const STATUS_OPTIONS = [
@@ -38,6 +40,8 @@ export const InvoiceFilter = ({
   const [selectedFamiliesState, setSelectedFamiliesState] = React.useState<
     GroupFamilyWithOwner[]
   >([]);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   React.useEffect(() => {
     onGroupFamilyFilter(selectedFamiliesState);
@@ -49,14 +53,26 @@ export const InvoiceFilter = ({
 
   return (
     <CustomizedAccordions title="Filtros" open={false}>
-      <Stack direction="column" spacing={2} sx={{ p: 1 }}>
-        <Stack direction="row" spacing={2}>
+      <Stack direction="column" spacing={isMobile ? 1 : 2} sx={{ p: isMobile ? 0.5 : 1 }}>
+        <Stack 
+          direction={isMobile ? "column" : "row"} 
+          spacing={isMobile ? 1 : 2}
+          sx={{ width: "100%" }}
+        >
           <Search
             parametrosDeBusca={parametrosDeBusca}
             setParametrosDeBusca={setParametrosDeBusca}
           />
 
-          <FormControl fullWidth sx={inputsStyles}>
+          <FormControl 
+            fullWidth 
+            sx={{
+              ...inputsStyles,
+              maxWidth: isMobile ? "100%" : "249px",
+              my: isMobile ? 0.5 : 2,
+            }}
+            size={isMobile ? "small" : "medium"}
+          >
             <InputLabel id="status-label">Status</InputLabel>
             <Select
               labelId="status-label"

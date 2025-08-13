@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Box } from "@mui/material";
+import { Box, useTheme, useMediaQuery } from "@mui/material";
 import { GroupFamilyWithOwner } from "@/types";
 import { InvoiceFilter } from "./InvoiceFilter";
 import { Search } from "./Search";
@@ -29,6 +29,8 @@ export const Filters: React.FC<FiltersProps> = ({ children, rows, type }) => {
   >([]);
   const [finalFilteredRows, setFinalFilteredRows] = useState(rows || []);
   const [status, setStatus] = useState<string>("");
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     let result = rows || [];
@@ -64,17 +66,20 @@ export const Filters: React.FC<FiltersProps> = ({ children, rows, type }) => {
       <Box
         sx={{
           display: "flex",
+          flexDirection: isMobile ? "column" : "row",
           flexWrap: "wrap",
-          alignItems: "center",
+          alignItems: isMobile ? "stretch" : "center",
           justifyContent: "space-between",
-          gap: 2,
-          mb: 2,
+          gap: isMobile ? 1 : 2,
+          mb: isMobile ? 1 : 2,
+          width: "100%",
         }}
       >
         <Box
           sx={{
             flex: 1,
-            minWidth: { xs: 250, sm: 300 },
+            width: "100%",
+            minWidth: { xs: "100%", sm: 300 },
           }}
         >
           {type !== "invoice" && (
