@@ -106,7 +106,6 @@ export const TotalBoxContent = ({ startDate, endDate }: { startDate?: Date; endD
         flexDirection: { xs: "column", lg: "row" },
         gap: 1.5,
         alignItems: isMobile ? "flex-start" : "center",
-        width: isMobile ? "calc(50% - 16px)" : "100%",
         height: { xs: "auto", lg: "9rem" },
         margin: isMobile ? "1rem 0" : "1rem",
         padding: isMobile ? "0.5rem" : "1rem",

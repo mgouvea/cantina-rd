@@ -1,4 +1,4 @@
-import { Stack } from "@mui/material";
+import { Stack, useMediaQuery, useTheme } from "@mui/material";
 import React from "react";
 import GenericBreadcrumbs from "../../breadcrumb/GenericBreadcrumb";
 
@@ -24,18 +24,21 @@ const ContentWrapper = ({
   breadcrumbItems,
   isDashboard = false,
 }: WrapperProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   return (
     <Stack>
       <GenericBreadcrumbs items={breadcrumbItems} />
 
       <Stack
         sx={{
-          minWidth: minWidth,
-          maxWidth: maxWidth,
+          minWidth: isMobile ? "100%" : minWidth,
+          maxWidth: isMobile ? "100%" : maxWidth,
           minHeight: minHeight,
           backgroundColor: isDashboard ? "#eef2f6" : "#fff",
           borderRadius: "16px",
           mt: "0.3rem",
+          overflowX: isMobile ? "hidden" : "auto",
         }}
       >
         {children}
