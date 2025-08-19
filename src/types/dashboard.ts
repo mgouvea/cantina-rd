@@ -23,3 +23,10 @@ export type TopClientsDto = {
   groupFamilyName: string;
   urlImage: string;
 };
+
+export type PaymentsVsReceives = {
+  _id?: string;
+  payments: number[];
+  expenses: number[];
+  xLabels: string[];
+};

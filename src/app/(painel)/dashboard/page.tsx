@@ -14,7 +14,12 @@ import {
   TopProducts,
   TotalBoxContent,
 } from "@/app/components";
-import { useGroupFamilyInvoicesOpen, useMostSoldProducts, useTopClients } from "@/hooks/queries";
+import {
+  useGroupFamilyInvoicesOpen,
+  useMostSoldProducts,
+  usePaymentsVsReceives,
+  useTopClients,
+} from "@/hooks/queries";
 
 // Custom scrollbar style
 const overflowStyle = {
@@ -61,6 +66,11 @@ export default function Dashboard() {
     filterDates.startDate!,
     filterDates.endDate!
   );
+
+  const { data: paymentsVsReceives, isLoading: isLoadingPaymentsVsReceives } =
+    usePaymentsVsReceives();
+
+  console.log("paymentsVsReceives", paymentsVsReceives);
 
   const renderContent = () => (
     <>
@@ -119,7 +129,11 @@ export default function Dashboard() {
               height: "calc(100% - 24px)",
             }}
           >
-            <AreaChart />
+            {isLoadingPaymentsVsReceives ? (
+              <Loading minHeight={10} />
+            ) : (
+              <AreaChart data={paymentsVsReceives!} />
+            )}
           </Box>
         </Box>
 

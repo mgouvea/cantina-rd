@@ -1,6 +1,7 @@
 import {
   GroupFamilyInvoicesOpen,
   MostSoldProducts,
+  PaymentsVsReceives,
   TopClientsDto,
   TotalContents,
 } from "@/types";
@@ -22,9 +23,7 @@ export const GetGroupFamilyInvoicesOpen = async (
   endDate?: Date
 ): Promise<GroupFamilyInvoicesOpen[]> => {
   const queryString = parseDateRange(startDate!, endDate!);
-  const url = `dashboard/group-family-open-invoices${
-    queryString ? `?${queryString}` : ""
-  }`;
+  const url = `dashboard/group-family-open-invoices${queryString ? `?${queryString}` : ""}`;
 
   return (await http.get(url)).data;
 };
@@ -34,19 +33,20 @@ export const GetMostSoldProducts = async (
   endDate?: Date
 ): Promise<MostSoldProducts[]> => {
   const queryString = parseDateRange(startDate!, endDate!);
-  const url = `dashboard/most-sold-products${
-    queryString ? `?${queryString}` : ""
-  }`;
+  const url = `dashboard/most-sold-products${queryString ? `?${queryString}` : ""}`;
 
   return (await http.get(url)).data;
 };
 
-export const GetTopClients = async (
-  startDate?: Date,
-  endDate?: Date
-): Promise<TopClientsDto[]> => {
+export const GetTopClients = async (startDate?: Date, endDate?: Date): Promise<TopClientsDto[]> => {
   const queryString = parseDateRange(startDate!, endDate!);
   const url = `dashboard/top-buyers${queryString ? `?${queryString}` : ""}`;
+
+  return (await http.get(url)).data;
+};
+
+export const GetPaymentsVsReceives = async (): Promise<PaymentsVsReceives> => {
+  const url = "dashboard/payments-expenses";
 
   return (await http.get(url)).data;
 };
