@@ -1,4 +1,5 @@
 import React from "react";
+import { useTheme, useMediaQuery } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import PriceCheckIcon from "@mui/icons-material/PriceCheck";
 import AccessTimeFilledIcon from "@mui/icons-material/AccessTimeFilled";
@@ -30,14 +31,14 @@ const BoxContent = ({
       display: "flex",
       justifyContent: "space-between",
       gap: 1.5,
-      width: { xs: "90%", sm: "80%", md: "17rem" },
+      width: { xs: "100%", sm: "80%", md: "17rem" },
       height: { xs: "auto", md: "7rem" },
-      minHeight: "6rem",
+      minHeight: { xs: "5.5rem", md: "6rem" },
       background: backgroundColor
         ? `linear-gradient(to right, ${color}20, ${backgroundColor}50)`
         : `linear-gradient(to right, ${color}20, #eef2f6)`,
-      margin: { xs: "0.5rem", md: "0.5rem" },
-      padding: "1rem 0.8rem",
+      margin: { xs: "0.25rem 0", md: "0.5rem" },
+      padding: { xs: "0.75rem 0.6rem", md: "1rem 0.8rem" },
       borderRadius: "8px",
       borderLeft: `3px solid ${color}`,
     }}
@@ -78,6 +79,8 @@ export const TotalBoxContent = ({
   startDate?: Date;
   endDate?: Date;
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   // Usar o hook useTotalContents com as datas
   const { data: totalContents, isLoading } = useTotalContents(
     startDate,
@@ -132,7 +135,7 @@ export const TotalBoxContent = ({
           color={COLORS[0].color}
           backgroundColor={COLORS[0].backgroundColor}
         >
-          <ShoppingCartIcon color="inherit" fontSize="large" />
+          <ShoppingCartIcon color="inherit" fontSize={isMobile ? "medium" : "large"} />
         </BoxIcon>
       </BoxContent>
       <BoxContent
@@ -156,7 +159,7 @@ export const TotalBoxContent = ({
           color={COLORS[1].color}
           backgroundColor={COLORS[1].backgroundColor}
         >
-          <PriceCheckIcon color="inherit" fontSize="large" />
+          <PriceCheckIcon color="inherit" fontSize={isMobile ? "medium" : "large"} />
         </BoxIcon>
       </BoxContent>
       <BoxContent
@@ -180,7 +183,7 @@ export const TotalBoxContent = ({
           color={COLORS[2].color}
           backgroundColor={COLORS[2].backgroundColor}
         >
-          <AccessTimeFilledIcon color="inherit" fontSize="large" />
+          <AccessTimeFilledIcon color="inherit" fontSize={isMobile ? "medium" : "large"} />
         </BoxIcon>
       </BoxContent>
 
@@ -222,7 +225,7 @@ export const TotalBoxContent = ({
         >
           <ProductionQuantityLimitsOutlinedIcon
             color="inherit"
-            fontSize="large"
+            fontSize={isMobile ? "medium" : "large"}
           />
         </BoxIcon>
       </BoxContent>

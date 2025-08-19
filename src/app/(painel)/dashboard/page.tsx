@@ -51,6 +51,8 @@ export default function Dashboard() {
     endDate: Date | null;
   }>({ startDate: null, endDate: null });
 
+  // Theme is used for responsive styling in child components
+
   const {
     data: groupFamilyInvoicesOpen,
     isLoading: isLoadingGroupFamilyInvoicesOpen,
@@ -72,7 +74,7 @@ export default function Dashboard() {
         sx={{
           justifyContent: "space-between",
           alignItems: { xs: "flex-start", sm: "center" },
-          marginInline: "1rem",
+          marginInline: { xs: "0.5rem", sm: "1rem" },
           mb: { xs: 2, sm: 0 },
         }}
       >
@@ -92,9 +94,9 @@ export default function Dashboard() {
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          gap: { xs: 2, md: 3 },
+          gap: { xs: 1.5, md: 3 },
           height: { xs: "auto", md: "24rem" },
-          marginInline: "0.5rem",
+          marginInline: { xs: "0.25rem", sm: "0.5rem" },
         }}
       >
         {/* Box de vendas vs à receber */}
@@ -102,8 +104,8 @@ export default function Dashboard() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            padding: "1rem",
-            gap: 1,
+            padding: { xs: "0.75rem", sm: "1rem" },
+            gap: { xs: 0.5, sm: 1 },
             width: { xs: "100%", md: "70%" },
             height: { xs: "350px", md: "inherit" },
             backgroundColor: "#fff",
@@ -123,8 +125,8 @@ export default function Dashboard() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            padding: "1.5rem",
-            gap: 2,
+            padding: { xs: "1rem", sm: "1.5rem" },
+            gap: { xs: 1, sm: 2 },
             width: { xs: "100%", md: "30%" },
             height: { xs: "400px", md: "inherit" },
             backgroundColor: "#fff",
@@ -171,8 +173,8 @@ export default function Dashboard() {
           flexDirection: { xs: "column", md: "row" },
           gap: { xs: 1, md: 2 },
           height: { xs: "auto", md: "22rem" },
-          marginInline: "0.5rem",
-          marginTop: "0.5rem",
+          marginInline: { xs: "0.25rem", sm: "0.5rem" },
+          marginTop: { xs: "0.25rem", sm: "0.5rem" },
         }}
       >
         {/* Box de top produtos */}
@@ -280,9 +282,9 @@ export default function Dashboard() {
         <Box
           sx={{
             width: { xs: "100%", md: "30%" },
-            backgroundColor: "#fff",
+            margin: { xs: "0.5rem", sm: "1rem" },
             borderRadius: "8px",
-            padding: "1rem",
+            padding: { xs: "0.5rem 0", lg: 0 },
             height: { xs: "350px", md: "auto" },
             display: "flex",
             flexDirection: "column",

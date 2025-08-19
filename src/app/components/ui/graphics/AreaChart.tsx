@@ -1,5 +1,6 @@
 import * as React from "react";
 import { LineChart } from "@mui/x-charts/LineChart";
+import { useTheme, useMediaQuery } from "@mui/material";
 
 const margin = { right: 24 };
 const uData = [4000, 3000, 2000, 2780, 1890, 2390, 3490];
@@ -15,17 +16,37 @@ const xLabels = [
 ];
 
 export default function SimpleLineChart() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  
   return (
     <LineChart
-      height={300}
+      height={isMobile ? 250 : 300}
       series={[
         { data: pData, label: "Receitas" },
         { data: uData, label: "Despesas" },
       ]}
       colors={["#16a34a", "#e22626"]}
-      xAxis={[{ scaleType: "point", data: xLabels }]}
-      yAxis={[{ width: 50 }]}
+      xAxis={[{ 
+        scaleType: "point", 
+        data: xLabels,
+        tickLabelStyle: isMobile ? { fontSize: 10 } : undefined
+      }]}
+      yAxis={[{ 
+        width: isMobile ? 40 : 50,
+        tickLabelStyle: isMobile ? { fontSize: 10 } : undefined
+      }]}
       margin={margin}
+      sx={{
+        '& .MuiChartsLegend-label': {
+          fontSize: isMobile ? 10 : undefined,
+        },
+        '& .MuiChartsLegend-mark': {
+          width: isMobile ? 8 : undefined,
+          height: isMobile ? 8 : undefined,
+          marginRight: isMobile ? 3 : undefined
+        }
+      }}
     />
   );
 }
