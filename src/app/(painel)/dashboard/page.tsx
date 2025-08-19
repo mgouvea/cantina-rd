@@ -70,8 +70,6 @@ export default function Dashboard() {
   const { data: paymentsVsReceives, isLoading: isLoadingPaymentsVsReceives } =
     usePaymentsVsReceives();
 
-  console.log("paymentsVsReceives", paymentsVsReceives);
-
   const renderContent = () => (
     <>
       <Stack
@@ -102,7 +100,6 @@ export default function Dashboard() {
           flexDirection: { xs: "column", md: "row" },
           gap: { xs: 1.5, md: 3 },
           height: { xs: "auto", md: "24rem" },
-          width: isMobile ? "calc(50% - 16px)" : "100%",
           marginInline: isMobile ? "0" : { xs: "0.25rem", sm: "0.5rem" },
         }}
       >
@@ -200,7 +197,7 @@ export default function Dashboard() {
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
             gap: { xs: 3, sm: 2 },
-            width: isMobile ? "calc(50% - 16px)" : { xs: "100%", md: "70%" },
+            width: { xs: "100%", md: "70%" },
             height: { xs: "auto", md: "inherit" },
             borderRadius: "8px",
           }}
@@ -292,7 +289,7 @@ export default function Dashboard() {
             </Box>
           </Box>
         </Box>
-        <Box
+        {/* <Box
           sx={{
             width: { xs: "100%", md: "30%" },
             margin: { xs: "0.5rem", sm: "1rem" },
@@ -307,8 +304,8 @@ export default function Dashboard() {
             Faturamento por produto %
           </Text>
           <Divider />
-          {/* <PieChartProduct /> */}
-        </Box>
+          <PieChartProduct />
+        </Box> */}
       </Box>
     </>
   );
