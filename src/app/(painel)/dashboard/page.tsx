@@ -4,7 +4,7 @@ import AreaChart from "@/app/components/ui/graphics/AreaChart";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import Loading from "@/app/components/loading/Loading";
 import Text from "@/app/components/ui/text/Text";
-import { Box, Divider, Stack } from "@mui/material";
+import { Box, Divider, Stack, useMediaQuery, useTheme } from "@mui/material";
 import { Suspense, useState } from "react";
 
 import {
@@ -17,6 +17,7 @@ import {
 import {
   useGroupFamilyInvoicesOpen,
   useMostSoldProducts,
+  usePaymentsVsReceives,
   useTopClients,
 } from "@/hooks/queries";
 
@@ -39,30 +40,37 @@ const overflowStyle = {
   scrollbarColor: "#bdbdbd transparent",
 };
 
-const breadcrumbItems = [
-  { label: "Início", href: "/dashboard" },
-  { label: "Dashboard" },
-];
+const breadcrumbItems = [{ label: "Início", href: "/dashboard" }, { label: "Dashboard" }];
 
 export default function Dashboard() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   // Estado para armazenar as datas selecionadas no filtro
   const [filterDates, setFilterDates] = useState<{
     startDate: Date | null;
     endDate: Date | null;
   }>({ startDate: null, endDate: null });
 
-  const {
-    data: groupFamilyInvoicesOpen,
-    isLoading: isLoadingGroupFamilyInvoicesOpen,
-  } = useGroupFamilyInvoicesOpen(filterDates.startDate!, filterDates.endDate!);
+  // Theme is used for responsive styling in child components
 
-  const { data: mostSoldProducts, isLoading: isLoadingMostSoldProducts } =
-    useMostSoldProducts(filterDates.startDate!, filterDates.endDate!);
+  const { data: groupFamilyInvoicesOpen, isLoading: isLoadingGroupFamilyInvoicesOpen } =
+    useGroupFamilyInvoicesOpen(filterDates.startDate!, filterDates.endDate!);
+
+  const { data: mostSoldProducts, isLoading: isLoadingMostSoldProducts } = useMostSoldProducts(
+    filterDates.startDate!,
+    filterDates.endDate!
+  );
 
   const { data: topClients, isLoading: isLoadingTopClients } = useTopClients(
     filterDates.startDate!,
     filterDates.endDate!
   );
+
+  const { data: paymentsVsReceives, isLoading: isLoadingPaymentsVsReceives } =
+    usePaymentsVsReceives();
+
+  console.log("paymentsVsReceives", paymentsVsReceives);
 
   const renderContent = () => (
     <>
@@ -72,7 +80,7 @@ export default function Dashboard() {
         sx={{
           justifyContent: "space-between",
           alignItems: { xs: "flex-start", sm: "center" },
-          marginInline: "1rem",
+          marginInline: { xs: "0.5rem", sm: "1rem" },
           mb: { xs: 2, sm: 0 },
         }}
       >
@@ -92,9 +100,10 @@ export default function Dashboard() {
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          gap: { xs: 2, md: 3 },
+          gap: { xs: 1.5, md: 3 },
           height: { xs: "auto", md: "24rem" },
-          marginInline: "0.5rem",
+          width: isMobile ? "calc(50% - 16px)" : "100%",
+          marginInline: isMobile ? "0" : { xs: "0.25rem", sm: "0.5rem" },
         }}
       >
         {/* Box de vendas vs à receber */}
@@ -102,8 +111,8 @@ export default function Dashboard() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            padding: "1rem",
-            gap: 1,
+            padding: { xs: "0.75rem", sm: "1rem" },
+            gap: { xs: 0.5, sm: 1 },
             width: { xs: "100%", md: "70%" },
             height: { xs: "350px", md: "inherit" },
             backgroundColor: "#fff",
@@ -113,8 +122,18 @@ export default function Dashboard() {
           <Text variant="subtitle2" color="#596772" fontWeight="bold">
             Receitas vs Despesas
           </Text>
-          <Box sx={{ flexGrow: 1, width: "100%", height: "calc(100% - 24px)" }}>
-            <AreaChart />
+          <Box
+            sx={{
+              flexGrow: 1,
+              width: "100%",
+              height: "calc(100% - 24px)",
+            }}
+          >
+            {isLoadingPaymentsVsReceives ? (
+              <Loading minHeight={10} />
+            ) : (
+              <AreaChart data={paymentsVsReceives!} />
+            )}
           </Box>
         </Box>
 
@@ -123,8 +142,8 @@ export default function Dashboard() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            padding: "1.5rem",
-            gap: 2,
+            padding: { xs: "1rem", sm: "1.5rem" },
+            gap: { xs: 1, sm: 2 },
             width: { xs: "100%", md: "30%" },
             height: { xs: "400px", md: "inherit" },
             backgroundColor: "#fff",
@@ -169,10 +188,10 @@ export default function Dashboard() {
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          gap: { xs: 1, md: 2 },
+          gap: isMobile ? 0 : { xs: 1, md: 2 },
           height: { xs: "auto", md: "22rem" },
-          marginInline: "0.5rem",
-          marginTop: "0.5rem",
+          marginInline: isMobile ? "0" : { xs: "0.25rem", sm: "0.5rem" },
+          marginTop: isMobile ? "1rem" : { xs: "0.25rem", sm: "0.5rem" },
         }}
       >
         {/* Box de top produtos */}
@@ -181,7 +200,7 @@ export default function Dashboard() {
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
             gap: { xs: 3, sm: 2 },
-            width: { xs: "100%", md: "70%" },
+            width: isMobile ? "calc(50% - 16px)" : { xs: "100%", md: "70%" },
             height: { xs: "auto", md: "inherit" },
             borderRadius: "8px",
           }}
@@ -194,7 +213,7 @@ export default function Dashboard() {
               padding: "1.5rem",
               display: "flex",
               flexDirection: "column",
-              mb: { xs: 2, sm: 0 },
+              mb: isMobile ? 0 : { xs: 2, sm: 0 },
               height: { xs: "400px", sm: "auto" },
             }}
           >
@@ -224,9 +243,7 @@ export default function Dashboard() {
               {isLoadingMostSoldProducts ? (
                 <Loading minHeight={10} />
               ) : (
-                mostSoldProducts?.map((product) => (
-                  <TopProducts key={product._id} {...product} />
-                ))
+                mostSoldProducts?.map((product) => <TopProducts key={product._id} {...product} />)
               )}
             </Box>
           </Box>
@@ -270,9 +287,7 @@ export default function Dashboard() {
               {isLoadingTopClients ? (
                 <Loading minHeight={10} />
               ) : (
-                topClients?.map((client) => (
-                  <TopClients key={client._id} {...client} />
-                ))
+                topClients?.map((client) => <TopClients key={client._id} {...client} />)
               )}
             </Box>
           </Box>
@@ -280,9 +295,9 @@ export default function Dashboard() {
         <Box
           sx={{
             width: { xs: "100%", md: "30%" },
-            backgroundColor: "#fff",
+            margin: { xs: "0.5rem", sm: "1rem" },
             borderRadius: "8px",
-            padding: "1rem",
+            padding: { xs: "0.5rem 0", lg: 0 },
             height: { xs: "350px", md: "auto" },
             display: "flex",
             flexDirection: "column",

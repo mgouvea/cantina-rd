@@ -11,6 +11,7 @@ import { useCategories, useSubCategories } from "@/hooks/queries";
 import { useForm } from "react-hook-form";
 import { useProductStore } from "@/contexts";
 import { useRouter } from "next/navigation";
+import { useTheme, useMediaQuery } from "@mui/material";
 
 import {
   Box,
@@ -45,6 +46,8 @@ export const ProductsForm = () => {
   const { mutateAsync: updateProduct } = useUpdateProduct();
 
   const router = useRouter();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { isEditing, updateIsEditing, productToEdit, updateProductToEdit } =
     useProductStore();
   // Ensure productId is a string, not an object
@@ -289,7 +292,7 @@ export const ProductsForm = () => {
             fotoUpdate={productToEdit?.urlImage || ""}
           />
         </Box>
-        <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
+        <Stack direction={{ xs: "column", sm: "row" }} gap={isMobile ? 2 : 1}>
           <EntradaTexto
             name="name"
             control={productsControl}
@@ -303,7 +306,7 @@ export const ProductsForm = () => {
           />
         </Stack>
 
-        <Stack direction={{ xs: "column", sm: "row" }} gap={1}>
+        <Stack direction={{ xs: "column", sm: "row" }} gap={isMobile ? 2 : 1}>
           <FormControl
             sx={{
               width: "100%",
@@ -376,7 +379,7 @@ export const ProductsForm = () => {
             control={productsControl}
             label="Tag do produto"
           />
-          {getProductValues().tag && (
+          {getProductValues().tag && !isMobile && (
             <Chip label={`${getProductValues().tag || ""}`} color="success" />
           )}
         </Stack>

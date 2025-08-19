@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, useTheme, useMediaQuery } from "@mui/material";
 import { ButtonComponent } from "../button/ButtonComponent";
 
 interface FormActionsProps {
@@ -19,11 +19,15 @@ export const FormActions = ({
   isEditing,
   isGroupFamilyEdit,
   isFatura,
-}: FormActionsProps) => (
+}: FormActionsProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  
+  return (
   <Box
     sx={{
       display: "flex",
-      justifyContent: "flex-end",
+      justifyContent: isMobile ? "center" : "flex-end",
       gap: 2,
       marginTop: 3,
       px: { xs: 2, sm: 4 },
@@ -57,4 +61,5 @@ export const FormActions = ({
         : "Cadastrar"}
     </ButtonComponent>
   </Box>
-);
+  );
+};
