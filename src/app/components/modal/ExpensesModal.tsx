@@ -455,6 +455,7 @@ export const ExpensesModal: React.FC<ExpensesModalProps> = ({
                     label="Tipo de Despesa"
                     size="small"
                     error={!!errors.expenseType}
+                    value={field.value || ""}
                   >
                     {expenseType.map((type) => (
                       <MenuItem key={type.value} value={type.value}>
