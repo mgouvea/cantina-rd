@@ -4,7 +4,7 @@ import AreaChart from "@/app/components/ui/graphics/AreaChart";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import Loading from "@/app/components/loading/Loading";
 import Text from "@/app/components/ui/text/Text";
-import { Box, Divider, Stack } from "@mui/material";
+import { Box, Divider, Stack, useMediaQuery, useTheme } from "@mui/material";
 import { Suspense, useState } from "react";
 
 import {
@@ -14,11 +14,7 @@ import {
   TopProducts,
   TotalBoxContent,
 } from "@/app/components";
-import {
-  useGroupFamilyInvoicesOpen,
-  useMostSoldProducts,
-  useTopClients,
-} from "@/hooks/queries";
+import { useGroupFamilyInvoicesOpen, useMostSoldProducts, useTopClients } from "@/hooks/queries";
 
 // Custom scrollbar style
 const overflowStyle = {
@@ -39,12 +35,12 @@ const overflowStyle = {
   scrollbarColor: "#bdbdbd transparent",
 };
 
-const breadcrumbItems = [
-  { label: "Início", href: "/dashboard" },
-  { label: "Dashboard" },
-];
+const breadcrumbItems = [{ label: "Início", href: "/dashboard" }, { label: "Dashboard" }];
 
 export default function Dashboard() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   // Estado para armazenar as datas selecionadas no filtro
   const [filterDates, setFilterDates] = useState<{
     startDate: Date | null;
@@ -53,13 +49,13 @@ export default function Dashboard() {
 
   // Theme is used for responsive styling in child components
 
-  const {
-    data: groupFamilyInvoicesOpen,
-    isLoading: isLoadingGroupFamilyInvoicesOpen,
-  } = useGroupFamilyInvoicesOpen(filterDates.startDate!, filterDates.endDate!);
+  const { data: groupFamilyInvoicesOpen, isLoading: isLoadingGroupFamilyInvoicesOpen } =
+    useGroupFamilyInvoicesOpen(filterDates.startDate!, filterDates.endDate!);
 
-  const { data: mostSoldProducts, isLoading: isLoadingMostSoldProducts } =
-    useMostSoldProducts(filterDates.startDate!, filterDates.endDate!);
+  const { data: mostSoldProducts, isLoading: isLoadingMostSoldProducts } = useMostSoldProducts(
+    filterDates.startDate!,
+    filterDates.endDate!
+  );
 
   const { data: topClients, isLoading: isLoadingTopClients } = useTopClients(
     filterDates.startDate!,
@@ -96,7 +92,8 @@ export default function Dashboard() {
           flexDirection: { xs: "column", md: "row" },
           gap: { xs: 1.5, md: 3 },
           height: { xs: "auto", md: "24rem" },
-          marginInline: { xs: "0.25rem", sm: "0.5rem" },
+          width: isMobile ? "calc(50% - 16px)" : "100%",
+          marginInline: isMobile ? "0" : { xs: "0.25rem", sm: "0.5rem" },
         }}
       >
         {/* Box de vendas vs à receber */}
@@ -115,7 +112,13 @@ export default function Dashboard() {
           <Text variant="subtitle2" color="#596772" fontWeight="bold">
             Receitas vs Despesas
           </Text>
-          <Box sx={{ flexGrow: 1, width: "100%", height: "calc(100% - 24px)" }}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              width: "100%",
+              height: "calc(100% - 24px)",
+            }}
+          >
             <AreaChart />
           </Box>
         </Box>
@@ -171,10 +174,10 @@ export default function Dashboard() {
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          gap: { xs: 1, md: 2 },
+          gap: isMobile ? 0 : { xs: 1, md: 2 },
           height: { xs: "auto", md: "22rem" },
-          marginInline: { xs: "0.25rem", sm: "0.5rem" },
-          marginTop: { xs: "0.25rem", sm: "0.5rem" },
+          marginInline: isMobile ? "0" : { xs: "0.25rem", sm: "0.5rem" },
+          marginTop: isMobile ? "1rem" : { xs: "0.25rem", sm: "0.5rem" },
         }}
       >
         {/* Box de top produtos */}
@@ -183,7 +186,7 @@ export default function Dashboard() {
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
             gap: { xs: 3, sm: 2 },
-            width: { xs: "100%", md: "70%" },
+            width: isMobile ? "calc(50% - 16px)" : { xs: "100%", md: "70%" },
             height: { xs: "auto", md: "inherit" },
             borderRadius: "8px",
           }}
@@ -196,7 +199,7 @@ export default function Dashboard() {
               padding: "1.5rem",
               display: "flex",
               flexDirection: "column",
-              mb: { xs: 2, sm: 0 },
+              mb: isMobile ? 0 : { xs: 2, sm: 0 },
               height: { xs: "400px", sm: "auto" },
             }}
           >
@@ -226,9 +229,7 @@ export default function Dashboard() {
               {isLoadingMostSoldProducts ? (
                 <Loading minHeight={10} />
               ) : (
-                mostSoldProducts?.map((product) => (
-                  <TopProducts key={product._id} {...product} />
-                ))
+                mostSoldProducts?.map((product) => <TopProducts key={product._id} {...product} />)
               )}
             </Box>
           </Box>
@@ -272,9 +273,7 @@ export default function Dashboard() {
               {isLoadingTopClients ? (
                 <Loading minHeight={10} />
               ) : (
-                topClients?.map((client) => (
-                  <TopClients key={client._id} {...client} />
-                ))
+                topClients?.map((client) => <TopClients key={client._id} {...client} />)
               )}
             </Box>
           </Box>
