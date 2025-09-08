@@ -1,55 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Text from "../../components/ui/text/Text";
+import Text from "../../../components/ui/text/Text";
 import { Box, Divider, IconButton, Stack, Tooltip } from "@mui/material";
-import { useFullInvoices } from "@/hooks/mutations";
+import { useFullInvoicesVisitors } from "@/hooks/mutations";
 import { usePathname } from "next/navigation";
-import { FullInvoiceResponse } from "@/types/invoice";
+import { visitorInvoiceDto } from "@/types/visitorInvoice";
 import { capitalizeFirstLastName, formatDate, formatDateTime } from "@/utils";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useSnackbar } from "@/app/components";
 
-export default function FaturaCliente() {
+export default function VisitantePage() {
   const { showSnackbar } = useSnackbar();
   const router = usePathname();
-  const { mutateAsync: fullInvoice } = useFullInvoices();
+  const { mutateAsync: fullInvoiceVisitors } = useFullInvoicesVisitors();
 
-  const [invoice, setInvoice] = useState<FullInvoiceResponse | null>(null);
+  const [invoice, setInvoice] = useState<visitorInvoiceDto | null>(null);
 
   const handleFullInvoice = async () => {
     const id = router.split("/")[2];
     try {
-      const responseData = await fullInvoice({
+      const responseData = await fullInvoiceVisitors({
         ids: [id],
         isArchivedInvoice: "all",
       });
 
-      // Verificar se a resposta é um array e extrair o primeiro item
       const response = Array.isArray(responseData) ? responseData[0] : responseData;
 
-      // Verificar se os dados essenciais estão presentes
       if (!response) {
-        console.error("Resposta da API vazia");
-      } else if (!response.consumidoresNomes) {
-        console.error("Dados de consumidoresNomes ausentes na resposta");
+        console.error("Resposta da API (visitante) vazia");
       } else if (!response.orders) {
-        console.error("Dados de orders ausentes na resposta");
-      } else if (Object.keys(response.consumidoresNomes).length === 0) {
-        console.error("consumidoresNomes está vazio");
+        console.error("Dados de orders ausentes na resposta (visitante)");
       } else if (response.orders.length === 0) {
-        console.error("orders está vazio");
+        console.error("orders está vazio (visitante)");
       }
 
-      setInvoice(response);
+      setInvoice(response as visitorInvoiceDto); // Fixed type to use visitorInvoiceDto
     } catch (error) {
-      console.error("Error fetching invoice:", error);
+      console.error("Error fetching visitor invoice:", error);
     }
   };
 
   useEffect(() => {
     handleFullInvoice();
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -64,11 +57,11 @@ export default function FaturaCliente() {
   return (
     <Stack>
       <Text variant="subtitle1" sx={{ fontWeight: "bold" }}>
-        Cantina RD - Fatura
+        Cantina RD - Fatura (Visitante)
       </Text>
 
       <Text variant="subtitle2" sx={{ mt: 1 }}>
-        <strong>Olá, {capitalizeFirstLastName(invoice?.ownerName) || "cliente"}!</strong>
+        <strong>Olá, {capitalizeFirstLastName(invoice?.visitorName) || "visitante"}!</strong>
         <br /> Uma nova fatura foi gerada no valor de R${" "}
         <strong>{invoice?.totalAmount?.toFixed(2) || "0.00"}</strong>.
       </Text>
@@ -125,67 +118,28 @@ export default function FaturaCliente() {
 
       {!invoice && <Text>Carregando fatura...</Text>}
 
-      {/* Se a fatura foi carregada mas não tem dados */}
-      {invoice && (!invoice.consumidoresNomes || !invoice.orders) && (
-        <Box sx={{ margin: 2 }}>
-          <Text variant="subtitle1">Não foi possível carregar os dados da fatura.</Text>
-          {!invoice.consumidoresNomes && <Text>Dados de consumidores não disponíveis</Text>}
-          {!invoice.orders && <Text>Dados de pedidos não disponíveis</Text>}
-        </Box>
-      )}
-
-      {/* Se a fatura foi carregada mas não tem pedidos */}
-      {invoice && invoice.orders && invoice.orders.length === 0 && (
+      {invoice && (!invoice.orders || invoice.orders.length === 0) && (
         <Box sx={{ margin: 2 }}>
           <Text variant="subtitle1">Não há itens para exibir nesta fatura.</Text>
         </Box>
       )}
 
-      {/* Renderização dos itens da fatura */}
-      {invoice && invoice.consumidoresNomes && invoice.orders && invoice.orders.length > 0 && (
+      {/* Renderização dos itens da fatura (apenas um consumidor - o visitante) */}
+      {invoice && invoice.orders && invoice.orders.length > 0 && (
         <>
-          {Object.entries(invoice.consumidoresNomes).map(([buyerId, name]) => {
-            // Filtrar ordens deste comprador
-            const buyerOrders = invoice.orders.filter((order) => order.buyerId === buyerId);
-
-            const debit = invoice.debitAmount!;
-
-            if (buyerOrders.length === 0) return null;
-
-            // Calcular total por pessoa
-            const totalByPerson = buyerOrders.reduce((total, order) => total + order.totalPrice, 0);
-
-            // Agrupar por data
-            const ordersByDate = buyerOrders.reduce((acc, order) => {
+          {(() => {
+            const ordersByDate = invoice.orders.reduce((acc, order) => {
               const date = new Date(order.createdAt);
               const dateStr = `${formatDate(date)} às ${formatTime(date)}`;
-
-              if (!acc[dateStr]) {
-                acc[dateStr] = [];
-              }
+              if (!acc[dateStr]) acc[dateStr] = [];
               acc[dateStr].push(order);
               return acc;
-            }, {} as Record<string, typeof buyerOrders>);
+            }, {} as Record<string, typeof invoice.orders>);
 
             return (
-              <Box key={buyerId} sx={{ marginTop: 2, marginBottom: 2 }}>
-                {debit > 0 && (
-                  <Text variant="subtitle2" sx={{ fontWeight: "bold" }}>
-                    Debitos anteriores:{" "}
-                    <Text variant="subtitle2" sx={{ fontWeight: "bold", color: "error.main" }}>
-                      R$ {debit.toFixed(2)}
-                    </Text>
-                  </Text>
-                )}
-
-                <Text variant="subtitle2" sx={{ fontWeight: "bold", mt: 2 }}>
-                  Compras de {capitalizeFirstLastName(name)}:
-                </Text>
-
+              <>
                 {Object.entries(ordersByDate).map(([dateStr, orders]) => {
-                  // Calcular total por data
                   const totalByDate = orders.reduce((total, order) => total + order.totalPrice, 0);
-
                   return (
                     <Box key={dateStr} sx={{ marginTop: 1, marginLeft: 1 }}>
                       <Text variant="subtitle2" sx={{ fontWeight: "bold" }}>
@@ -244,32 +198,9 @@ export default function FaturaCliente() {
                     </Box>
                   );
                 })}
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    width: "100%",
-                    marginTop: 2,
-                  }}
-                >
-                  <Text variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                    Total {capitalizeFirstLastName(name)}
-                  </Text>
-                  <Box
-                    sx={{
-                      flex: 1,
-                      borderBottom: "1px dotted rgba(0, 0, 0, 0.42)",
-                      margin: "0 8px",
-                    }}
-                  />
-                  <Text variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                    R$ {totalByPerson.toFixed(2)}
-                  </Text>
-                </Box>
-              </Box>
+              </>
             );
-          })}
+          })()}
 
           {/* Total geral da fatura */}
           <Box sx={{ marginTop: 4, marginBottom: 2 }}>
