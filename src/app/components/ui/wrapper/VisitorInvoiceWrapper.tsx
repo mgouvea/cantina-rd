@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import VisitorInvoiceTable from "../tables/VisitorInvoiceTable";
 import { Box } from "@mui/material";
 import { BoxStyle } from "./style/BoxStyle";
@@ -14,15 +14,10 @@ interface VisitorInvoiceWrapperProps {
   viewType: "socios" | "visitantes";
 }
 
-export const VisitorInvoiceWrapper = ({
-  allVisitorsIds,
-  viewType,
-}: VisitorInvoiceWrapperProps) => {
-  const { mutateAsync: fullInvoices, isPending: isLoadingFullInvoices } =
-    useFullInvoicesVisitors();
+export const VisitorInvoiceWrapper = ({ allVisitorsIds, viewType }: VisitorInvoiceWrapperProps) => {
+  const { mutateAsync: fullInvoices, isPending: isLoadingFullInvoices } = useFullInvoicesVisitors();
 
   const [fullInvoicesData, setFullInvoicesData] = useState([]);
-  // false = show active invoices (open/partially paid), true = show archived invoices (fully paid)
   const [viewInvoiceArchive, setViewInvoiceArchive] = useState(false);
   const [resetFullInvoices, setResetFullInvoices] = useState(false);
 
@@ -50,11 +45,8 @@ export const VisitorInvoiceWrapper = ({
     setResetFullInvoices((prev) => !prev);
   };
 
-  // Toggle between viewing active invoices (false) and archived/paid invoices (true)
   const handleViewInvoiceArchive = () => {
     setViewInvoiceArchive((prev) => !prev);
-    // No need to call handleFullInvoices explicitly as the useEffect will trigger
-    // when viewInvoiceArchive changes
   };
 
   return (
