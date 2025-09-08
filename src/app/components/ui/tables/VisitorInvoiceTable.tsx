@@ -243,7 +243,6 @@ export default function VisitorInvoiceTable({
   };
 
   const handleSendInvoiceClick = (params: visitorInvoiceDto) => async () => {
-    console.log("params", params.buyerId);
     setSendingInvoiceId(String(params._id));
     await sendInvoiceByWhatsApp(String(params.buyerId));
     setSendingInvoiceId(null);
