@@ -48,6 +48,7 @@ import {
 } from "@mui/x-data-grid";
 import { useAddPaymentVisitors } from "@/hooks/mutations/usePayments-visitors.mutation";
 import WhatsAppResendIcon from "../icons/WhatsAppResendIcon";
+import { visitorInvoiceDto } from "@/types/visitorInvoice";
 
 interface TabelaProps {
   data: FullInvoiceResponse[] | undefined;
@@ -70,16 +71,17 @@ const ConsumptionDetails = ({ invoice }: { invoice: FullInvoiceResponse }) => {
   };
 
   // Group orders by date
-  const ordersByDate = invoice.orders.reduce<
-    Record<string, (typeof invoice.orders)[0][]>
-  >((acc, order) => {
-    const dateKey = format(new Date(order.createdAt), "yyyy-MM-dd");
-    if (!acc[dateKey]) {
-      acc[dateKey] = [];
-    }
-    acc[dateKey].push(order);
-    return acc;
-  }, {});
+  const ordersByDate = invoice.orders.reduce<Record<string, (typeof invoice.orders)[0][]>>(
+    (acc, order) => {
+      const dateKey = format(new Date(order.createdAt), "yyyy-MM-dd");
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push(order);
+      return acc;
+    },
+    {}
+  );
 
   // Calculate total for a specific date
   const calculateDateTotal = (orders: (typeof invoice.orders)[0][]): number => {
@@ -106,11 +108,7 @@ const ConsumptionDetails = ({ invoice }: { invoice: FullInvoiceResponse }) => {
               }}
             >
               <Typography variant="subtitle2">Data: {formattedDate}</Typography>
-              <Chip
-                label={`R$ ${dateTotal.toFixed(2)}`}
-                color="primary"
-                size="small"
-              />
+              <Chip label={`R$ ${dateTotal.toFixed(2)}`} color="primary" size="small" />
             </Box>
 
             <Collapse in={expandedDate === dateKey}>
@@ -134,25 +132,18 @@ const ConsumptionDetails = ({ invoice }: { invoice: FullInvoiceResponse }) => {
                         <ListItemText
                           primary={
                             <Typography variant="body2">
-                              {product.name} - {product.quantity}x R${" "}
-                              {product.price.toFixed(2)}
+                              {product.name} - {product.quantity}x R$ {product.price.toFixed(2)}
                             </Typography>
                           }
                           secondary={
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              Total: R${" "}
-                              {(product.price * product.quantity).toFixed(2)}
+                            <Typography variant="caption" color="text.secondary">
+                              Total: R$ {(product.price * product.quantity).toFixed(2)}
                             </Typography>
                           }
                         />
                       </ListItem>
                     ))}
-                    {orderIndex < orders.length - 1 && (
-                      <Divider sx={{ my: 1 }} />
-                    )}
+                    {orderIndex < orders.length - 1 && <Divider sx={{ my: 1 }} />}
                   </React.Fragment>
                 ))}
               </List>
@@ -175,21 +166,14 @@ export default function VisitorInvoiceTable({
   const [sendingInvoiceId, setSendingInvoiceId] = useState<string | null>(null);
 
   const { mutateAsync: deleteInvoice } = useDeleteInvoiceVisitors();
-  const { mutateAsync: sendInvoiceByWhatsApp } =
-    useSendInvoiceVisitorsByWhatsApp();
-  const {
-    mutateAsync: resetWhatsAppInvoice,
-    isPending: isResettingWhatsAppInvoice,
-  } = useResetWhatsAppVisitorsInvoice();
+  const { mutateAsync: sendInvoiceByWhatsApp } = useSendInvoiceVisitorsByWhatsApp();
+  const { mutateAsync: resetWhatsAppInvoice, isPending: isResettingWhatsAppInvoice } =
+    useResetWhatsAppVisitorsInvoice();
 
   const { mutateAsync: confirmPayment } = useAddPaymentVisitors();
 
-  const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(
-    null
-  );
-  const [invoiceNameToDelete, setInvoiceNameToDelete] = useState<string | null>(
-    null
-  );
+  const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(null);
+  const [invoiceNameToDelete, setInvoiceNameToDelete] = useState<string | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
 
@@ -219,8 +203,7 @@ export default function VisitorInvoiceTable({
     // Calcular o valor total já pago para esta fatura
     const totalPaid =
       row.payments?.reduce(
-        (sum: number, payment: { amountPaid: number }) =>
-          sum + payment.amountPaid,
+        (sum: number, payment: { amountPaid: number }) => sum + payment.amountPaid,
         0
       ) || 0;
 
@@ -259,9 +242,10 @@ export default function VisitorInvoiceTable({
     });
   };
 
-  const handleSendInvoiceClick = (_id: string) => async () => {
-    setSendingInvoiceId(_id);
-    await sendInvoiceByWhatsApp(_id);
+  const handleSendInvoiceClick = (params: visitorInvoiceDto) => async () => {
+    console.log("params", params.buyerId);
+    setSendingInvoiceId(String(params._id));
+    await sendInvoiceByWhatsApp(String(params.buyerId));
     setSendingInvoiceId(null);
   };
 
@@ -307,8 +291,7 @@ export default function VisitorInvoiceTable({
       width: isSmallScreen ? 100 : 120,
       editable: false,
       align: "center",
-      renderCell: (params) =>
-        format(new Date(params.value), "dd/MM/yyyy", { locale: ptBR }),
+      renderCell: (params) => format(new Date(params.value), "dd/MM/yyyy", { locale: ptBR }),
     },
     {
       field: "endDate",
@@ -316,8 +299,7 @@ export default function VisitorInvoiceTable({
       width: isSmallScreen ? 100 : 120,
       editable: false,
       align: "center",
-      renderCell: (params) =>
-        format(new Date(params.value), "dd/MM/yyyy", { locale: ptBR }),
+      renderCell: (params) => format(new Date(params.value), "dd/MM/yyyy", { locale: ptBR }),
     },
     {
       field: "orders",
@@ -409,24 +391,17 @@ export default function VisitorInvoiceTable({
       headerAlign: "center",
       renderCell: (params) => {
         const status = params.value as "OPEN" | "PARTIALLY_PAID" | "PAID";
-        let color:
-          | "default"
-          | "primary"
-          | "secondary"
-          | "error"
-          | "info"
-          | "success"
-          | "warning" = "default";
+        let color: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" =
+          "default";
         if (status === "OPEN") color = "error";
         if (status === "PARTIALLY_PAID") color = "warning";
         if (status === "PAID") color = "success";
 
-        const statusLabels: Record<"OPEN" | "PARTIALLY_PAID" | "PAID", string> =
-          {
-            OPEN: "Em aberto",
-            PARTIALLY_PAID: "Parcialmente pago",
-            PAID: "Pago",
-          };
+        const statusLabels: Record<"OPEN" | "PARTIALLY_PAID" | "PAID", string> = {
+          OPEN: "Em aberto",
+          PARTIALLY_PAID: "Parcialmente pago",
+          PAID: "Pago",
+        };
 
         return (
           <Chip
@@ -448,9 +423,7 @@ export default function VisitorInvoiceTable({
       cellClassName: "actions",
       getActions: (params) => {
         const isSentByWhatsApp = Boolean(params.row.sentByWhatsapp);
-        const isOpenStatus =
-          params.row.status === "OPEN" ||
-          params.row.status === "PARTIALLY_PAID";
+        const isOpenStatus = params.row.status === "OPEN" || params.row.status === "PARTIALLY_PAID";
         const isDisabledSend = !isOpenStatus || isSentByWhatsApp;
         const isDisabledPayment = params.row.status === "PAID";
 
@@ -478,7 +451,7 @@ export default function VisitorInvoiceTable({
                 )
               }
               label="Enviar"
-              onClick={handleSendInvoiceClick(String(params.id))}
+              onClick={handleSendInvoiceClick(params.row)}
               color="inherit"
               disabled={isDisabledSend || sendingInvoiceId !== null}
             />
@@ -523,11 +496,7 @@ export default function VisitorInvoiceTable({
         <Text variant="h5">Faturas Registradas</Text>
 
         <Stack direction="row" alignItems="center">
-          <Tooltip
-            title={
-              viewInvoiceArchive ? "Ver faturas em aberto" : "Ver faturas pagas"
-            }
-          >
+          <Tooltip title={viewInvoiceArchive ? "Ver faturas em aberto" : "Ver faturas pagas"}>
             <IconButton
               aria-label="toggle-archive-view"
               sx={{ color: viewInvoiceArchive ? "#fff" : "warning.main" }}
@@ -562,11 +531,7 @@ export default function VisitorInvoiceTable({
             </IconButton>
           </Tooltip>
           <Tooltip title="Recarregar dados">
-            <IconButton
-              aria-label="add"
-              sx={{ color: "success.main" }}
-              onClick={handleResetData}
-            >
+            <IconButton aria-label="add" sx={{ color: "success.main" }} onClick={handleResetData}>
               <CachedOutlinedIcon fontSize="medium" />
             </IconButton>
           </Tooltip>
