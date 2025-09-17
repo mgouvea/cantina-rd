@@ -1,4 +1,4 @@
-import { CreateCreditDto, CreateDebitDto } from "@/types/credit";
+import { CreateCreditDto, CreateDebitDto, Credit } from "@/types/credit";
 import { http } from "./api";
 
 export const CreateCredit = async (credit: CreateCreditDto) => {
@@ -15,4 +15,8 @@ export const GetActiveCredits = async () => {
 
 export const GetArchiveCredits = async () => {
   return (await http.get("credit/archive")).data;
+};
+
+export const GetGroupFamilyCredits = async (groupFamilyId: string): Promise<Credit[]> => {
+  return (await http.get(`credit/group-family/${groupFamilyId}`)).data as Credit[];
 };

@@ -35,8 +35,7 @@ export function capitalizeFirstLastName(str?: string) {
     return words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
   }
 
-  const firstName =
-    words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
+  const firstName = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
   const lastName =
     words[words.length - 1].charAt(0).toUpperCase() +
     words[words.length - 1].slice(1).toLowerCase();
@@ -114,6 +113,13 @@ export function formatDateTime(date: Date | string | undefined): string {
     : "";
 }
 
+export const formatCurrency = (value: number) => {
+  return value.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+};
+
 export function a11yProps(index: number) {
   return {
     id: `full-width-tab-${index}`,
@@ -121,20 +127,14 @@ export function a11yProps(index: number) {
   };
 }
 
-export function getCategoryNameById(
-  categoryId: string,
-  categories: Categories[]
-): string {
+export function getCategoryNameById(categoryId: string, categories: Categories[]): string {
   if (!categories || !categoryId) return "N/A";
 
   const category = categories.find((cat) => cat._id === categoryId);
   return category ? category.name : "N/A";
 }
 
-export function findUserById(
-  userId: string,
-  users: User[] | null
-): User | null {
+export function findUserById(userId: string, users: User[] | null): User | null {
   if (!users) return null;
   return users.find((user) => user._id === userId) || null;
 }
@@ -144,9 +144,7 @@ export function getGroupFamilyNameById(
   groupFamilies: GroupFamily[]
 ): string {
   if (!groupFamilies || !groupFamilyId) return "N/A";
-  const groupFamily = groupFamilies.find(
-    (groupFamily) => groupFamily._id === groupFamilyId
-  );
+  const groupFamily = groupFamilies.find((groupFamily) => groupFamily._id === groupFamilyId);
   return groupFamily ? groupFamily.name : "N/A";
 }
 
