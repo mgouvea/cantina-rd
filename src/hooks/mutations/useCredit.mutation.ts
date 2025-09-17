@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CreateCredit, CreateDebit } from "../services";
+import { CreateCredit, CreateDebit, DeleteCredit } from "../services";
 import { CreateCreditDto, CreateDebitDto } from "@/types/credit";
 import { useSnackbar } from "@/app/components";
 
@@ -44,6 +44,31 @@ export const useAddDebit = () => {
       showSnackbar({
         message: "Erro ao cadastrar o débito",
         severity: "error",
+      });
+    },
+  });
+};
+
+export const useDeleteCredit = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+
+  return useMutation({
+    mutationFn: DeleteCredit,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["credits"] });
+
+      showSnackbar({
+        message: "Crédito deletado com sucesso!",
+        severity: "success",
+        duration: 3000,
+      });
+    },
+    onError: () => {
+      showSnackbar({
+        message: "Erro ao deletar o crédito",
+        severity: "error",
+        duration: 3000,
       });
     },
   });

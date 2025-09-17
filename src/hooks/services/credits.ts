@@ -20,3 +20,7 @@ export const GetArchiveCredits = async () => {
 export const GetGroupFamilyCredits = async (groupFamilyId: string): Promise<Credit[]> => {
   return (await http.get(`credit/group-family/${groupFamilyId}`)).data as Credit[];
 };
+
+export const DeleteCredit = async (creditId: string) => {
+  return (await http.delete(`credit/${creditId}`)).data;
+};

@@ -87,11 +87,13 @@ export default function FaturaCliente() {
         )}
         <br /> Valor total da fatura: {formatCurrency(invoice?.totalAmount || 0)}.
       </Text>
-      {groupFamilyCredit && groupFamilyCredit[0].amount > 0 && (
-        <Text variant="subtitle2">
-          Você ainda possui {formatCurrency(groupFamilyCredit[0].amount)} reais de crédito.
-        </Text>
-      )}
+      {Array.isArray(groupFamilyCredit) &&
+        groupFamilyCredit.length > 0 &&
+        (groupFamilyCredit[0]?.amount ?? 0) > 0 && (
+          <Text variant="subtitle2">
+            Você ainda possui {formatCurrency(groupFamilyCredit[0]!.amount)} reais de crédito.
+          </Text>
+        )}
 
       {invoice?.createdAt && (
         <Box
