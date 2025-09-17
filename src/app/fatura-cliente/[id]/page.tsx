@@ -71,6 +71,11 @@ export default function FaturaCliente() {
       .padStart(2, "0")}`;
   };
 
+  // Total de crédito disponível para a família (soma dos lançamentos)
+  const totalGroupFamilyCredit = Array.isArray(groupFamilyCredit)
+    ? groupFamilyCredit.reduce((sum, c) => sum + (c?.amount ?? 0), 0)
+    : 0;
+
   return (
     <Stack>
       <Text variant="subtitle1" sx={{ fontWeight: "bold" }}>
@@ -87,13 +92,17 @@ export default function FaturaCliente() {
         )}
         <br /> Valor total da fatura: {formatCurrency(invoice?.totalAmount || 0)}.
       </Text>
+
       {Array.isArray(groupFamilyCredit) &&
-        groupFamilyCredit.length > 0 &&
-        (groupFamilyCredit[0]?.amount ?? 0) > 0 && (
+        (totalGroupFamilyCredit > 0 ? (
           <Text variant="subtitle2">
-            Você ainda possui {formatCurrency(groupFamilyCredit[0]!.amount)} reais de crédito.
+            Você ainda possui {formatCurrency(totalGroupFamilyCredit)} reais de crédito.
           </Text>
-        )}
+        ) : (
+          <Text variant="subtitle2" sx={{ color: "error.main" }}>
+            Você não possui crédito.
+          </Text>
+        ))}
 
       {invoice?.createdAt && (
         <Box
@@ -303,7 +312,7 @@ export default function FaturaCliente() {
                 width: "100%",
               }}
             >
-              <Text variant="h6" sx={{ fontWeight: "bold" }}>
+              <Text variant="h6" sx={{ fontWeight: "bold", color: "error.main" }}>
                 TOTAL A PAGAR
               </Text>
               <Box
@@ -313,7 +322,7 @@ export default function FaturaCliente() {
                   margin: "0 8px",
                 }}
               />
-              <Text variant="h6" sx={{ fontWeight: "bold" }}>
+              <Text variant="h6" sx={{ fontWeight: "bold", color: "error.main" }}>
                 {invoice.remaining !== undefined && invoice.remaining > 0
                   ? formatCurrency(invoice.remaining)
                   : formatCurrency(invoice.totalAmount || 0)}
