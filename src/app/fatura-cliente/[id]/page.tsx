@@ -6,16 +6,26 @@ import { Box, Divider, IconButton, Stack, Tooltip } from "@mui/material";
 import { useFullInvoices } from "@/hooks/mutations";
 import { usePathname } from "next/navigation";
 import { FullInvoiceResponse } from "@/types/invoice";
-import { capitalizeFirstLastName, formatDate, formatDateTime } from "@/utils";
+import { capitalizeFirstLastName, formatCurrency, formatDate, formatDateTime } from "@/utils";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useSnackbar } from "@/app/components";
+import { useGetGroupFamilyCredits } from "@/hooks/queries";
 
 export default function FaturaCliente() {
   const { showSnackbar } = useSnackbar();
   const router = usePathname();
   const { mutateAsync: fullInvoice } = useFullInvoices();
-
   const [invoice, setInvoice] = useState<FullInvoiceResponse | null>(null);
+
+  const { refetch: refetchGroupFamilyCredit, data: groupFamilyCredit } = useGetGroupFamilyCredits(
+    invoice?.groupFamilyId
+  );
+
+  useEffect(() => {
+    if (invoice?.groupFamilyId) {
+      refetchGroupFamilyCredit();
+    }
+  }, [invoice, refetchGroupFamilyCredit]);
 
   const handleFullInvoice = async () => {
     const id = router.split("/")[2];
@@ -69,9 +79,19 @@ export default function FaturaCliente() {
 
       <Text variant="subtitle2" sx={{ mt: 1 }}>
         <strong>Olá, {capitalizeFirstLastName(invoice?.ownerName) || "cliente"}!</strong>
-        <br /> Uma nova fatura foi gerada no valor de R${" "}
-        <strong>{invoice?.totalAmount?.toFixed(2) || "0.00"}</strong>.
+        {invoice?.appliedCredit && invoice?.appliedCredit > 0 && (
+          <Text variant="subtitle2">
+            Foi aplicado em sua fatura o valor de {formatCurrency(invoice?.appliedCredit || 0)}{" "}
+            reais de crédito.
+          </Text>
+        )}
+        <br /> Valor total da fatura: {formatCurrency(invoice?.totalAmount || 0)}.
       </Text>
+      {groupFamilyCredit && groupFamilyCredit[0].amount > 0 && (
+        <Text variant="subtitle2">
+          Você ainda possui {formatCurrency(groupFamilyCredit[0].amount)} reais de crédito.
+        </Text>
+      )}
 
       {invoice?.createdAt && (
         <Box
@@ -282,7 +302,7 @@ export default function FaturaCliente() {
               }}
             >
               <Text variant="h6" sx={{ fontWeight: "bold" }}>
-                TOTAL GERAL
+                TOTAL A PAGAR
               </Text>
               <Box
                 sx={{
@@ -292,34 +312,11 @@ export default function FaturaCliente() {
                 }}
               />
               <Text variant="h6" sx={{ fontWeight: "bold" }}>
-                R$ {invoice.totalAmount?.toFixed(2) || "0.00"}
+                {invoice.remaining !== undefined && invoice.remaining > 0
+                  ? formatCurrency(invoice.remaining)
+                  : formatCurrency(invoice.totalAmount || 0)}
               </Text>
             </Box>
-
-            {invoice.remaining !== undefined && invoice.remaining > 0 && (
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  width: "100%",
-                  marginTop: 1,
-                }}
-              >
-                <Text variant="subtitle1" sx={{ fontWeight: "bold", color: "error.main" }}>
-                  VALOR PENDENTE
-                </Text>
-                <Box
-                  sx={{
-                    flex: 1,
-                    borderBottom: "1px dotted rgba(0, 0, 0, 0.42)",
-                    margin: "0 8px",
-                  }}
-                />
-                <Text variant="subtitle1" sx={{ fontWeight: "bold", color: "error.main" }}>
-                  R$ {invoice.remaining.toFixed(2)}
-                </Text>
-              </Box>
-            )}
             <br />
             <Text variant="subtitle1" sx={{ fontWeight: "bold" }}>
               Chave pix:
