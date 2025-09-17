@@ -3,12 +3,13 @@
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import Box from "@mui/material/Box";
 import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import Text from "../text/Text";
 import { CreditModal } from "../../modal/CreditModal";
 import { CreditResponse } from "@/types/credit";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 import { Filters } from "../../filters/Filters";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -25,6 +26,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import { useDeleteCredit } from "@/hooks/mutations";
 
 export default function CreditTable({
   data,
@@ -42,8 +44,18 @@ export default function CreditTable({
 
   const [openCreditModal, setOpenCreditModal] = useState(false);
 
+  const { mutateAsync: deleteCredit } = useDeleteCredit();
+
   const handleResetData = () => {
     queryClient.invalidateQueries({ queryKey: ["credits"] });
+  };
+
+  const handleDeleteClick = (id: string) => async () => {
+    try {
+      await deleteCredit(id);
+    } catch (error) {
+      console.error("Error deleting credit:", error);
+    }
   };
 
   const columns: GridColDef[] = [
@@ -54,9 +66,7 @@ export default function CreditTable({
       flex: 1,
       minWidth: 120,
       editable: true,
-      renderCell: ({ value }) => (
-        <Typography sx={{ py: 0.5 }}>{value}</Typography>
-      ),
+      renderCell: ({ value }) => <Typography sx={{ py: 0.5 }}>{value}</Typography>,
     },
     {
       field: "creditedAmount",
@@ -95,6 +105,24 @@ export default function CreditTable({
         </Typography>
       ),
     },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "",
+      width: 80,
+      cellClassName: "actions",
+      getActions: (params) => {
+        return [
+          <GridActionsCellItem
+            key={`delete-${params.id}`}
+            icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 25 }} />}
+            label="Delete"
+            onClick={handleDeleteClick(params.id.toString())}
+            color="inherit"
+          />,
+        ];
+      },
+    },
   ];
 
   return (
@@ -113,16 +141,10 @@ export default function CreditTable({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">
-          {viewCreditArchive ? "Créditos arquivados" : "Créditos ativos"}
-        </Text>
+        <Text variant="h5">{viewCreditArchive ? "Créditos arquivados" : "Créditos ativos"}</Text>
 
         <Stack direction="row" spacing={2}>
-          <Tooltip
-            title={
-              viewCreditArchive ? "Creditos ativos" : "Creditos arquivados"
-            }
-          >
+          <Tooltip title={viewCreditArchive ? "Creditos ativos" : "Creditos arquivados"}>
             <IconButton
               aria-label="add"
               sx={{ color: viewCreditArchive ? "#fff" : "warning.main" }}
@@ -151,11 +173,7 @@ export default function CreditTable({
             </IconButton>
           </Tooltip>
           <Tooltip title="Recarregar dados">
-            <IconButton
-              aria-label="add"
-              sx={{ color: "success.main" }}
-              onClick={handleResetData}
-            >
+            <IconButton aria-label="add" sx={{ color: "success.main" }} onClick={handleResetData}>
               <CachedOutlinedIcon fontSize="medium" />
             </IconButton>
           </Tooltip>
@@ -188,8 +206,7 @@ export default function CreditTable({
                     wordBreak: "break-word",
                   },
                   "& .MuiDataGrid-columnHeaders": {
-                    backgroundColor:
-                      theme.palette.mode === "light" ? "#f5f5f5" : "#333",
+                    backgroundColor: theme.palette.mode === "light" ? "#f5f5f5" : "#333",
                   },
                   "& .MuiDataGrid-virtualScroller": {
                     minHeight: "200px",
@@ -215,10 +232,7 @@ export default function CreditTable({
           }
         </Filters>
       )}
-      <CreditModal
-        openModal={openCreditModal}
-        setOpenModal={setOpenCreditModal}
-      />
+      <CreditModal openModal={openCreditModal} setOpenModal={setOpenCreditModal} />
     </Box>
   );
 }
