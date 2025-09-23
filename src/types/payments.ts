@@ -2,6 +2,7 @@ export interface PaymentDto {
   _id: string;
   invoiceId: string;
   amountPaid: number;
+  baseAmount?: number;
   paymentDate: Date;
   isPartial: boolean;
   isCredit: boolean;
@@ -12,6 +13,7 @@ export interface PaymentResponse {
   _id: string;
   invoiceId: string;
   amountPaid: number;
+  baseAmount?: number;
   paymentDate: Date;
   isPartial: boolean;
   isCredit: boolean;
@@ -29,6 +31,7 @@ export interface VisitorPaymentResponse {
   _id: string;
   invoiceId: string;
   amountPaid: number;
+  baseAmount?: number;
   paymentDate: Date;
   isPartial: boolean;
   createdAt: Date;
