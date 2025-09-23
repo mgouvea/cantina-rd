@@ -212,8 +212,9 @@ export default function VisitorInvoiceTable({
   };
 
   const handleConfirmPayment = async (modalData: {
-    paymentType: "total" | "partial";
+    paymentType: "total" | "partial" | "over";
     partialValue?: number;
+    baseAmount?: number;
   }) => {
     // Retornando uma Promise para que o modal possa aguardar sua conclusão
     return new Promise<void>(async (resolve, reject) => {
@@ -599,6 +600,7 @@ export default function VisitorInvoiceTable({
         paidAmount={paidAmount!}
         setOpenModal={setOpenPaymentModal}
         onConfirmPayment={handleConfirmPayment}
+        isVisitor
       />
     </Box>
   );
