@@ -23,6 +23,7 @@ type PaymentFormData = {
 };
 
 type PaymentModalProps = {
+  isVisitor?: boolean;
   openModal: boolean;
   ownerName?: string;
   invoiceValue?: number; // Valor total da fatura
@@ -36,6 +37,7 @@ type PaymentModalProps = {
 };
 
 export const PaymentModal: React.FC<PaymentModalProps> = ({
+  isVisitor = false,
   ownerName,
   openModal,
   invoiceValue = 0,
@@ -84,13 +86,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       await onConfirmPayment({
         paymentType: data.paymentType,
         partialValue:
-          data.paymentType === "partial" || data.paymentType === "over"
+          data.paymentType === "partial" || (!isVisitor && data.paymentType === "over")
             ? parseFloat(data.partialValue)
             : data.paymentType === "total" && paidAmount > 0
             ? remainingAmount // Se for pagamento total e já tiver pago algo, envia o valor restante
             : undefined, // Se for pagamento total sem pagamento anterior, envia undefined
         baseAmount:
-          data.paymentType === "over"
+          !isVisitor && data.paymentType === "over"
             ? paidAmount > 0
               ? remainingAmount // base é o restante se já houve pagamento
               : invoiceValue // base é o total se não houve pagamento
@@ -178,15 +180,18 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   control={<Radio />}
                   label="Pagamento parcial da fatura"
                 />
-                <FormControlLabel
-                  value="over"
-                  control={<Radio />}
-                  label={
-                    paidAmount > 0
-                      ? `Pagamento acima do valor restante (${formattedRemainingAmount})`
-                      : "Pagamento acima do valor total"
-                  }
-                />
+
+                {!isVisitor && (
+                  <FormControlLabel
+                    value="over"
+                    control={<Radio />}
+                    label={
+                      paidAmount > 0
+                        ? `Pagamento acima do valor restante (${formattedRemainingAmount})`
+                        : "Pagamento acima do valor total"
+                    }
+                  />
+                )}
               </RadioGroup>
             )}
           />
@@ -228,7 +233,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           />
         )}
 
-        {paymentType === "over" && (
+        {!isVisitor && paymentType === "over" && (
           <Controller
             name="partialValue"
             control={control}
