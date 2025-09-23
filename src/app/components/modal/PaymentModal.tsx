@@ -15,7 +15,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 
-type PaymentType = "total" | "partial";
+type PaymentType = "total" | "partial" | "over";
 
 type PaymentFormData = {
   paymentType: PaymentType;
@@ -31,7 +31,8 @@ type PaymentModalProps = {
   onConfirmPayment: (paymentData: {
     paymentType: PaymentType;
     partialValue?: number;
-  }) => void;
+    baseAmount?: number; // Valor de referência (total ou restante) para o modo 'over'
+  }) => Promise<void>;
 };
 
 export const PaymentModal: React.FC<PaymentModalProps> = ({
@@ -83,11 +84,17 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       await onConfirmPayment({
         paymentType: data.paymentType,
         partialValue:
-          data.paymentType === "partial"
+          data.paymentType === "partial" || data.paymentType === "over"
             ? parseFloat(data.partialValue)
             : data.paymentType === "total" && paidAmount > 0
             ? remainingAmount // Se for pagamento total e já tiver pago algo, envia o valor restante
             : undefined, // Se for pagamento total sem pagamento anterior, envia undefined
+        baseAmount:
+          data.paymentType === "over"
+            ? paidAmount > 0
+              ? remainingAmount // base é o restante se já houve pagamento
+              : invoiceValue // base é o total se não houve pagamento
+            : undefined,
       });
 
       // Só fecha o modal após a conclusão bem-sucedida
@@ -117,9 +124,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   return (
     <GenericModal
-      title={`Confirmar pagamento de fatura${
-        ownerName ? ` de ${ownerName}` : ""
-      }`}
+      title={`Confirmar pagamento de fatura${ownerName ? ` de ${ownerName}` : ""}`}
       open={openModal}
       handleClose={() => {
         if (!isProcessing) {
@@ -173,6 +178,15 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   control={<Radio />}
                   label="Pagamento parcial da fatura"
                 />
+                <FormControlLabel
+                  value="over"
+                  control={<Radio />}
+                  label={
+                    paidAmount > 0
+                      ? `Pagamento acima do valor restante (${formattedRemainingAmount})`
+                      : "Pagamento acima do valor total"
+                  }
+                />
               </RadioGroup>
             )}
           />
@@ -204,9 +218,46 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 fullWidth
                 type="number"
                 InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">R$</InputAdornment>
-                  ),
+                  startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                }}
+                error={!!errors.partialValue}
+                helperText={errors.partialValue?.message}
+                sx={{ mt: 1 }}
+              />
+            )}
+          />
+        )}
+
+        {paymentType === "over" && (
+          <Controller
+            name="partialValue"
+            control={control}
+            rules={{
+              required: "Valor do pagamento é obrigatório",
+              pattern: {
+                value: /^\d+(\.\d{1,2})?$/,
+                message: "Valor inválido",
+              },
+              validate: (value) => {
+                const numValue = parseFloat(value);
+                if (numValue <= 0) return "Valor deve ser maior que zero";
+                const threshold = paidAmount > 0 ? remainingAmount : invoiceValue;
+                if (numValue <= threshold)
+                  return paidAmount > 0
+                    ? `O valor deve ser maior que ${formattedRemainingAmount}`
+                    : `O valor deve ser maior que ${formattedInvoiceValue}`;
+                return true;
+              },
+            }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Valor pago"
+                variant="outlined"
+                fullWidth
+                type="number"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">R$</InputAdornment>,
                 }}
                 error={!!errors.partialValue}
                 helperText={errors.partialValue?.message}

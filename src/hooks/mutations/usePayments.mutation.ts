@@ -12,6 +12,7 @@ export const useAddPayment = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["credits"] });
 
       showSnackbar({
         message: "Pagamento confirmado com sucesso!",

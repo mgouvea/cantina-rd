@@ -17,12 +17,7 @@ import { format } from "date-fns";
 import { PaymentModal } from "../../modal/PaymentModal";
 import { ptBR } from "date-fns/locale";
 
-import {
-  CreatePaymentDto,
-  FullInvoiceResponse,
-  GroupFamily,
-  User,
-} from "@/types";
+import { CreatePaymentDto, FullInvoiceResponse, GroupFamily, User } from "@/types";
 
 import {
   useAddPayment,
@@ -53,11 +48,7 @@ import {
   GridRenderCellParams,
   GridRowModel,
 } from "@mui/x-data-grid";
-import {
-  capitalizeFirstLastName,
-  findUserById,
-  getGroupFamilyNameById,
-} from "@/utils";
+import { capitalizeFirstLastName, findUserById, getGroupFamilyNameById } from "@/utils";
 
 interface TabelaProps {
   data: FullInvoiceResponse[] | undefined;
@@ -128,14 +119,9 @@ const ConsumptionDetails = ({
               }}
             >
               <Typography variant="subtitle2">
-                Membro:{" "}
-                {capitalizeFirstLastName(findUserById(userId, dataUser)?.name)}
+                Membro: {capitalizeFirstLastName(findUserById(userId, dataUser)?.name)}
               </Typography>
-              <Chip
-                label={`R$ ${userTotal.toFixed(2)}`}
-                color="primary"
-                size="small"
-              />
+              <Chip label={`R$ ${userTotal.toFixed(2)}`} color="primary" size="small" />
             </Box>
 
             <Collapse in={expandedUser === userId}>
@@ -159,25 +145,18 @@ const ConsumptionDetails = ({
                         <ListItemText
                           primary={
                             <Typography variant="body2">
-                              {product.name} - {product.quantity}x R${" "}
-                              {product.price.toFixed(2)}
+                              {product.name} - {product.quantity}x R$ {product.price.toFixed(2)}
                             </Typography>
                           }
                           secondary={
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              Total: R${" "}
-                              {(product.price * product.quantity).toFixed(2)}
+                            <Typography variant="caption" color="text.secondary">
+                              Total: R$ {(product.price * product.quantity).toFixed(2)}
                             </Typography>
                           }
                         />
                       </ListItem>
                     ))}
-                    {entryIndex < entries.length - 1 && (
-                      <Divider sx={{ my: 1 }} />
-                    )}
+                    {entryIndex < entries.length - 1 && <Divider sx={{ my: 1 }} />}
                   </React.Fragment>
                 ))}
               </List>
@@ -206,18 +185,12 @@ export default function InvoiceTable({
 
   const { mutateAsync: deleteInvoice } = useDeleteInvoice();
   const { mutateAsync: sendInvoiceByWhatsApp } = useSendInvoiceByWhatsApp();
-  const {
-    mutateAsync: resetWhatsAppInvoice,
-    isPending: isLoadingResetWhatsAppInvoice,
-  } = useResetWhatsAppInvoice();
+  const { mutateAsync: resetWhatsAppInvoice, isPending: isLoadingResetWhatsAppInvoice } =
+    useResetWhatsAppInvoice();
   const { mutateAsync: confirmPayment } = useAddPayment();
 
-  const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(
-    null
-  );
-  const [invoiceNameToDelete, setInvoiceNameToDelete] = useState<string | null>(
-    null
-  );
+  const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(null);
+  const [invoiceNameToDelete, setInvoiceNameToDelete] = useState<string | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
 
@@ -246,8 +219,7 @@ export default function InvoiceTable({
     // Calcular o valor total já pago para esta fatura
     const totalPaid =
       row.payments?.reduce(
-        (sum: number, payment: { amountPaid: number }) =>
-          sum + payment.amountPaid,
+        (sum: number, payment: { amountPaid: number }) => sum + payment.amountPaid,
         0
       ) || 0;
 
@@ -256,29 +228,41 @@ export default function InvoiceTable({
   };
 
   const handleConfirmPayment = async (modalData: {
-    paymentType: "total" | "partial";
+    paymentType: "total" | "partial" | "over";
     partialValue?: number;
+    baseAmount?: number;
   }) => {
     // Retornando uma Promise para que o modal possa aguardar sua conclusão
     return new Promise<void>(async (resolve, reject) => {
       try {
-        // Se for pagamento total e já tiver pagamentos parciais anteriores,
-        // o valor a ser pago é o restante (total - já pago)
-        const amountPaid =
-          modalData.paymentType === "total"
-            ? paidAmount! > 0
-              ? invoiceValue! - paidAmount! // Paga apenas o restante
-              : invoiceValue! // Paga o valor total
-            : modalData.partialValue!; // Pagamento parcial conforme informado
+        // Definir o valor a ser pago de acordo com o tipo de pagamento
+        const remainingAmount = invoiceValue! - (paidAmount || 0)!;
+        let amountPaid: number;
+        let isPartial = false;
+        let isCredit = false;
+
+        if (modalData.paymentType === "total") {
+          // Se já houver pagamentos, paga apenas o restante; caso contrário, paga o total
+          amountPaid = paidAmount! > 0 ? remainingAmount : invoiceValue!;
+        } else if (modalData.paymentType === "partial") {
+          amountPaid = modalData.partialValue!;
+          isPartial = true;
+        } else {
+          // over: pagamento acima do total/restante vira crédito
+          amountPaid = modalData.partialValue!;
+          // Opcionalmente, se quiser calcular o excedente:
+          // const creditExcedente = modalData.baseAmount ? modalData.partialValue! - modalData.baseAmount : undefined;
+          isCredit = true;
+        }
 
         const paymentData: CreatePaymentDto = {
           invoiceId: paymentId!,
           amountPaid: amountPaid,
+          baseAmount: modalData.baseAmount,
           paymentDate: new Date(),
-          isPartial: modalData.paymentType === "partial",
-          isCredit: false,
+          isPartial: isPartial,
+          isCredit: isCredit,
         };
-
         await confirmPayment(paymentData);
 
         resolve();
@@ -328,8 +312,7 @@ export default function InvoiceTable({
       editable: false,
       sortable: true,
       align: "center",
-      renderCell: (params) =>
-        getGroupFamilyNameById(params.value, groupFamilies),
+      renderCell: (params) => getGroupFamilyNameById(params.value, groupFamilies),
     },
     {
       field: "startDate",
@@ -337,8 +320,7 @@ export default function InvoiceTable({
       width: isSmallScreen ? 100 : 120,
       editable: false,
       align: "center",
-      renderCell: (params) =>
-        format(new Date(params.value), "dd/MM/yyyy", { locale: ptBR }),
+      renderCell: (params) => format(new Date(params.value), "dd/MM/yyyy", { locale: ptBR }),
     },
     {
       field: "endDate",
@@ -346,8 +328,7 @@ export default function InvoiceTable({
       width: isSmallScreen ? 100 : 120,
       editable: false,
       align: "center",
-      renderCell: (params) =>
-        format(new Date(params.value), "dd/MM/yyyy", { locale: ptBR }),
+      renderCell: (params) => format(new Date(params.value), "dd/MM/yyyy", { locale: ptBR }),
     },
     {
       field: "consumoPorPessoa",
@@ -357,10 +338,7 @@ export default function InvoiceTable({
       renderCell: (params: GridRenderCellParams) => (
         <Tooltip title="Clique para ver detalhes" arrow placement="top">
           <Box sx={{ width: "100%" }}>
-            <ConsumptionDetails
-              consumptionData={params.value}
-              dataUser={dataUser}
-            />
+            <ConsumptionDetails consumptionData={params.value} dataUser={dataUser} />
           </Box>
         </Tooltip>
       ),
@@ -442,24 +420,17 @@ export default function InvoiceTable({
       headerAlign: "center",
       renderCell: (params) => {
         const status = params.value as "OPEN" | "PARTIALLY_PAID" | "PAID";
-        let color:
-          | "default"
-          | "primary"
-          | "secondary"
-          | "error"
-          | "info"
-          | "success"
-          | "warning" = "default";
+        let color: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" =
+          "default";
         if (status === "OPEN") color = "error";
         if (status === "PARTIALLY_PAID") color = "warning";
         if (status === "PAID") color = "success";
 
-        const statusLabels: Record<"OPEN" | "PARTIALLY_PAID" | "PAID", string> =
-          {
-            OPEN: "Em aberto",
-            PARTIALLY_PAID: "Parcialmente pago",
-            PAID: "Pago",
-          };
+        const statusLabels: Record<"OPEN" | "PARTIALLY_PAID" | "PAID", string> = {
+          OPEN: "Em aberto",
+          PARTIALLY_PAID: "Parcialmente pago",
+          PAID: "Pago",
+        };
 
         return (
           <Chip
@@ -481,9 +452,7 @@ export default function InvoiceTable({
       cellClassName: "actions",
       getActions: (params) => {
         const isSentByWhatsApp = Boolean(params.row.sentByWhatsapp);
-        const isOpenStatus =
-          params.row.status === "OPEN" ||
-          params.row.status === "PARTIALLY_PAID";
+        const isOpenStatus = params.row.status === "OPEN" || params.row.status === "PARTIALLY_PAID";
         const isDisabledSend = !isOpenStatus || isSentByWhatsApp;
         const isDisabledPayment = params.row.status === "PAID";
 
@@ -556,11 +525,7 @@ export default function InvoiceTable({
         <Text variant="h5">Faturas Registradas</Text>
 
         <Stack direction="row" alignItems="center">
-          <Tooltip
-            title={
-              viewInvoiceArchive ? "Ver faturas em aberto" : "Ver faturas pagas"
-            }
-          >
+          <Tooltip title={viewInvoiceArchive ? "Ver faturas em aberto" : "Ver faturas pagas"}>
             <IconButton
               aria-label="toggle-archive-view"
               sx={{ color: viewInvoiceArchive ? "#fff" : "warning.main" }}
@@ -595,11 +560,7 @@ export default function InvoiceTable({
             </IconButton>
           </Tooltip>
           <Tooltip title="Recarregar dados">
-            <IconButton
-              aria-label="add"
-              sx={{ color: "success.main" }}
-              onClick={handleResetData}
-            >
+            <IconButton aria-label="add" sx={{ color: "success.main" }} onClick={handleResetData}>
               <CachedOutlinedIcon fontSize="medium" />
             </IconButton>
           </Tooltip>

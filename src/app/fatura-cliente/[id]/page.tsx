@@ -95,12 +95,12 @@ export default function FaturaCliente() {
 
       {Array.isArray(groupFamilyCredit) &&
         (totalGroupFamilyCredit > 0 ? (
-          <Text variant="subtitle2">
+          <Text variant="subtitle2" sx={{ color: "success.main" }}>
             Você ainda possui {formatCurrency(totalGroupFamilyCredit)} reais de crédito.
           </Text>
         ) : (
           <Text variant="subtitle2" sx={{ color: "error.main" }}>
-            Você não possui crédito.
+            Você não possui mais crédito.
           </Text>
         ))}
 
