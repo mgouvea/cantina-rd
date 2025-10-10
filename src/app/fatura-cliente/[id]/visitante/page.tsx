@@ -213,7 +213,7 @@ export default function VisitantePage() {
               }}
             >
               <Text variant="h6" sx={{ fontWeight: "bold", color: "error.main" }}>
-                TOTAL A PAGAR
+                TOTAL
               </Text>
               <Box
                 sx={{
@@ -227,30 +227,6 @@ export default function VisitantePage() {
               </Text>
             </Box>
 
-            {/* {invoice.remaining !== undefined && invoice.remaining > 0 && (
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  width: "100%",
-                  marginTop: 1,
-                }}
-              >
-                <Text variant="subtitle1" sx={{ fontWeight: "bold", color: "error.main" }}>
-                  VALOR PENDENTE
-                </Text>
-                <Box
-                  sx={{
-                    flex: 1,
-                    borderBottom: "1px dotted rgba(0, 0, 0, 0.42)",
-                    margin: "0 8px",
-                  }}
-                />
-                <Text variant="subtitle1" sx={{ fontWeight: "bold", color: "error.main" }}>
-                  R$ {invoice.remaining.toFixed(2)}
-                </Text>
-              </Box>
-            )} */}
             <br />
             <Text variant="subtitle1" sx={{ fontWeight: "bold" }}>
               Chave pix:
