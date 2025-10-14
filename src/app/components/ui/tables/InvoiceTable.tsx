@@ -11,6 +11,7 @@ import React, { useEffect, useState } from "react";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
 import WhatsAppResendIcon from "../icons/WhatsAppResendIcon";
+import CardInvoiceMobile from "../CardWrapper/CardInvoiceMobile";
 import { DeleteModal } from "../../modal/DeleteModal";
 import { Filters } from "../../filters/Filters";
 import { format } from "date-fns";
@@ -18,6 +19,7 @@ import { PaymentModal } from "../../modal/PaymentModal";
 import { ptBR } from "date-fns/locale";
 
 import { CreatePaymentDto, FullInvoiceResponse, GroupFamily, User } from "@/types";
+import ConsumptionDetails from "../consumption/ConsumptionDetails";
 
 import {
   useAddPayment,
@@ -31,13 +33,7 @@ import {
   Stack,
   Tooltip,
   Chip,
-  Collapse,
-  Paper,
   Typography,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
   IconButton,
 } from "@mui/material";
 
@@ -48,7 +44,7 @@ import {
   GridRenderCellParams,
   GridRowModel,
 } from "@mui/x-data-grid";
-import { capitalizeFirstLastName, findUserById, getGroupFamilyNameById } from "@/utils";
+import { capitalizeFirstLastName, getGroupFamilyNameById } from "@/utils";
 
 interface TabelaProps {
   data: FullInvoiceResponse[] | undefined;
@@ -59,114 +55,7 @@ interface TabelaProps {
   setOpenModal: (open: boolean) => void;
 }
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-}
 
-interface ConsumptionEntry {
-  date: string;
-  products: Product[];
-}
-
-interface ConsumptionByPerson {
-  [userId: string]: ConsumptionEntry[];
-}
-
-const ConsumptionDetails = ({
-  consumptionData,
-  dataUser,
-}: {
-  consumptionData: ConsumptionByPerson;
-  dataUser: User[] | null;
-}) => {
-  const [expandedUser, setExpandedUser] = React.useState<string | null>(null);
-
-  if (!consumptionData || Object.keys(consumptionData).length === 0) {
-    return <Typography variant="body2">Nenhum consumo registrado</Typography>;
-  }
-
-  const toggleUserExpand = (userId: string) => {
-    setExpandedUser(expandedUser === userId ? null : userId);
-  };
-
-  const calculateUserTotal = (entries: ConsumptionEntry[]): number => {
-    return entries.reduce((total, entry) => {
-      const entryTotal = entry.products.reduce(
-        (sum, product) => sum + product.price * product.quantity,
-        0
-      );
-      return total + entryTotal;
-    }, 0);
-  };
-
-  return (
-    <Box sx={{ maxHeight: 300, overflow: "auto", width: "100%" }}>
-      {Object.entries(consumptionData).map(([userId, entries]) => {
-        const userTotal = calculateUserTotal(entries);
-
-        return (
-          <Paper key={userId} sx={{ mb: 1, p: 1 }}>
-            <Box
-              onClick={() => toggleUserExpand(userId)}
-              sx={{
-                cursor: "pointer",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography variant="subtitle2">
-                Membro: {capitalizeFirstLastName(findUserById(userId, dataUser)?.name)}
-              </Typography>
-              <Chip label={`R$ ${userTotal.toFixed(2)}`} color="primary" size="small" />
-            </Box>
-
-            <Collapse in={expandedUser === userId}>
-              <List dense>
-                {entries.map((entry, entryIndex) => (
-                  <React.Fragment key={entryIndex}>
-                    <ListItem>
-                      <ListItemText
-                        primary={
-                          <Typography variant="body2">
-                            {format(new Date(entry.date), "dd/MM/yyyy HH:mm", {
-                              locale: ptBR,
-                            })}
-                          </Typography>
-                        }
-                      />
-                    </ListItem>
-                    <Divider />
-                    {entry.products.map((product, productIndex) => (
-                      <ListItem key={productIndex} sx={{ pl: 4 }}>
-                        <ListItemText
-                          primary={
-                            <Typography variant="body2">
-                              {product.name} - {product.quantity}x R$ {product.price.toFixed(2)}
-                            </Typography>
-                          }
-                          secondary={
-                            <Typography variant="caption" color="text.secondary">
-                              Total: R$ {(product.price * product.quantity).toFixed(2)}
-                            </Typography>
-                          }
-                        />
-                      </ListItem>
-                    ))}
-                    {entryIndex < entries.length - 1 && <Divider sx={{ my: 1 }} />}
-                  </React.Fragment>
-                ))}
-              </List>
-            </Collapse>
-          </Paper>
-        );
-      })}
-    </Box>
-  );
-};
 
 export default function InvoiceTable({
   data,
@@ -578,36 +467,70 @@ export default function InvoiceTable({
               <CircularProgress />
             ) : (
               <Box sx={{ width: "100%", overflowX: "auto" }}>
-                <DataGrid
-                  rows={rowsFiltradas}
-                  columns={columns}
-                  editMode="row"
-                  getRowId={(row) => row._id}
-                  getRowHeight={() => "auto"}
-                  getEstimatedRowHeight={() => 100}
-                  autoHeight
-                  disableColumnMenu={isSmallScreen}
-                  initialState={{
-                    sorting: {
-                      sortModel: [{ field: "createdAt", sort: "desc" }],
-                    },
-                  }}
-                  sx={{
-                    borderRadius: "16px",
-                    width: "100%",
-                    "& .MuiDataGrid-main": {
-                      overflow: "auto",
-                    },
-                    "& .MuiDataGrid-cell": {
-                      whiteSpace: "normal",
-                      wordWrap: "break-word",
-                    },
-                    "& .MuiDataGrid-columnHeaders": {
-                      whiteSpace: "normal",
-                      wordWrap: "break-word",
-                    },
-                  }}
-                />
+                {isSmallScreen ? (
+                  <Stack spacing={2}>
+                    {rowsFiltradas.map((row: FullInvoiceResponse) => {
+                      const isSentByWhatsApp = Boolean(row.sentByWhatsapp);
+                      const isOpenStatus = row.status === "OPEN" || row.status === "PARTIALLY_PAID";
+                      const disableSend = !isOpenStatus || isSentByWhatsApp || sendingInvoiceId !== null;
+                      const disablePayment = row.status === "PAID";
+
+                      return (
+                        <CardInvoiceMobile
+                          key={row._id}
+                          groupFamilyName={getGroupFamilyNameById(row.groupFamilyId, groupFamilies) as unknown as string}
+                          dtStart={row.startDate}
+                          dtEnd={row.endDate}
+                          totalAmount={row.totalAmount}
+                          originalAmount={row.originalAmount}
+                          appliedCredit={row.appliedCredit}
+                          paidAmount={row.paidAmount}
+                          status={row.status}
+                          consumoPorPessoa={row.consumoPorPessoa}
+                          dataUser={dataUser}
+                          sentByWhatsapp={row.sentByWhatsapp}
+                          isSending={sendingInvoiceId === String(row._id)}
+                          disableSend={disableSend}
+                          disablePayment={disablePayment}
+                          onDelete={handleDeleteClick(row)}
+                          onSend={handleSendInvoiceClick(String(row._id))}
+                          onPayment={handlePaymentClick(row)}
+                        />
+                      );
+                    })}
+                  </Stack>
+                ) : (
+                  <DataGrid
+                    rows={rowsFiltradas}
+                    columns={columns}
+                    editMode="row"
+                    getRowId={(row) => row._id}
+                    getRowHeight={() => "auto"}
+                    getEstimatedRowHeight={() => 100}
+                    autoHeight
+                    disableColumnMenu={isSmallScreen}
+                    initialState={{
+                      sorting: {
+                        sortModel: [{ field: "createdAt", sort: "desc" }],
+                      },
+                    }}
+                    sx={{
+                      borderRadius: "16px",
+                      width: "100%",
+                      "& .MuiDataGrid-main": {
+                        overflow: "auto",
+                      },
+                      "& .MuiDataGrid-cell": {
+                        whiteSpace: "normal",
+                        wordWrap: "break-word",
+                      },
+                      "& .MuiDataGrid-columnHeaders": {
+                        whiteSpace: "normal",
+                        wordWrap: "break-word",
+                      },
+                    }}
+                  />
+                )}
               </Box>
             )
           }
