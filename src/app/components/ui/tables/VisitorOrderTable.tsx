@@ -6,10 +6,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Text from "../text/Text";
 import { capitalize } from "@/utils";
-import { CircularProgress, Stack, Typography } from "@mui/material";
+import { CircularProgress, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 import { Filters } from "../../filters/Filters";
 import { OrderVisitor, ProductItem, TabelaProps } from "@/types";
+import CardOrdersMobile from "../CardWrapper/CardOrdersMobile";
 
 export default function VisitorOrderTable({
   data,
@@ -17,15 +18,22 @@ export default function VisitorOrderTable({
   handleEditClick,
   handleDeleteClick,
 }: TabelaProps<OrderVisitor>) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  // Local row shape used by the table that includes denormalized fields for display on visitors
+  type VisitorOrderRow = OrderVisitor & {
+    buyerName: string;
+    churchCore: string;
+    products: ProductItem[];
+    createdAt: Date | string;
+  };
   const columns: GridColDef[] = [
     {
       field: "buyerName",
       headerName: "Nome",
       width: 350,
       editable: true,
-      renderCell: (params) => (
-        <Typography sx={{ py: 0.5 }}>{capitalize(params.value)}</Typography>
-      ),
+      renderCell: (params) => <Typography sx={{ py: 0.5 }}>{capitalize(params.value)}</Typography>,
     },
     {
       field: "churchCore",
@@ -42,11 +50,7 @@ export default function VisitorOrderTable({
       headerAlign: "center",
       editable: true,
       renderCell: (params) => {
-        if (
-          !params.value ||
-          !Array.isArray(params.value) ||
-          params.value.length === 0
-        ) {
+        if (!params.value || !Array.isArray(params.value) || params.value.length === 0) {
           return "-";
         }
 
@@ -62,14 +66,11 @@ export default function VisitorOrderTable({
                     fontSize: "0.875rem",
                     display: "flex",
                     justifyContent: "space-between",
-                    borderBottom:
-                      params.value.length > 1 ? "1px dashed #eee" : "",
+                    borderBottom: params.value.length > 1 ? "1px dashed #eee" : "",
                     pb: params.value.length > 1 ? 0.5 : 0,
                   }}
                 >
-                  <Typography
-                    sx={{ fontWeight: quantity > 1 ? "bold" : "normal" }}
-                  >
+                  <Typography sx={{ fontWeight: quantity > 1 ? "bold" : "normal" }}>
                     {capitalize(prod.name)}
                   </Typography>
                   <Typography sx={{ color: "text.secondary" }}>
@@ -101,9 +102,7 @@ export default function VisitorOrderTable({
       editable: false,
       align: "center",
       headerAlign: "center",
-      renderCell: (params) => (
-        <Typography sx={{ py: 0.5 }}>{`R$ ${params.value}`}</Typography>
-      ),
+      renderCell: (params) => <Typography sx={{ py: 0.5 }}>{`R$ ${params.value}`}</Typography>,
     },
     {
       field: "createdAt",
@@ -113,9 +112,7 @@ export default function VisitorOrderTable({
       align: "center",
       headerAlign: "center",
       renderCell: (params) => (
-        <Typography sx={{ py: 0.5 }}>
-          {new Date(params.value).toLocaleDateString()}
-        </Typography>
+        <Typography sx={{ py: 0.5 }}>{new Date(params.value).toLocaleDateString()}</Typography>
       ),
     },
     {
@@ -171,6 +168,22 @@ export default function VisitorOrderTable({
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
+            ) : isMobile ? (
+              <Stack spacing={2} sx={{ mt: 1 }}>
+                {(rowsFiltradas as unknown as VisitorOrderRow[]).map((row) => (
+                  <CardOrdersMobile
+                    key={row._id}
+                    buyerName={row.buyerName}
+                    churchCore={row.churchCore}
+                    isVisitor
+                    products={row.products}
+                    totalPrice={row.totalPrice}
+                    createdAt={row.createdAt}
+                    onEdit={() => handleEditClick!(row)()}
+                    onDelete={() => handleDeleteClick!(row)()}
+                  />
+                ))}
+              </Stack>
             ) : (
               <DataGrid
                 rows={rowsFiltradas}

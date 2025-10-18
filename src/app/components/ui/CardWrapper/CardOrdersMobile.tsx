@@ -7,7 +7,9 @@ import type { ProductItem } from "@/types";
 
 interface CardOrdersMobileProps {
   buyerName: string;
-  groupFamilyName: string;
+  groupFamilyName?: string;
+  churchCore?: string;
+  isVisitor?: boolean;
   products: ProductItem[];
   totalPrice: number;
   createdAt: string | Date;
@@ -18,6 +20,8 @@ interface CardOrdersMobileProps {
 const CardOrdersMobile = ({
   buyerName,
   groupFamilyName,
+  churchCore,
+  isVisitor,
   products,
   totalPrice,
   createdAt,
@@ -36,9 +40,9 @@ const CardOrdersMobile = ({
 
         <Box>
           <Text variant="caption" color="text.secondary">
-            Grupo Familiar
+            {isVisitor ? "Núcleo" : "Grupo Familiar"}
           </Text>
-          <Text variant="body2">{capitalize(groupFamilyName)}</Text>
+          <Text variant="body2">{capitalize(isVisitor ? churchCore || "-" : groupFamilyName || "-")}</Text>
         </Box>
 
         <Divider />
