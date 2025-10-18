@@ -156,7 +156,12 @@ export default function VisitorOrderTable({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Compras realizadas</Text>
+        <Text
+          variant={isMobile ? "subtitle2" : "h5"}
+          sx={{ fontWeight: { xs: "bold", sm: "normal" }, pb: { xs: 2, sm: 0 } }}
+        >
+          Compras realizadas
+        </Text>
       </Stack>
 
       {!isLoading && (!data || data.length === 0) && (

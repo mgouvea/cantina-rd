@@ -506,7 +506,12 @@ export default function VisitorInvoiceTable({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Faturas Registradas</Text>
+        <Text
+          variant={isSmallScreen ? "subtitle2" : "h5"}
+          sx={{ fontWeight: { xs: "bold", sm: "normal" }, pb: { xs: 2, sm: 0 } }}
+        >
+          Faturas Registradas
+        </Text>
 
         <Stack direction="row" alignItems="center">
           <Tooltip title={viewInvoiceArchive ? "Ver faturas em aberto" : "Ver faturas pagas"}>
@@ -565,7 +570,8 @@ export default function VisitorInvoiceTable({
                 {(rowsFiltradas as unknown as VisitorFullInvoiceRow[]).map((row) => {
                   const isSentByWhatsapp = Boolean(row.sentByWhatsapp);
                   const isOpenStatus = row.status === "OPEN" || row.status === "PARTIALLY_PAID";
-                  const disableSend = !isOpenStatus || isSentByWhatsapp || sendingInvoiceId !== null;
+                  const disableSend =
+                    !isOpenStatus || isSentByWhatsapp || sendingInvoiceId !== null;
                   const disablePayment = row.status === "PAID";
                   return (
                     <CardInvoiceMobile
@@ -583,7 +589,9 @@ export default function VisitorInvoiceTable({
                       disableSend={disableSend}
                       disablePayment={disablePayment}
                       onDelete={handleDeleteClick(row)}
-                      onSend={handleSendInvoiceClick(row as unknown as import("@/types/visitorInvoice").visitorInvoiceDto)}
+                      onSend={handleSendInvoiceClick(
+                        row as unknown as import("@/types/visitorInvoice").visitorInvoiceDto
+                      )}
                       onPayment={handlePaymentClick(row)}
                     />
                   );

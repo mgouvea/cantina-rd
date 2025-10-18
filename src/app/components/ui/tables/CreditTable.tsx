@@ -142,7 +142,15 @@ export default function CreditTable({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">{viewCreditArchive ? "Créditos arquivados" : "Créditos ativos"}</Text>
+        <Text
+          variant={isMobile ? "subtitle2" : "h5"}
+          sx={{
+            fontWeight: { xs: "bold", sm: "normal" },
+            pb: { xs: 2, sm: 0 },
+          }}
+        >
+          {viewCreditArchive ? "Créditos arquivados" : "Créditos ativos"}
+        </Text>
 
         <Stack direction="row" spacing={2}>
           <Tooltip title={viewCreditArchive ? "Creditos ativos" : "Creditos arquivados"}>

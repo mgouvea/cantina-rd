@@ -60,9 +60,7 @@ export default function OrderTable({
       minWidth: 120,
       editable: true,
       renderCell: (params) => (
-        <Typography sx={{ py: 0.5 }}>
-          {capitalizeFirstLastName(params.value)}
-        </Typography>
+        <Typography sx={{ py: 0.5 }}>{capitalizeFirstLastName(params.value)}</Typography>
       ),
     },
     {
@@ -72,9 +70,7 @@ export default function OrderTable({
       flex: 0.8,
       minWidth: 120,
       editable: true,
-      renderCell: (params) => (
-        <Typography sx={{ py: 0.5 }}>{capitalize(params.value)}</Typography>
-      ),
+      renderCell: (params) => <Typography sx={{ py: 0.5 }}>{capitalize(params.value)}</Typography>,
     },
     {
       field: "products",
@@ -86,11 +82,7 @@ export default function OrderTable({
       headerAlign: "center",
       editable: true,
       renderCell: (params) => {
-        if (
-          !params.value ||
-          !Array.isArray(params.value) ||
-          params.value.length === 0
-        ) {
+        if (!params.value || !Array.isArray(params.value) || params.value.length === 0) {
           return "-";
         }
 
@@ -106,14 +98,11 @@ export default function OrderTable({
                     fontSize: "0.875rem",
                     display: "flex",
                     justifyContent: "space-between",
-                    borderBottom:
-                      params.value.length > 1 ? "1px dashed #eee" : "",
+                    borderBottom: params.value.length > 1 ? "1px dashed #eee" : "",
                     pb: params.value.length > 1 ? 0.5 : 0,
                   }}
                 >
-                  <Typography
-                    sx={{ fontWeight: quantity > 1 ? "bold" : "normal" }}
-                  >
+                  <Typography sx={{ fontWeight: quantity > 1 ? "bold" : "normal" }}>
                     {capitalize(prod.name)}
                   </Typography>
                   <Typography sx={{ color: "text.secondary" }}>
@@ -147,9 +136,7 @@ export default function OrderTable({
       editable: false,
       align: "center",
       headerAlign: "center",
-      renderCell: (params) => (
-        <Typography sx={{ py: 0.5 }}>{`R$ ${params.value}`}</Typography>
-      ),
+      renderCell: (params) => <Typography sx={{ py: 0.5 }}>{`R$ ${params.value}`}</Typography>,
     },
     {
       field: "createdAt",
@@ -161,9 +148,7 @@ export default function OrderTable({
       align: "center",
       headerAlign: "center",
       renderCell: (params) => (
-        <Typography sx={{ py: 0.5 }}>
-          {new Date(params.value).toLocaleDateString()}
-        </Typography>
+        <Typography sx={{ py: 0.5 }}>{new Date(params.value).toLocaleDateString()}</Typography>
       ),
     },
     {
@@ -211,7 +196,12 @@ export default function OrderTable({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Compras realizadas</Text>
+        <Text
+          variant={isMobile ? "subtitle2" : "h5"}
+          sx={{ fontWeight: { xs: "bold", sm: "normal" }, pb: { xs: 2, sm: 0 } }}
+        >
+          Compras realizadas
+        </Text>
 
         <Stack direction="row" alignItems="center">
           <Tooltip title="Adicionar nova fatura">
@@ -225,11 +215,7 @@ export default function OrderTable({
             </IconButton>
           </Tooltip>
           <Tooltip title="Recarregar dados">
-            <IconButton
-              aria-label="add"
-              sx={{ color: "success.main" }}
-              onClick={handleResetData}
-            >
+            <IconButton aria-label="add" sx={{ color: "success.main" }} onClick={handleResetData}>
               <CachedOutlinedIcon fontSize="medium" />
             </IconButton>
           </Tooltip>
@@ -245,63 +231,60 @@ export default function OrderTable({
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
+            ) : isMobile ? (
+              <Stack spacing={2} sx={{ mt: 1 }}>
+                {(rowsFiltradas as unknown as OrderRow[]).map((row) => (
+                  <CardOrdersMobile
+                    key={row._id}
+                    buyerName={row.buyerName}
+                    groupFamilyName={row.groupFamilyName}
+                    products={row.products}
+                    totalPrice={row.totalPrice}
+                    createdAt={row.createdAt}
+                    onEdit={() => handleEditClick!(row)()}
+                    onDelete={() => handleDeleteClick!(row)()}
+                  />
+                ))}
+              </Stack>
             ) : (
-              isMobile ? (
-                <Stack spacing={2} sx={{ mt: 1 }}>
-                  {(rowsFiltradas as unknown as OrderRow[]).map((row) => (
-                    <CardOrdersMobile
-                      key={row._id}
-                      buyerName={row.buyerName}
-                      groupFamilyName={row.groupFamilyName}
-                      products={row.products}
-                      totalPrice={row.totalPrice}
-                      createdAt={row.createdAt}
-                      onEdit={() => handleEditClick!(row)()}
-                      onDelete={() => handleDeleteClick!(row)()}
-                    />
-                  ))}
-                </Stack>
-              ) : (
-                <DataGrid
-                  rows={rowsFiltradas}
-                  columns={columns}
-                  editMode="row"
-                  getRowId={(row) => row._id}
-                  getRowHeight={() => "auto"}
-                  getEstimatedRowHeight={() => 100}
-                  autoHeight
-                  disableColumnMenu={isMobile}
-                  sx={{
-                    borderRadius: "16px",
-                    width: "100%",
-                    "& .MuiDataGrid-cell": {
-                      wordBreak: "break-word",
+              <DataGrid
+                rows={rowsFiltradas}
+                columns={columns}
+                editMode="row"
+                getRowId={(row) => row._id}
+                getRowHeight={() => "auto"}
+                getEstimatedRowHeight={() => 100}
+                autoHeight
+                disableColumnMenu={isMobile}
+                sx={{
+                  borderRadius: "16px",
+                  width: "100%",
+                  "& .MuiDataGrid-cell": {
+                    wordBreak: "break-word",
+                  },
+                  "& .MuiDataGrid-columnHeaders": {
+                    backgroundColor: theme.palette.mode === "light" ? "#f5f5f5" : "#333",
+                  },
+                  "& .MuiDataGrid-virtualScroller": {
+                    minHeight: "200px",
+                  },
+                }}
+                initialState={{
+                  pagination: {
+                    paginationModel: { pageSize: isMobile ? 5 : 15 },
+                  },
+                  columns: {
+                    columnVisibilityModel: {
+                      groupFamilyName: !isMobile,
+                      createdAt: !(isMobile && !isTablet),
                     },
-                    "& .MuiDataGrid-columnHeaders": {
-                      backgroundColor:
-                        theme.palette.mode === "light" ? "#f5f5f5" : "#333",
-                    },
-                    "& .MuiDataGrid-virtualScroller": {
-                      minHeight: "200px",
-                    },
-                  }}
-                  initialState={{
-                    pagination: {
-                      paginationModel: { pageSize: isMobile ? 5 : 15 },
-                    },
-                    columns: {
-                      columnVisibilityModel: {
-                        groupFamilyName: !isMobile,
-                        createdAt: !(isMobile && !isTablet),
-                      },
-                    },
-                    sorting: {
-                      sortModel: [{ field: "createdAt", sort: "desc" }],
-                    },
-                  }}
-                  pageSizeOptions={[5, 15, 25]}
-                />
-              )
+                  },
+                  sorting: {
+                    sortModel: [{ field: "createdAt", sort: "desc" }],
+                  },
+                }}
+                pageSizeOptions={[5, 15, 25]}
+              />
             )
           }
         </Filters>

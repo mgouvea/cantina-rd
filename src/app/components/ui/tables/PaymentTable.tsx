@@ -20,10 +20,7 @@ import {
 } from "@mui/material";
 import { Filters } from "../../filters/Filters";
 
-export default function PaymentTable({
-  data,
-  isLoading,
-}: TabelaProps<PaymentResponse>) {
+export default function PaymentTable({ data, isLoading }: TabelaProps<PaymentResponse>) {
   const queryClient = useQueryClient();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -41,9 +38,7 @@ export default function PaymentTable({
       flex: 1,
       minWidth: 120,
       editable: true,
-      renderCell: ({ value }) => (
-        <Typography sx={{ py: 0.5 }}>{value}</Typography>
-      ),
+      renderCell: ({ value }) => <Typography sx={{ py: 0.5 }}>{value}</Typography>,
     },
     {
       field: "invoicePeriod",
@@ -70,9 +65,7 @@ export default function PaymentTable({
       flex: 0.8,
       minWidth: 100,
       editable: true,
-      renderCell: ({ value }) => (
-        <Typography sx={{ py: 0.5 }}>R$ {value}</Typography>
-      ),
+      renderCell: ({ value }) => <Typography sx={{ py: 0.5 }}>R$ {value}</Typography>,
     },
     {
       field: "amountPaid",
@@ -81,9 +74,7 @@ export default function PaymentTable({
       flex: 0.8,
       minWidth: 100,
       editable: true,
-      renderCell: ({ value }) => (
-        <Typography sx={{ py: 0.5 }}>R$ {value}</Typography>
-      ),
+      renderCell: ({ value }) => <Typography sx={{ py: 0.5 }}>R$ {value}</Typography>,
     },
     {
       field: "isPartial",
@@ -94,9 +85,7 @@ export default function PaymentTable({
       align: "center",
       headerAlign: "center",
       editable: true,
-      renderCell: ({ value }) => (
-        <Typography sx={{ py: 0.5 }}>{value ? "Sim" : "Não"}</Typography>
-      ),
+      renderCell: ({ value }) => <Typography sx={{ py: 0.5 }}>{value ? "Sim" : "Não"}</Typography>,
     },
     {
       field: "paymentDate",
@@ -108,9 +97,7 @@ export default function PaymentTable({
       align: "center",
       headerAlign: "center",
       renderCell: ({ value }) => (
-        <Typography sx={{ py: 0.5 }}>
-          {new Date(value).toLocaleDateString()}
-        </Typography>
+        <Typography sx={{ py: 0.5 }}>{new Date(value).toLocaleDateString()}</Typography>
       ),
     },
   ];
@@ -131,14 +118,15 @@ export default function PaymentTable({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Pagamentos</Text>
+        <Text
+          variant={isMobile ? "subtitle2" : "h5"}
+          sx={{ fontWeight: { xs: "bold", sm: "normal" }, pb: { xs: 2, sm: 0 } }}
+        >
+          Pagamentos
+        </Text>
 
         <Tooltip title="Recarregar dados">
-          <IconButton
-            aria-label="add"
-            sx={{ color: "success.main" }}
-            onClick={handleResetData}
-          >
+          <IconButton aria-label="add" sx={{ color: "success.main" }} onClick={handleResetData}>
             <CachedOutlinedIcon fontSize="medium" />
           </IconButton>
         </Tooltip>
@@ -185,8 +173,7 @@ export default function PaymentTable({
                     wordBreak: "break-word",
                   },
                   "& .MuiDataGrid-columnHeaders": {
-                    backgroundColor:
-                      theme.palette.mode === "light" ? "#f5f5f5" : "#333",
+                    backgroundColor: theme.palette.mode === "light" ? "#f5f5f5" : "#333",
                   },
                   "& .MuiDataGrid-virtualScroller": {
                     minHeight: "200px",
