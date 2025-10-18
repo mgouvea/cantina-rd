@@ -7,6 +7,7 @@ import Text from "../text/Text";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { PaymentResponse, TabelaProps } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
+import CardPaymentsMobile from "../CardWrapper/CardPaymentsMobile";
 
 import {
   CircularProgress,
@@ -152,6 +153,21 @@ export default function PaymentTable({
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
+            ) : isMobile ? (
+              <Stack spacing={2} sx={{ mt: 1 }}>
+                {rowsFiltradas.map((row: PaymentResponse) => (
+                  <CardPaymentsMobile
+                    key={row._id}
+                    isVisitor={false}
+                    groupFamilyName={row.groupFamilyName}
+                    invoicePeriod={row.invoicePeriod}
+                    invoiceTotalAmount={row.invoiceTotalAmount}
+                    amountPaid={row.amountPaid}
+                    isPartial={row.isPartial}
+                    paymentDate={row.paymentDate}
+                  />
+                ))}
+              </Stack>
             ) : (
               <DataGrid
                 rows={rowsFiltradas}
