@@ -1,4 +1,4 @@
-import React, { useMemo, memo } from "react";
+import { useMemo, memo } from "react";
 import Autocomplete from "@mui/material/Autocomplete";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
@@ -19,11 +19,7 @@ const OptionLabel = memo(({ option }: { option: GroupFamilyWithOwner }) => (
     }}
   >
     {option.ownerAvatar && (
-      <Avatar
-        src={option.ownerAvatar}
-        alt={option.ownerName}
-        sx={{ width: 40, height: 40 }}
-      />
+      <Avatar src={option.ownerAvatar} alt={option.ownerName} sx={{ width: 40, height: 40 }} />
     )}
     <span>{option.name}</span>
   </Box>
@@ -60,9 +56,8 @@ const SelectFamilies = memo(function SelectFamilies({
     return (
       groupFamiliesWithOwner
         ?.slice()
-        .sort((a: GroupFamilyWithOwner, b: GroupFamilyWithOwner) =>
-          a.name.localeCompare(b.name)
-        ) || []
+        .sort((a: GroupFamilyWithOwner, b: GroupFamilyWithOwner) => a.name.localeCompare(b.name)) ||
+      []
     );
   }, [groupFamiliesWithOwner]);
 
@@ -95,7 +90,11 @@ const SelectFamilies = memo(function SelectFamilies({
         px: hasPadding ? 2 : 0,
       }}
     >
-      <Stack direction="row" justifyContent="space-between">
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        sx={{ display: { xs: "none", sm: "flex" } }}
+      >
         <Text variant="subtitle1" sx={{ mb: 1, fontWeight: "medium" }}>
           Selecione as famílias
         </Text>
@@ -111,12 +110,7 @@ const SelectFamilies = memo(function SelectFamilies({
             Selecionar Todos
           </Button>
 
-          <Button
-            size="small"
-            variant="outlined"
-            color="error"
-            onClick={handleClearAll}
-          >
+          <Button size="small" variant="outlined" color="error" onClick={handleClearAll}>
             Desmarcar Todos
           </Button>
         </Box>

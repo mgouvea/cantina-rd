@@ -34,42 +34,26 @@ import {
   useOrdersVisitors,
   useUsers,
 } from "@/hooks/queries";
-import {
-  Box,
-  Stack,
-  Tab,
-  Tabs,
-  useTheme,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "@mui/material";
+import { Box, Stack, Tab, Tabs, useTheme, ToggleButton, ToggleButtonGroup } from "@mui/material";
 
-const breadcrumbItems = [
-  { label: "Início", href: "/dashboard" },
-  { label: "Financeiro" },
-];
+const breadcrumbItems = [{ label: "Início", href: "/dashboard" }, { label: "Financeiro" }];
 
 function FaturasContent() {
   const theme = useTheme();
   const searchParams = useSearchParams();
 
-  const initialTab = searchParams.get("tab")
-    ? parseInt(searchParams.get("tab")!)
-    : 0;
+  const initialTab = searchParams.get("tab") ? parseInt(searchParams.get("tab")!) : 0;
 
   const [value, setValue] = useState<number>(initialTab);
   const [viewType, setViewType] = useState<"socios" | "visitantes">("socios");
   const [viewCreditArchive, setViewCreditArchive] = useState(false);
 
   const { data: dataOrders, isLoading: isLoadingOrders } = useOrders();
-  const { data: dataVisitors, isLoading: isLoadingVisitors } =
-    useOrdersVisitors();
+  const { data: dataVisitors, isLoading: isLoadingVisitors } = useOrdersVisitors();
   const { data: allInvoices, isLoading: isLoadingInvoices } = useInvoices();
-  const { data: allVisitors, isLoading: isLoadingAllVisitors } =
-    useVisitorsWithoutDateFilter();
+  const { data: allVisitors, isLoading: isLoadingAllVisitors } = useVisitorsWithoutDateFilter();
   const { data: dataUser, isLoading: isLoadingUser } = useUsers();
-  const { data: groupFamilies, isLoading: isLoadingGroupFamily } =
-    useGroupFamily();
+  const { data: groupFamilies, isLoading: isLoadingGroupFamily } = useGroupFamily();
   const { data: payments, isLoading: isLoadingPayments } = usePayments();
   const {
     data: credits,
@@ -164,22 +148,15 @@ function FaturasContent() {
               "& .MuiTab-root": {
                 backgroundColor: "background.paper",
                 color: "text.primary",
+                fontSize: { xs: "0.75rem", sm: "1rem" },
               },
             }}
           >
             <Tab icon={<ReceiptLongIcon />} label="Compras" {...a11yProps(0)} />
             <Tab icon={<PriceCheckIcon />} label="Faturas" {...a11yProps(1)} />
-            <Tab
-              icon={<AssuredWorkloadIcon />}
-              label="Pagamentos"
-              {...a11yProps(2)}
-            />
+            <Tab icon={<AssuredWorkloadIcon />} label="Pagamentos" {...a11yProps(2)} />
             {viewType === "socios" && (
-              <Tab
-                icon={<PaidOutlinedIcon />}
-                label="Credito"
-                {...a11yProps(3)}
-              />
+              <Tab icon={<PaidOutlinedIcon />} label="Credito" {...a11yProps(3)} />
             )}
           </Tabs>
         </Box>
@@ -187,10 +164,7 @@ function FaturasContent() {
           {viewType === "socios" ? (
             <OrderWrapper data={dataOrders} isLoading={isLoadingOrders} />
           ) : (
-            <VisitorOrderWrapper
-              data={dataVisitors}
-              isLoading={isLoadingVisitors}
-            />
+            <VisitorOrderWrapper data={dataVisitors} isLoading={isLoadingVisitors} />
           )}
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1} dir={theme.direction}>
@@ -201,10 +175,7 @@ function FaturasContent() {
               allInvoicesIds={allInvoicesIds}
             />
           ) : (
-            <VisitorInvoiceWrapper
-              allVisitorsIds={allVisitorsIds}
-              viewType={viewType}
-            />
+            <VisitorInvoiceWrapper allVisitorsIds={allVisitorsIds} viewType={viewType} />
           )}
         </CustomTabPanel>
         <CustomTabPanel value={value} index={2} dir={theme.direction}>

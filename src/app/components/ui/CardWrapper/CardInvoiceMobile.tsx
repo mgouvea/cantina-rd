@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Box,
   Chip,
-  Paper,
   Divider,
   IconButton,
   Tooltip,
@@ -71,7 +70,7 @@ const CardInvoiceMobile = ({
   const [showConsumption, setShowConsumption] = useState(false);
 
   return (
-    <Paper elevation={2} sx={{ p: 2, borderRadius: 2, width: "100%" }}>
+    <Stack sx={{ p: 2, borderRadius: 5, width: "100%", boxShadow: 2, border: "1px solid #f6f6f6" }}>
       <Stack spacing={1.5}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Text variant="subtitle1">{groupFamilyName}</Text>
@@ -177,7 +176,7 @@ const CardInvoiceMobile = ({
           </Tooltip>
         </Stack>
       </Stack>
-    </Paper>
+    </Stack>
   );
 };
 

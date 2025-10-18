@@ -19,7 +19,17 @@ export function CustomTabPanel(props: TabPanelProps) {
       style={{ height: "100%" }}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3, height: "100%" }}>{children}</Box>}
+      {value === index && (
+        <Box
+          sx={{
+            height: "100%",
+            px: { xs: 0, sm: 3 },
+            py: 3,
+          }}
+        >
+          {children}
+        </Box>
+      )}
     </div>
   );
 }
