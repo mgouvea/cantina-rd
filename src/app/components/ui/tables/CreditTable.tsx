@@ -16,6 +16,7 @@ import { ptBR } from "date-fns/locale";
 import { TabelaProps } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import CardCreditMobile from "../CardWrapper/CardCreditMobile";
 
 import {
   CircularProgress,
@@ -141,7 +142,15 @@ export default function CreditTable({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">{viewCreditArchive ? "Créditos arquivados" : "Créditos ativos"}</Text>
+        <Text
+          variant={isMobile ? "subtitle2" : "h5"}
+          sx={{
+            fontWeight: { xs: "bold", sm: "normal" },
+            pb: { xs: 2, sm: 0 },
+          }}
+        >
+          {viewCreditArchive ? "Créditos arquivados" : "Créditos ativos"}
+        </Text>
 
         <Stack direction="row" spacing={2}>
           <Tooltip title={viewCreditArchive ? "Creditos ativos" : "Creditos arquivados"}>
@@ -189,6 +198,21 @@ export default function CreditTable({
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
+            ) : isMobile ? (
+              <Stack spacing={2} sx={{ mt: 1 }}>
+                {(rowsFiltradas as CreditResponse[])
+                  .filter((row) => Boolean(row._id))
+                  .map((row) => (
+                    <CardCreditMobile
+                      key={row._id as string}
+                      groupFamilyName={row.groupFamilyName}
+                      creditedAmount={row.creditedAmount}
+                      amount={row.amount}
+                      createdAt={row.createdAt}
+                      onDelete={handleDeleteClick(row._id as string)}
+                    />
+                  ))}
+              </Stack>
             ) : (
               <DataGrid
                 rows={rowsFiltradas}

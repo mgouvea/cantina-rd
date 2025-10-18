@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Box,
   Chip,
-  Paper,
   Divider,
   IconButton,
   Tooltip,
@@ -21,7 +20,9 @@ import ConsumptionDetails, { ConsumptionByPerson } from "../consumption/Consumpt
 import type { User } from "@/types";
 
 interface CardInvoiceMobileProps {
-  groupFamilyName: string;
+  groupFamilyName?: string;
+  visitorName?: string;
+  isVisitor?: boolean;
   dtStart: Date | string;
   dtEnd: Date | string;
   totalAmount: number;
@@ -30,11 +31,12 @@ interface CardInvoiceMobileProps {
   paidAmount?: number;
   status: "OPEN" | "PARTIALLY_PAID" | "PAID";
   consumoPorPessoa?: ConsumptionByPerson;
-  dataUser: User[] | null;
+  dataUser?: User[] | null;
   sentByWhatsapp?: boolean;
   isSending?: boolean;
   disableSend?: boolean;
   disablePayment?: boolean;
+  hideConsumption?: boolean;
   onDelete: () => void;
   onSend: () => void;
   onPayment: () => void;
@@ -42,6 +44,8 @@ interface CardInvoiceMobileProps {
 
 const CardInvoiceMobile = ({
   groupFamilyName,
+  visitorName,
+  isVisitor,
   dtStart,
   dtEnd,
   totalAmount,
@@ -55,6 +59,7 @@ const CardInvoiceMobile = ({
   isSending,
   disableSend,
   disablePayment,
+  hideConsumption,
   onDelete,
   onSend,
   onPayment,
@@ -71,10 +76,10 @@ const CardInvoiceMobile = ({
   const [showConsumption, setShowConsumption] = useState(false);
 
   return (
-    <Paper elevation={2} sx={{ p: 2, borderRadius: 2, width: "100%" }}>
+    <Stack sx={{ p: 2, borderRadius: 5, width: "100%", boxShadow: 2, border: "1px solid #f6f6f6" }}>
       <Stack spacing={1.5}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Text variant="subtitle1">{groupFamilyName}</Text>
+          <Text variant="subtitle1">{isVisitor ? visitorName : groupFamilyName}</Text>
           <Chip
             label={
               status === "OPEN"
@@ -133,7 +138,7 @@ const CardInvoiceMobile = ({
           )}
         </Box>
 
-        {consumoPorPessoa && (
+        {!hideConsumption && consumoPorPessoa && (
           <Box>
             <Box
               onClick={() => setShowConsumption((prev: boolean) => !prev)}
@@ -144,7 +149,7 @@ const CardInvoiceMobile = ({
               </Typography>
             </Box>
             <Collapse in={showConsumption}>
-              <ConsumptionDetails consumptionData={consumoPorPessoa} dataUser={dataUser} />
+              <ConsumptionDetails consumptionData={consumoPorPessoa} dataUser={dataUser || null} />
             </Collapse>
           </Box>
         )}
@@ -177,7 +182,7 @@ const CardInvoiceMobile = ({
           </Tooltip>
         </Stack>
       </Stack>
-    </Paper>
+    </Stack>
   );
 };
 

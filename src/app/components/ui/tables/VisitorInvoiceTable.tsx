@@ -17,6 +17,7 @@ import { Filters } from "../../filters/Filters";
 import { format } from "date-fns";
 import { PaymentModal } from "../../modal/PaymentModal";
 import { ptBR } from "date-fns/locale";
+import CardInvoiceMobile from "../CardWrapper/CardInvoiceMobile";
 
 import {
   useDeleteInvoiceVisitors,
@@ -37,6 +38,8 @@ import {
   ListItem,
   ListItemText,
   IconButton,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
 import {
@@ -164,6 +167,16 @@ export default function VisitorInvoiceTable({
   onViewInvoiceArchive,
 }: TabelaProps) {
   const [sendingInvoiceId, setSendingInvoiceId] = useState<string | null>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  // Row shape for visitor invoices when rendering on mobile
+  type VisitorFullInvoiceRow = FullInvoiceResponse & {
+    visitorName: string;
+    buyerId: string;
+    startDate: string | Date;
+    endDate: string | Date;
+  };
 
   const { mutateAsync: deleteInvoice } = useDeleteInvoiceVisitors();
   const { mutateAsync: sendInvoiceByWhatsApp } = useSendInvoiceVisitorsByWhatsApp();
@@ -493,7 +506,12 @@ export default function VisitorInvoiceTable({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Faturas Registradas</Text>
+        <Text
+          variant={isSmallScreen ? "subtitle2" : "h5"}
+          sx={{ fontWeight: { xs: "bold", sm: "normal" }, pb: { xs: 2, sm: 0 } }}
+        >
+          Faturas Registradas
+        </Text>
 
         <Stack direction="row" alignItems="center">
           <Tooltip title={viewInvoiceArchive ? "Ver faturas em aberto" : "Ver faturas pagas"}>
@@ -547,6 +565,38 @@ export default function VisitorInvoiceTable({
           {(rowsFiltradas) =>
             isLoading ? (
               <CircularProgress />
+            ) : isMobile ? (
+              <Stack spacing={2} sx={{ mt: 1 }}>
+                {(rowsFiltradas as unknown as VisitorFullInvoiceRow[]).map((row) => {
+                  const isSentByWhatsapp = Boolean(row.sentByWhatsapp);
+                  const isOpenStatus = row.status === "OPEN" || row.status === "PARTIALLY_PAID";
+                  const disableSend =
+                    !isOpenStatus || isSentByWhatsapp || sendingInvoiceId !== null;
+                  const disablePayment = row.status === "PAID";
+                  return (
+                    <CardInvoiceMobile
+                      key={row._id}
+                      isVisitor
+                      visitorName={row.visitorName}
+                      dtStart={row.startDate}
+                      dtEnd={row.endDate}
+                      totalAmount={row.totalAmount}
+                      paidAmount={row.paidAmount}
+                      status={row.status as "OPEN" | "PARTIALLY_PAID" | "PAID"}
+                      hideConsumption
+                      sentByWhatsapp={row.sentByWhatsapp}
+                      isSending={sendingInvoiceId === String(row._id)}
+                      disableSend={disableSend}
+                      disablePayment={disablePayment}
+                      onDelete={handleDeleteClick(row)}
+                      onSend={handleSendInvoiceClick(
+                        row as unknown as import("@/types/visitorInvoice").visitorInvoiceDto
+                      )}
+                      onPayment={handlePaymentClick(row)}
+                    />
+                  );
+                })}
+              </Stack>
             ) : (
               <Box sx={{ width: "100%", overflowX: "auto" }}>
                 <DataGrid

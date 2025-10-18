@@ -7,7 +7,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
 import WhatsAppResendIcon from "../icons/WhatsAppResendIcon";
@@ -28,14 +28,7 @@ import {
   useSendInvoiceByWhatsApp,
 } from "@/hooks/mutations";
 
-import {
-  CircularProgress,
-  Stack,
-  Tooltip,
-  Chip,
-  Typography,
-  IconButton,
-} from "@mui/material";
+import { CircularProgress, Stack, Tooltip, Chip, Typography, IconButton } from "@mui/material";
 
 import {
   DataGrid,
@@ -54,8 +47,6 @@ interface TabelaProps {
   onResetData: () => void;
   setOpenModal: (open: boolean) => void;
 }
-
-
 
 export default function InvoiceTable({
   data,
@@ -411,7 +402,12 @@ export default function InvoiceTable({
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Text variant="h5">Faturas Registradas</Text>
+        <Text
+          variant={isSmallScreen ? "subtitle2" : "h5"}
+          sx={{ fontWeight: { xs: "bold", sm: "normal" }, pb: { xs: 2, sm: 0 } }}
+        >
+          Faturas Registradas
+        </Text>
 
         <Stack direction="row" alignItems="center">
           <Tooltip title={viewInvoiceArchive ? "Ver faturas em aberto" : "Ver faturas pagas"}>
@@ -472,13 +468,19 @@ export default function InvoiceTable({
                     {rowsFiltradas.map((row: FullInvoiceResponse) => {
                       const isSentByWhatsApp = Boolean(row.sentByWhatsapp);
                       const isOpenStatus = row.status === "OPEN" || row.status === "PARTIALLY_PAID";
-                      const disableSend = !isOpenStatus || isSentByWhatsApp || sendingInvoiceId !== null;
+                      const disableSend =
+                        !isOpenStatus || isSentByWhatsApp || sendingInvoiceId !== null;
                       const disablePayment = row.status === "PAID";
 
                       return (
                         <CardInvoiceMobile
                           key={row._id}
-                          groupFamilyName={getGroupFamilyNameById(row.groupFamilyId, groupFamilies) as unknown as string}
+                          groupFamilyName={
+                            getGroupFamilyNameById(
+                              row.groupFamilyId,
+                              groupFamilies
+                            ) as unknown as string
+                          }
                           dtStart={row.startDate}
                           dtEnd={row.endDate}
                           totalAmount={row.totalAmount}
