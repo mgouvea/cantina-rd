@@ -12,6 +12,7 @@ import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 import { Filters } from "../../filters/Filters";
 import { Order, ProductItem, TabelaProps } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
+import CardOrdersMobile from "../CardWrapper/CardOrdersMobile";
 
 import {
   CircularProgress,
@@ -22,6 +23,14 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+
+// Local row shape used by the table that includes denormalized fields for display
+type OrderRow = Order & {
+  buyerName: string;
+  groupFamilyName: string;
+  createdAt: Date | string;
+  products: ProductItem[];
+};
 
 export default function OrderTable({
   data,
@@ -237,45 +246,62 @@ export default function OrderTable({
             isLoading ? (
               <CircularProgress />
             ) : (
-              <DataGrid
-                rows={rowsFiltradas}
-                columns={columns}
-                editMode="row"
-                getRowId={(row) => row._id}
-                getRowHeight={() => "auto"}
-                getEstimatedRowHeight={() => 100}
-                autoHeight
-                disableColumnMenu={isMobile}
-                sx={{
-                  borderRadius: "16px",
-                  width: "100%",
-                  "& .MuiDataGrid-cell": {
-                    wordBreak: "break-word",
-                  },
-                  "& .MuiDataGrid-columnHeaders": {
-                    backgroundColor:
-                      theme.palette.mode === "light" ? "#f5f5f5" : "#333",
-                  },
-                  "& .MuiDataGrid-virtualScroller": {
-                    minHeight: "200px",
-                  },
-                }}
-                initialState={{
-                  pagination: {
-                    paginationModel: { pageSize: isMobile ? 5 : 15 },
-                  },
-                  columns: {
-                    columnVisibilityModel: {
-                      groupFamilyName: !isMobile,
-                      createdAt: !(isMobile && !isTablet),
+              isMobile ? (
+                <Stack spacing={2} sx={{ mt: 1 }}>
+                  {(rowsFiltradas as unknown as OrderRow[]).map((row) => (
+                    <CardOrdersMobile
+                      key={row._id}
+                      buyerName={row.buyerName}
+                      groupFamilyName={row.groupFamilyName}
+                      products={row.products}
+                      totalPrice={row.totalPrice}
+                      createdAt={row.createdAt}
+                      onEdit={() => handleEditClick!(row)()}
+                      onDelete={() => handleDeleteClick!(row)()}
+                    />
+                  ))}
+                </Stack>
+              ) : (
+                <DataGrid
+                  rows={rowsFiltradas}
+                  columns={columns}
+                  editMode="row"
+                  getRowId={(row) => row._id}
+                  getRowHeight={() => "auto"}
+                  getEstimatedRowHeight={() => 100}
+                  autoHeight
+                  disableColumnMenu={isMobile}
+                  sx={{
+                    borderRadius: "16px",
+                    width: "100%",
+                    "& .MuiDataGrid-cell": {
+                      wordBreak: "break-word",
                     },
-                  },
-                  sorting: {
-                    sortModel: [{ field: "createdAt", sort: "desc" }],
-                  },
-                }}
-                pageSizeOptions={[5, 15, 25]}
-              />
+                    "& .MuiDataGrid-columnHeaders": {
+                      backgroundColor:
+                        theme.palette.mode === "light" ? "#f5f5f5" : "#333",
+                    },
+                    "& .MuiDataGrid-virtualScroller": {
+                      minHeight: "200px",
+                    },
+                  }}
+                  initialState={{
+                    pagination: {
+                      paginationModel: { pageSize: isMobile ? 5 : 15 },
+                    },
+                    columns: {
+                      columnVisibilityModel: {
+                        groupFamilyName: !isMobile,
+                        createdAt: !(isMobile && !isTablet),
+                      },
+                    },
+                    sorting: {
+                      sortModel: [{ field: "createdAt", sort: "desc" }],
+                    },
+                  }}
+                  pageSizeOptions={[5, 15, 25]}
+                />
+              )
             )
           }
         </Filters>
