@@ -16,6 +16,12 @@ export type Debit = {
   createdAt: Date;
 };
 
+export type CreditMessage = {
+  groupFamilyId: string;
+  isAutomatic: boolean;
+  addedValue: number;
+};
+
 export type CreateCreditDto = Omit<Credit, "_id" | "createdAt" | "updatedAt">;
 
 export type CreditResponse = Credit & {

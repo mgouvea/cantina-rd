@@ -6,10 +6,11 @@ import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EmptyContent from "../emptyContent/EmptyContent";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import Text from "../text/Text";
 import { CreditModal } from "../../modal/CreditModal";
-import { CreditResponse } from "@/types/credit";
-import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
+import { CreditMessage, CreditResponse } from "@/types/credit";
+import { DataGrid, GridActionsCellItem, GridColDef, GridRowModel } from "@mui/x-data-grid";
 import { Filters } from "../../filters/Filters";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -27,7 +28,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { useDeleteCredit } from "@/hooks/mutations";
+import { useDeleteCredit, useSendCreditMessage } from "@/hooks/mutations";
 
 export default function CreditTable({
   data,
@@ -46,6 +47,8 @@ export default function CreditTable({
   const [openCreditModal, setOpenCreditModal] = useState(false);
 
   const { mutateAsync: deleteCredit } = useDeleteCredit();
+  const { mutateAsync: sendCreditMessage, isPending: isPendingSendCreditMessage } =
+    useSendCreditMessage();
 
   const handleResetData = () => {
     queryClient.invalidateQueries({ queryKey: ["credits"] });
@@ -54,6 +57,21 @@ export default function CreditTable({
   const handleDeleteClick = (id: string) => async () => {
     try {
       await deleteCredit(id);
+    } catch (error) {
+      console.error("Error deleting credit:", error);
+    }
+  };
+
+  const handleSendCreditMessage = (row: GridRowModel<CreditResponse>) => async () => {
+    try {
+      const body: CreditMessage = {
+        groupFamilyId: row.groupFamilyId,
+        isAutomatic: false,
+        addedValue: row.creditedAmount,
+      };
+
+      console.log(body);
+      await sendCreditMessage(body);
     } catch (error) {
       console.error("Error deleting credit:", error);
     }
@@ -114,13 +132,32 @@ export default function CreditTable({
       cellClassName: "actions",
       getActions: (params) => {
         return [
-          <GridActionsCellItem
-            key={`delete-${params.id}`}
-            icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 25 }} />}
-            label="Delete"
-            onClick={handleDeleteClick(params.id.toString())}
-            color="inherit"
-          />,
+          <Tooltip title="Excluir crédito" key={`delete-${params.id}`}>
+            <GridActionsCellItem
+              key={`delete-${params.id}`}
+              icon={<DeleteIcon sx={{ color: "#9B0B00", fontSize: 25 }} />}
+              label="Delete"
+              onClick={handleDeleteClick(params.id.toString())}
+              color="inherit"
+            />
+          </Tooltip>,
+          <Tooltip title="Enviar crédito" key={`send-${params.id}`}>
+            <GridActionsCellItem
+              icon={
+                <SendOutlinedIcon
+                  sx={{
+                    color: isPendingSendCreditMessage ? "#ccc" : "#4caf50",
+                    fontSize: 27,
+                    mr: 2,
+                  }}
+                />
+              }
+              label="Enviar"
+              onClick={handleSendCreditMessage(params.row)}
+              color="inherit"
+              disabled={isPendingSendCreditMessage}
+            />
+          </Tooltip>,
         ];
       },
     },
@@ -210,6 +247,7 @@ export default function CreditTable({
                       amount={row.amount}
                       createdAt={row.createdAt}
                       onDelete={handleDeleteClick(row._id as string)}
+                      onSend={handleSendCreditMessage(row)}
                     />
                   ))}
               </Stack>
