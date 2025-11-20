@@ -45,10 +45,10 @@ export default function CreditTable({
   const queryClient = useQueryClient();
 
   const [openCreditModal, setOpenCreditModal] = useState(false);
+  const [sendingCreditId, setSendingCreditId] = useState<string | null>(null);
 
   const { mutateAsync: deleteCredit } = useDeleteCredit();
-  const { mutateAsync: sendCreditMessage, isPending: isPendingSendCreditMessage } =
-    useSendCreditMessage();
+  const { mutateAsync: sendCreditMessage } = useSendCreditMessage();
 
   const handleResetData = () => {
     queryClient.invalidateQueries({ queryKey: ["credits"] });
@@ -64,6 +64,7 @@ export default function CreditTable({
 
   const handleSendCreditMessage = (row: GridRowModel<CreditResponse>) => async () => {
     try {
+      setSendingCreditId(String(row._id));
       const body: CreditMessage = {
         groupFamilyId: row.groupFamilyId,
         isAutomatic: false,
@@ -74,6 +75,8 @@ export default function CreditTable({
       await sendCreditMessage(body);
     } catch (error) {
       console.error("Error deleting credit:", error);
+    } finally {
+      setSendingCreditId(null);
     }
   };
 
@@ -144,18 +147,21 @@ export default function CreditTable({
           <Tooltip title="Enviar crédito" key={`send-${params.id}`}>
             <GridActionsCellItem
               icon={
-                <SendOutlinedIcon
-                  sx={{
-                    color: isPendingSendCreditMessage ? "#ccc" : "#4caf50",
-                    fontSize: 27,
-                    mr: 2,
-                  }}
-                />
+                sendingCreditId === String(params.id) ? (
+                  <CircularProgress size={24} color="success" />
+                ) : (
+                  <SendOutlinedIcon
+                    sx={{
+                      color: "#4caf50",
+                      fontSize: 27,
+                    }}
+                  />
+                )
               }
               label="Enviar"
               onClick={handleSendCreditMessage(params.row)}
               color="inherit"
-              disabled={isPendingSendCreditMessage}
+              disabled={sendingCreditId !== null}
             />
           </Tooltip>,
         ];
