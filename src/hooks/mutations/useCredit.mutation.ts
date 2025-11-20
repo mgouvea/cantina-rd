@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CreateCredit, CreateDebit, DeleteCredit } from "../services";
-import { CreateCreditDto, CreateDebitDto } from "@/types/credit";
+import { CreateCredit, CreateDebit, DeleteCredit, SendCreditMessage } from "../services";
+import { CreateCreditDto, CreateDebitDto, CreditMessage } from "@/types/credit";
 import { useSnackbar } from "@/app/components";
 
 export const useAddCredit = () => {
@@ -19,6 +19,26 @@ export const useAddCredit = () => {
     onError: () => {
       showSnackbar({
         message: "Erro ao cadastrar o crédito",
+        severity: "error",
+      });
+    },
+  });
+};
+
+export const useSendCreditMessage = () => {
+  const { showSnackbar } = useSnackbar();
+
+  return useMutation({
+    mutationFn: (data: CreditMessage) => SendCreditMessage(data),
+    onSuccess: () => {
+      showSnackbar({
+        message: "Crédito enviado com sucesso!",
+        severity: "success",
+      });
+    },
+    onError: () => {
+      showSnackbar({
+        message: "Erro ao enviar o crédito",
         severity: "error",
       });
     },

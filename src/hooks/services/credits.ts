@@ -1,8 +1,12 @@
-import { CreateCreditDto, CreateDebitDto, Credit } from "@/types/credit";
+import { CreateCreditDto, CreateDebitDto, Credit, CreditMessage } from "@/types/credit";
 import { http } from "./api";
 
 export const CreateCredit = async (credit: CreateCreditDto) => {
   return (await http.post("credit", credit)).data;
+};
+
+export const SendCreditMessage = async (creditMessage: CreditMessage) => {
+  return (await http.post("credit/send-whatsapp", creditMessage)).data;
 };
 
 export const CreateDebit = async (debit: CreateDebitDto) => {
