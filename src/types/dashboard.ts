@@ -30,3 +30,8 @@ export type PaymentsVsReceives = {
   expenses: number[];
   xLabels: string[];
 };
+
+export type OpenInvoiceTime = {
+  openBalance: number[];
+  xLabels: string[];
+};
