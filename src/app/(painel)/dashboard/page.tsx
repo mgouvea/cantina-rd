@@ -1,25 +1,21 @@
 "use client";
 
-import AreaChart from "@/app/components/ui/graphics/AreaChart";
 import ContentWrapper from "@/app/components/ui/wrapper/ContentWrapper";
 import Loading from "@/app/components/loading/Loading";
 import Text from "@/app/components/ui/text/Text";
-import { Box, Divider, Stack, useMediaQuery, useTheme } from "@mui/material";
+import { Stack, useMediaQuery, useTheme } from "@mui/material";
 import { Suspense, useState } from "react";
 
-import {
-  DashFilter,
-  FamiliesOpen,
-  TopClients,
-  TopProducts,
-  TotalBoxContent,
-} from "@/app/components";
+import { DashFilter, TotalBoxContent } from "@/app/components";
 import {
   useGroupFamilyInvoicesOpen,
   useMostSoldProducts,
+  useOpenInvoiceTime,
   usePaymentsVsReceives,
   useTopClients,
 } from "@/hooks/queries";
+import ContentOne from "@/app/components/ui/dashboard/contentOne";
+import ContentTwo from "@/app/components/ui/dashboard/contentTwo";
 
 // Custom scrollbar style
 const overflowStyle = {
@@ -52,10 +48,10 @@ export default function Dashboard() {
     endDate: Date | null;
   }>({ startDate: null, endDate: null });
 
-  // Theme is used for responsive styling in child components
-
   const { data: groupFamilyInvoicesOpen, isLoading: isLoadingGroupFamilyInvoicesOpen } =
-    useGroupFamilyInvoicesOpen(filterDates.startDate!, filterDates.endDate!);
+    useGroupFamilyInvoicesOpen();
+
+  const { data: openInvoiceTime, isLoading: isLoadingOpenInvoiceTime } = useOpenInvoiceTime();
 
   const { data: mostSoldProducts, isLoading: isLoadingMostSoldProducts } = useMostSoldProducts(
     filterDates.startDate!,
@@ -79,7 +75,7 @@ export default function Dashboard() {
           justifyContent: "space-between",
           alignItems: { xs: "flex-start", sm: "center" },
           marginInline: { xs: "0.5rem", sm: "1rem" },
-          mb: { xs: 2, sm: 0 },
+          mb: { xs: 2, sm: 0, md: 2 },
         }}
       >
         <Text variant="h6" color="#111c35" fontWeight="bold">
@@ -89,224 +85,33 @@ export default function Dashboard() {
         <DashFilter onFilter={(data) => setFilterDates(data)} />
       </Stack>
 
-      <TotalBoxContent
-        startDate={filterDates.startDate || undefined}
-        endDate={filterDates.endDate || undefined}
-      />
+      <Stack spacing={2}>
+        <TotalBoxContent
+          startDate={filterDates.startDate || undefined}
+          endDate={filterDates.endDate || undefined}
+        />
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          gap: { xs: 1.5, md: 3 },
-          height: { xs: "auto", md: "24rem" },
-          marginInline: isMobile ? "0" : { xs: "0.25rem", sm: "0.5rem" },
-        }}
-      >
-        {/* Box de vendas vs à receber */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            padding: { xs: "0.75rem", sm: "1rem" },
-            gap: { xs: 0.5, sm: 1 },
-            width: { xs: "100%", md: "70%" },
-            height: { xs: "350px", md: "inherit" },
-            backgroundColor: "#fff",
-            borderRadius: "8px",
-          }}
-        >
-          <Text variant="subtitle2" color="#596772" fontWeight="bold">
-            Receitas vs Despesas
-          </Text>
-          <Box
-            sx={{
-              flexGrow: 1,
-              width: "100%",
-              height: "calc(100% - 24px)",
-            }}
-          >
-            {isLoadingPaymentsVsReceives ? (
-              <Loading minHeight={10} />
-            ) : (
-              <AreaChart data={paymentsVsReceives!} />
-            )}
-          </Box>
-        </Box>
+        {/* Box de receitas vs despesas e famílias em aberto */}
+        <ContentOne
+          isLoadingPaymentsVsReceives={isLoadingPaymentsVsReceives}
+          paymentsVsReceives={paymentsVsReceives || null}
+          isMobile={isMobile}
+          isLoadingOpenInvoiceTime={isLoadingOpenInvoiceTime}
+          openInvoiceTime={openInvoiceTime || null}
+        />
 
-        {/* Box de famílias em aberto */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            padding: { xs: "1rem", sm: "1.5rem" },
-            gap: { xs: 1, sm: 2 },
-            width: { xs: "100%", md: "30%" },
-            height: { xs: "400px", md: "inherit" },
-            backgroundColor: "#fff",
-            borderRadius: "8px",
-          }}
-        >
-          <Text variant="subtitle2" color="#596772" fontWeight="bold">
-            Famílias em aberto
-          </Text>
-          <Divider />
-          <Box
-            sx={{
-              flexGrow: 1,
-              width: "100%",
-              height: "calc(100% - 28px)",
-              overflowY: "auto",
-              ...overflowStyle,
-            }}
-          >
-            {isLoadingGroupFamilyInvoicesOpen ? (
-              <Loading minHeight={10} />
-            ) : (
-              // Sort by value in descending order (highest to lowest)
-              [...(groupFamilyInvoicesOpen || [])]
-                .sort((a, b) => b.value - a.value)
-                .map((family) => (
-                  <FamiliesOpen
-                    key={family._id}
-                    name={family.name}
-                    ownerName={family.ownerName}
-                    ownerAvatar={family.ownerAvatar}
-                    value={family.value}
-                  />
-                ))
-            )}
-          </Box>
-        </Box>
-      </Box>
-
-      {/* Box de top produtos e top clientes */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          gap: isMobile ? 0 : { xs: 1, md: 2 },
-          height: { xs: "auto", md: "22rem" },
-          marginInline: isMobile ? "0" : { xs: "0.25rem", sm: "0.5rem" },
-          marginTop: isMobile ? "1rem" : { xs: "0.25rem", sm: "0.5rem" },
-        }}
-      >
-        {/* Box de top produtos */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
-            gap: { xs: 3, sm: 2 },
-            width: { xs: "100%", md: "70%" },
-            height: { xs: "auto", md: "inherit" },
-            borderRadius: "8px",
-          }}
-        >
-          <Box
-            sx={{
-              width: { xs: "100%", sm: "50%" },
-              backgroundColor: "#fff",
-              borderRadius: "8px",
-              padding: "1.5rem",
-              display: "flex",
-              flexDirection: "column",
-              mb: isMobile ? 0 : { xs: 2, sm: 0 },
-              height: { xs: "400px", sm: "auto" },
-            }}
-          >
-            <Box
-              sx={{
-                position: "sticky",
-                top: 0,
-                zIndex: 1,
-                backgroundColor: "#fff",
-                pb: 1,
-              }}
-            >
-              <Text variant="subtitle2" color="#596772" fontWeight="bold">
-                Produtos mais vendidos
-              </Text>
-              <Divider />
-            </Box>
-
-            <Box
-              sx={{
-                flexGrow: 1,
-                overflowY: "auto",
-                ...overflowStyle,
-                mt: 1,
-              }}
-            >
-              {isLoadingMostSoldProducts ? (
-                <Loading minHeight={10} />
-              ) : (
-                mostSoldProducts?.map((product) => <TopProducts key={product._id} {...product} />)
-              )}
-            </Box>
-          </Box>
-
-          {/* Box de top clientes */}
-          <Box
-            sx={{
-              width: { xs: "100%", sm: "50%" },
-              backgroundColor: "#fff",
-              borderRadius: "8px",
-              padding: "1.5rem",
-              display: "flex",
-              flexDirection: "column",
-              mb: { xs: 2, sm: 0 },
-              height: { xs: "400px", sm: "auto" },
-            }}
-          >
-            <Box
-              sx={{
-                position: "sticky",
-                top: 0,
-                zIndex: 1,
-                backgroundColor: "#fff",
-                pb: 1,
-              }}
-            >
-              <Text variant="subtitle2" color="#596772" fontWeight="bold">
-                Top clientes
-              </Text>
-              <Divider />
-            </Box>
-
-            <Box
-              sx={{
-                flexGrow: 1,
-                overflowY: "auto",
-                ...overflowStyle,
-                mt: 1,
-              }}
-            >
-              {isLoadingTopClients ? (
-                <Loading minHeight={10} />
-              ) : (
-                topClients?.map((client) => <TopClients key={client._id} {...client} />)
-              )}
-            </Box>
-          </Box>
-        </Box>
-        {/* <Box
-          sx={{
-            width: { xs: "100%", md: "30%" },
-            margin: { xs: "0.5rem", sm: "1rem" },
-            borderRadius: "8px",
-            padding: { xs: "0.5rem 0", lg: 0 },
-            height: { xs: "350px", md: "auto" },
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <Text variant="subtitle2" color="#596772" fontWeight="bold">
-            Faturamento por produto %
-          </Text>
-          <Divider />
-          <PieChartProduct />
-        </Box> */}
-      </Box>
+        {/* Box de famílias em aberto, top clientes e top produtos */}
+        <ContentTwo
+          isLoadingGroupFamilyInvoicesOpen={isLoadingGroupFamilyInvoicesOpen}
+          groupFamilyInvoicesOpen={groupFamilyInvoicesOpen || []}
+          isMobile={isMobile}
+          overflowStyle={overflowStyle}
+          isLoadingMostSoldProducts={isLoadingMostSoldProducts}
+          mostSoldProducts={mostSoldProducts || []}
+          isLoadingTopClients={isLoadingTopClients}
+          topClients={topClients || []}
+        />
+      </Stack>
     </>
   );
 

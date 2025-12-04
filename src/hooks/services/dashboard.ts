@@ -1,6 +1,7 @@
 import {
   GroupFamilyInvoicesOpen,
   MostSoldProducts,
+  OpenInvoiceTime,
   PaymentsVsReceives,
   TopClientsDto,
   TotalContents,
@@ -18,13 +19,13 @@ export const GetTotalContents = async (
   return (await http.get(url)).data;
 };
 
-export const GetGroupFamilyInvoicesOpen = async (
-  startDate?: Date,
-  endDate?: Date
-): Promise<GroupFamilyInvoicesOpen[]> => {
-  const queryString = parseDateRange(startDate!, endDate!);
-  const url = `dashboard/group-family-open-invoices${queryString ? `?${queryString}` : ""}`;
+export const GetGroupFamilyInvoicesOpen = async (): Promise<GroupFamilyInvoicesOpen[]> => {
+  const url = "dashboard/group-family-open-invoices";
+  return (await http.get(url)).data;
+};
 
+export const GetOpenInvoiceTime = async (): Promise<OpenInvoiceTime> => {
+  const url = "dashboard/open-invoices-time";
   return (await http.get(url)).data;
 };
 
